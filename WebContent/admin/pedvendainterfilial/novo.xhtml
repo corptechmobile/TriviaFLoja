@@ -5,7 +5,19 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:util="http://java.sun.com/jsf/composite/components/util">
     
-    <div class="tab-content-space">
+    <h:outputStylesheet library="css" name="pedido-interfilial.css"/>
+    <div class="tab-content-space pedido-interfilial">
+        <div class="pedido-interfilial-cabecalho">
+            <div>
+                <span class="pedido-interfilial-etiqueta">NOVA FUNCIONALIDADE</span>
+                <h2>Venda com estoque de outras filiais</h2>
+                <p>Consulte a disponibilidade da rede e defina como cada item será atendido.</p>
+            </div>
+            <div class="pedido-interfilial-seguranca">
+                <i class="icon-lock"></i>
+                <span>Fluxo independente da entrada de pedido atual</span>
+            </div>
+        </div>
     <div id="tabViewVar:Title:tab_pedVendaInterfilialBean" class="panelUrlDescricao" style="display: none;"></div>
     
     <util:calculadorapiso id="calcPisoComponente"/>  
