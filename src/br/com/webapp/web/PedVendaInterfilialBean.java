@@ -88,6 +88,7 @@ public class PedVendaInterfilialBean implements Serializable {
 	private boolean tipoCpf;
 	private boolean tipoOutros;
 	private boolean alterouCli;
+	private boolean consultarEstoqueRede;
 	private Integer encomenda;
  
 	
@@ -155,6 +156,7 @@ public class PedVendaInterfilialBean implements Serializable {
 	
 	@PostConstruct
 	public void init(){
+		consultarEstoqueRede = true;
 		renderedBtnComposto = false;
 		renderedBtnEncomenda = false;
 		renderedSelectFreteTipo = false;
@@ -1109,7 +1111,7 @@ public class PedVendaInterfilialBean implements Serializable {
 		try {
 			
 			ProdutoEstoqueFBRN produtoEstoqueFBRN = new ProdutoEstoqueFBRN();
-			produtoSelecionada.setEstoques(produtoEstoqueFBRN.listar(selecionada.getEncomenda(), selecionada.getEmpresaId(), contextoBean.getUsuarioLogado().getId(), produtoSelecionada.getId(), produtoSelecionada.getControlaLote(), Funcoes.SO_ESTOQUE, produtoSelecionada.getPermiteVendaSemEstoque()));
+			produtoSelecionada.setEstoques(produtoEstoqueFBRN.listar(selecionada.getEncomenda(), consultarEstoqueRede ? null : selecionada.getEmpresaId(), contextoBean.getUsuarioLogado().getId(), produtoSelecionada.getId(), produtoSelecionada.getControlaLote(), Funcoes.SO_ESTOQUE, produtoSelecionada.getPermiteVendaSemEstoque()));
 			if(selecionada.getIsProdComposto()) {
 				produtoSelecionada.setComposicoes(new ProdCompostoItemFBRN().listar(produtoSelecionada.getId()));
 			}
@@ -1620,6 +1622,14 @@ public class PedVendaInterfilialBean implements Serializable {
 	
 	// gets and sets
 	
+	public boolean isConsultarEstoqueRede() {
+		return consultarEstoqueRede;
+	}
+
+	public void setConsultarEstoqueRede(boolean consultarEstoqueRede) {
+		this.consultarEstoqueRede = consultarEstoqueRede;
+	}
+
 	public ContextoBean getContextoBean() {
 		return contextoBean;
 	}
