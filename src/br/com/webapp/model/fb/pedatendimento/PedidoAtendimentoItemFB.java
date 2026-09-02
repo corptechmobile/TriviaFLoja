@@ -33,6 +33,9 @@ public class PedidoAtendimentoItemFB implements Serializable {
     @Column(columnDefinition = "Decimal(18,3)")
     private Double quantidade;
 
+    @Column(length = 500)
+    private String observacao;
+
     public Integer getId() {
         return id;
     }
@@ -87,5 +90,13 @@ public class PedidoAtendimentoItemFB implements Serializable {
 
     public void setQuantidade(Double quantidade) {
         this.quantidade = quantidade;
+    }
+
+    public String getObservacao() {
+        return observacao;
+    }
+
+    public void setObservacao(String observacao) {
+        this.observacao = observacao;
     }
 }
