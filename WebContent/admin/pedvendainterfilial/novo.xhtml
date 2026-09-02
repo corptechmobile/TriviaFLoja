@@ -11,22 +11,27 @@
 
     <h:outputStylesheet library="css" name="pedido-interfilial.css"/>
     <div class="tab-content-space pedido-interfilial">
-        <div class="pedido-interfilial-cabecalho">
-            <div>
-                <span class="pedido-interfilial-etiqueta">NOVA FUNCIONALIDADE</span>
-                <h2>Venda com estoque de outras filiais</h2>
-                <p>Consulte a disponibilidade da rede e defina como cada item será atendido.</p>
+        <header class="pedido-interfilial-cabecalho">
+            <div class="pedido-interfilial-titulo">
+                <div class="pedido-interfilial-icone"><i class="icon-cart"></i></div>
+                <div>
+                    <span class="pedido-interfilial-etiqueta">PEDIDO INTERFILIAL</span>
+                    <h2>Nova venda</h2>
+                    <p>Venda produtos da rede escolhendo a filial de estoque e a forma de atendimento.</p>
+                </div>
             </div>
             <div class="pedido-interfilial-cabecalho-acoes">
-                <div class="pedido-interfilial-seguranca">
-                    <i class="icon-lock"></i>
-                    <span>Fluxo independente da entrada de pedido atual</span>
-                </div>
+                <span class="pedido-interfilial-status-novo"><i class="icon-circle"></i> Novo pedido</span>
                 <button type="button" class="pedido-interfilial-btn-planejamento"
                         onclick="openTab('pedidoAtendimentoListaBean', 'Pedidos para Atendimento', 'Pedidos para Atendimento', 'pedatendimento/consulta.jsf?id=1')">
-                    Ver planejamento
+                    <i class="icon-calendar"></i> Planejamento
                 </button>
             </div>
+        </header>
+
+        <div class="pedido-interfilial-orientacao">
+            <i class="icon-info-sign"></i>
+            <span><strong>Como funciona:</strong> selecione o cliente, adicione os produtos e escolha de qual filial cada item sairá. O sistema criará os atendimentos necessários ao concluir.</span>
         </div>
     <div id="tabViewVar:Title:tab_pedVendaInterfilialBean" class="panelUrlDescricao" style="display: none;"></div>
     
@@ -127,79 +132,68 @@
      
      	<p:growl id="msg" showDetail="true" showSummary="false" life="6000"/>
      	
-     	<div class="ui-g">
-     		<div class="ui-g-3 ui-md-3 ui-lg-0">
-	     		<h:panelGroup rendered="#{not empty pedVendaInterfilialBean.empresa.id}">
-	     			<p:outputLabel value="Empresa: " /><br/> 
-					<h:outputText value="#{pedVendaInterfilialBean.empresa.cnpjCpf}"
-						converter="converter.CNPJConverter" /><br />
-	     			<p:outputLabel value="#{pedVendaInterfilialBean.empresa.nomeFantasia}" styleClass="txt_bold" />
-	     		</h:panelGroup>
-     		</div>
-     		<div class="ui-g-2 ui-md-2 ui-lg-0">
-	     		<h:panelGroup rendered="#{not empty pedVendaInterfilialBean.vendedor}">
-	     			<p:outputLabel value="Vendedor: " /> <br />
-	     			<p:outputLabel value="#{pedVendaInterfilialBean.vendedor.id} " /> <br />
-	     			<p:outputLabel value="#{pedVendaInterfilialBean.vendedor.nomeFantasia}" styleClass="txt_bold" />
-	     		</h:panelGroup>
-     		</div>
-     		<div class="ui-g-3 ui-md-3 ui-lg-0">
-	     		<h:panelGroup rendered="#{not empty pedVendaInterfilialBean.cliente.id}">
-	     			<p:outputLabel value="Cliente: " /> 
-	     			<p:commandButton id="btnModifClientePedVenda"
-	     					action="#{pedVendaInterfilialBean.editarCliente}"
-							update="@form :formModifCliPedVendaNovo :formStepsPedVendaBean :formVerCliPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean :formFilterCliPedVenda" 
-							process="@this" 
-							icon="ui-icon-pencil" 
-							title="Modificar o Cliente do Pedido"
-							rendered="#{pedVendaInterfilialBean.selecionada.podeEditar}" 
-							oncomplete="PF('dialogModifCliPedVendaNovo').show()"/>
-	     			<br />
-					<p:outputLabel value="#{pedVendaInterfilialBean.cliente.id} " /> <br />
-	     			<p:outputLabel value="#{pedVendaInterfilialBean.cliente.razaoSocial}" styleClass="txt_bold" /><br />
-	     			<p:outputLabel value="#{pedVendaInterfilialBean.nomeConsumidor}" styleClass="txt_bold" />
-	     		</h:panelGroup>
-     		</div>
-     		<div class="ui-g-3 ui-md-3 ui-lg-0">
-	     		<h:panelGroup rendered="#{not empty pedVendaInterfilialBean.selecionada.id}">
-	     			<p:outputLabel value="Pedido: " /> 
-	     			<p:commandButton id="btnExcluir" 
-							update="@form :formVerCliPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean" 
-							process="@this"
-							action="#{pedVendaInterfilialBean.excluir}" 
-							icon="ui-icon-trash" 
-							rendered="#{pedVendaInterfilialBean.selecionada.podeExcluir}"
-							onsuccess="verTabsPedidosAfterExcluir();"
-							title="Excluir">
-						<f:setPropertyActionListener target="#{pedVendaInterfilialBean.selecionadaId}" value="#{pedVendaInterfilialBean.selecionada.id}" />
-						<p:confirm header="Confirme" message="Deseja Excluir?" icon="ui-icon-alert" />
-					</p:commandButton>
-	     			<br />
-	     			<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.id}" styleClass="tx_bold_16" /><br />
-	     			<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.pedVendaStatus.descricao} " />
-	     			<h:outputText value=" em " rendered="#{pedVendaInterfilialBean.selecionada.pedVendaStatus.id eq 2}" /> 
-	     			<h:outputText value="#{pedVendaInterfilialBean.selecionada.dataUltAlteracao}" styleClass="tx_bold" rendered="#{pedVendaInterfilialBean.selecionada.pedVendaStatus.id eq 2}">
-						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
-					</h:outputText>
-	     		</h:panelGroup>
-     		</div>
-     		<div class="ui-g-1 ui-md-1 ui-lg-0">
-	     		<h:panelGroup rendered="${not empty pedVendaInterfilialBean.listaPedVendaItem}"> 
-	     			<p:outputLabel value="Total: " /> <br />
-	     			<h:outputText value="${pedVendaInterfilialBean.selecionada.valPedido}" converter="currencyFormat" styleClass="tx_bold_16" /> <br />
-					<h:panelGroup>
-						<ui:fragment rendered="#{pedVendaInterfilialBean.selecionada.condPagto.parcelas gt 1}" >
-							<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.condPagto.getParcelas(pedVendaInterfilialBean.selecionada.valPedido)}" styleClass="tx_bold" /> <br />
-						</ui:fragment>
-						<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.condPagto.descricao}" styleClass="tx_bold" />
-					</h:panelGroup><br />
-					<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.freteTipo.descricao}" styleClass="tx_bold" rendered="#{pedVendaInterfilialBean.selecionada.podeEditar == false and pedVendaInterfilialBean.selecionada.freteTipo!=null}"/>
-					
-	     		</h:panelGroup>
-     		</div>
-     	</div>
-     	
-	    <p:steps activeIndex="#{pedVendaInterfilialBean.stepIndex}" styleClass="custom" readonly="false" rendered="#{pedVendaInterfilialBean.renderedStep}">
+     	<div class="pedido-interfilial-resumo">
+            <div class="pedido-interfilial-resumo-card">
+                <span class="pedido-interfilial-resumo-rotulo">LOJA DA VENDA</span>
+                <h:panelGroup rendered="#{not empty pedVendaInterfilialBean.empresa.id}">
+                    <strong>#{pedVendaInterfilialBean.empresa.nomeFantasia}</strong>
+                    <small><h:outputText value="#{pedVendaInterfilialBean.empresa.cnpjCpf}" converter="converter.CNPJConverter" /></small>
+                </h:panelGroup>
+                <h:outputText value="A definir" rendered="#{empty pedVendaInterfilialBean.empresa.id}" styleClass="pedido-interfilial-vazio"/>
+            </div>
+
+            <div class="pedido-interfilial-resumo-card">
+                <span class="pedido-interfilial-resumo-rotulo">VENDEDOR</span>
+                <h:panelGroup rendered="#{not empty pedVendaInterfilialBean.vendedor}">
+                    <strong>#{pedVendaInterfilialBean.vendedor.nomeFantasia}</strong>
+                    <small>Código #{pedVendaInterfilialBean.vendedor.id}</small>
+                </h:panelGroup>
+                <h:outputText value="A definir" rendered="#{empty pedVendaInterfilialBean.vendedor}" styleClass="pedido-interfilial-vazio"/>
+            </div>
+
+            <div class="pedido-interfilial-resumo-card pedido-interfilial-resumo-cliente">
+                <span class="pedido-interfilial-resumo-rotulo">CLIENTE</span>
+                <h:panelGroup rendered="#{not empty pedVendaInterfilialBean.cliente.id}">
+                    <strong>#{pedVendaInterfilialBean.cliente.razaoSocial}</strong>
+                    <small>#{pedVendaInterfilialBean.nomeConsumidor}</small>
+                    <p:commandButton id="btnModifClientePedVenda"
+                            action="#{pedVendaInterfilialBean.editarCliente}"
+                            update="@form :formModifCliPedVendaNovo :formStepsPedVendaBean :formVerCliPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean :formFilterCliPedVenda"
+                            process="@this" icon="ui-icon-pencil" title="Modificar cliente"
+                            styleClass="pedido-interfilial-acao-card"
+                            rendered="#{pedVendaInterfilialBean.selecionada.podeEditar}"
+                            oncomplete="PF('dialogModifCliPedVendaNovo').show()"/>
+                </h:panelGroup>
+                <h:outputText value="Não selecionado" rendered="#{empty pedVendaInterfilialBean.cliente.id}" styleClass="pedido-interfilial-vazio"/>
+            </div>
+
+            <div class="pedido-interfilial-resumo-card">
+                <span class="pedido-interfilial-resumo-rotulo">PEDIDO</span>
+                <h:panelGroup rendered="#{not empty pedVendaInterfilialBean.selecionada.id}">
+                    <strong>#{pedVendaInterfilialBean.selecionada.id}</strong>
+                    <small>#{pedVendaInterfilialBean.selecionada.pedVendaStatus.descricao}</small>
+                    <p:commandButton id="btnExcluir"
+                            update="@form :formVerCliPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean"
+                            process="@this" action="#{pedVendaInterfilialBean.excluir}"
+                            icon="ui-icon-trash" title="Excluir pedido"
+                            styleClass="pedido-interfilial-acao-card pedido-interfilial-acao-perigo"
+                            rendered="#{pedVendaInterfilialBean.selecionada.podeExcluir}"
+                            onsuccess="verTabsPedidosAfterExcluir();">
+                        <f:setPropertyActionListener target="#{pedVendaInterfilialBean.selecionadaId}" value="#{pedVendaInterfilialBean.selecionada.id}" />
+                        <p:confirm header="Confirme" message="Deseja excluir este pedido?" icon="ui-icon-alert" />
+                    </p:commandButton>
+                </h:panelGroup>
+                <h:outputText value="Em elaboração" rendered="#{empty pedVendaInterfilialBean.selecionada.id}" styleClass="pedido-interfilial-vazio"/>
+            </div>
+
+            <div class="pedido-interfilial-resumo-card pedido-interfilial-resumo-total">
+                <span class="pedido-interfilial-resumo-rotulo">TOTAL DO PEDIDO</span>
+                <strong><h:outputText value="#{pedVendaInterfilialBean.selecionada.valPedido}" converter="currencyFormat"/></strong>
+                <small><h:outputText value="#{pedVendaInterfilialBean.selecionada.condPagto.descricao}"/></small>
+            </div>
+        </div>
+
+        <p:steps activeIndex="#{pedVendaInterfilialBean.stepIndex}" styleClass="pedido-interfilial-etapas" readonly="false" rendered="#{pedVendaInterfilialBean.renderedStep}">
 		   <p:menuitem value="Cliente" actionListener="#{pedVendaInterfilialBean.openCliente}" update="@form :formVerCliPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean :formFilterCliPedVenda"  />
 		   <p:menuitem value="Itens" actionListener="#{pedVendaInterfilialBean.openItens}" update="@form :formVerCliPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean :formFilterCliPedVenda" />
 		   <p:menuitem value="Concluir" actionListener="#{pedVendaInterfilialBean.openCondPagto}" update="@form :formVerCliPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean :formFilterCliPedVenda" />
@@ -217,7 +211,11 @@
 		
 		<p:focus context="panelVerCliPedVendaBean"/>
      
-	    <p:panel id="panelVerCliPedVendaBean" rendered="#{pedVendaInterfilialBean.stepIndex==0}">
+	    <p:panel id="panelVerCliPedVendaBean" rendered="#{pedVendaInterfilialBean.stepIndex==0}" styleClass="pedido-interfilial-etapa">
+            <div class="pedido-interfilial-etapa-cabecalho">
+                <span class="pedido-interfilial-etapa-numero">1</span>
+                <div><h3>Identifique o cliente</h3><p>Confirme a loja, o vendedor e os dados de quem está comprando.</p></div>
+            </div>
 	    
     		<p:defaultCommand target="btnVerCli" />
     	 	
@@ -561,7 +559,11 @@
 		<p:focus context="panelResultFilterPedVendaBean"/>
 		<!-- <p:remoteCommand name="loadFormItensPedVendaBean" update="@form" oncomplete="closePanelResultFilterPedVendaBean()" /> -->
      
-     	<p:panel id="panelItensPedVendaBean" rendered="#{pedVendaInterfilialBean.stepIndex==1}">
+     	<p:panel id="panelItensPedVendaBean" rendered="#{pedVendaInterfilialBean.stepIndex==1}" styleClass="pedido-interfilial-etapa">
+            <div class="pedido-interfilial-etapa-cabecalho">
+                <span class="pedido-interfilial-etapa-numero">2</span>
+                <div><h3>Monte o pedido</h3><p>Pesquise o produto, compare o estoque disponível nas filiais e defina o atendimento.</p></div>
+            </div>
      		
      		
      		<p:fieldset id="fieldFilterPedVendaInfo" legend="Informações Pedido" styleClass="painelFieldset" >
@@ -1288,7 +1290,11 @@
      <!-- Condicao Pagamento -->
      <h:form id="formCondPagtoPedVendaBean">
      
-     	<p:panel id="panelCondPagtoPedVendaBean" rendered="#{pedVendaInterfilialBean.stepIndex==2 or pedVendaInterfilialBean.renderedStep == false}">
+     	<p:panel id="panelCondPagtoPedVendaBean" rendered="#{pedVendaInterfilialBean.stepIndex==2 or pedVendaInterfilialBean.renderedStep == false}" styleClass="pedido-interfilial-etapa">
+            <div class="pedido-interfilial-etapa-cabecalho">
+                <span class="pedido-interfilial-etapa-numero">3</span>
+                <div><h3>Revise e conclua</h3><p>Confira pagamento, entrega, data acordada e observações antes de confirmar.</p></div>
+            </div>
      	
      		<p:fieldset id="fildDivergencias" legend="(#{pedVendaInterfilialBean.listaDivergencias.size()}) Divergências" styleClass="painelFieldset" rendered="#{not empty pedVendaInterfilialBean.listaDivergencias}" toggleable="false">
 		     	<p:dataTable id="dtDivergencias" 
