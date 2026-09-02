@@ -11,6 +11,7 @@ import javax.faces.bean.ManagedProperty;
 import javax.faces.bean.SessionScoped;
 import javax.faces.model.SelectItem;
 
+import br.com.webapp.model.fb.empresa.EmpresaFB;
 import br.com.webapp.model.fb.empresa.EmpresaFBRN;
 import br.com.webapp.model.fb.pedatendimento.PedidoAtendimentoFB;
 import br.com.webapp.model.fb.pedatendimento.PedidoAtendimentoFBRN;
@@ -68,8 +69,12 @@ public class PedidoAtendimentoListaBean implements Serializable {
     public List<SelectItem> getEmpresaSelectItem() {
         if (empresaSelectItem == null) {
             EmpresaFBRN empresaFBRN = new EmpresaFBRN();
-            empresaSelectItem = empresaFBRN.montaDadosSelect(
-                    empresaFBRN.listar(contextoBean.getUsuarioLogado()), "");
+            empresaSelectItem = new ArrayList<SelectItem>();
+            for (EmpresaFB empresa : empresaFBRN.listar(
+                    contextoBean.getUsuarioLogado())) {
+                empresaSelectItem.add(new SelectItem(
+                        empresa.getId(), empresa.getNomeFantasia()));
+            }
         }
         return empresaSelectItem;
     }
