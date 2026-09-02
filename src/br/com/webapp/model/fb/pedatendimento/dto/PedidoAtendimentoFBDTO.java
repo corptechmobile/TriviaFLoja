@@ -1,6 +1,7 @@
 package br.com.webapp.model.fb.pedatendimento.dto;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Date;
 
 import br.com.webapp.model.fb.pedatendimento.PedidoAtendimentoFB;
@@ -40,10 +41,27 @@ public class PedidoAtendimentoFBDTO implements Serializable {
     }
 
     public boolean isAtrasado() {
-        return dataAcordada != null
-                && dataAcordada.before(new Date())
-                && !PedidoAtendimentoFB.STATUS_ATENDIDO.equals(status)
-                && !PedidoAtendimentoFB.STATUS_CANCELADO.equals(status);
+        if (dataAcordada == null
+                || PedidoAtendimentoFB.STATUS_ATENDIDO.equals(status)
+                || PedidoAtendimentoFB.STATUS_CANCELADO.equals(status)) {
+            return false;
+        }
+
+        Calendar hoje = Calendar.getInstance();
+        zerarHorario(hoje);
+
+        Calendar acordada = Calendar.getInstance();
+        acordada.setTime(dataAcordada);
+        zerarHorario(acordada);
+
+        return acordada.before(hoje);
+    }
+
+    private void zerarHorario(Calendar data) {
+        data.set(Calendar.HOUR_OF_DAY, 0);
+        data.set(Calendar.MINUTE, 0);
+        data.set(Calendar.SECOND, 0);
+        data.set(Calendar.MILLISECOND, 0);
     }
 
     public Integer getId() {
