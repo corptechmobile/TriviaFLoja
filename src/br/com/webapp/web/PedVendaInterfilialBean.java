@@ -303,6 +303,10 @@ public class PedVendaInterfilialBean implements Serializable {
 		calcularPisoBean.setQtdDecimal(produtoSelecionada.getQtdDecimal());
 	}
 	
+	public void iniciarNovaVendaInterfilial() {
+		novoPedVendaNormal();
+	}
+
 	public void novoPedVendaNormal() {
 		verTipoDescontoPedido();
 		
