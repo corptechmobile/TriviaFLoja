@@ -1,0 +1,162 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+    
+    <div class="tab-content-space">
+    
+    	<div id="tabViewVar:Title:tab_-1" class="panelUrlDescricao" style="display:none;"></div>
+    	
+    	<h:form id="capturarMinhaConta">
+    	<p:panel header="CAPTURAR FOTO" rendered="#{not empty minhaContaBean.filename or minhaContaBean.cam == true ? true : false}">        
+		    <h:panelGrid columns="3" cellpadding="5">
+		        <p:photoCam widgetVar="pc" listener="#{minhaContaBean.oncapture}" update="@form" photoWidth="200" photoHeight="200" width="200" height="200" rendered="#{minhaContaBean.cam}"/>
+		        <p:commandButton type="button" value="Capture" onclick="PF('pc').capture()" rendered="#{minhaContaBean.cam}"/>
+		        <p:outputPanel id="photo">
+		            <p:graphicImage value="#{pageContext.servletContext.contextPath}/uploads/photocam/#{minhaContaBean.filename}.jpeg" cache="false" rendered="#{not empty minhaContaBean.filename}" styleClass="clip-circle"/>
+		            <p:commandButton 
+						value="Salvar" 
+							actionListener="#{minhaContaBean.updateFoto}" 
+								update="@form"
+								icon="ui-icon-disk" 
+									rendered="#{not empty minhaContaBean.filename}" 
+										oncomplete="updateMenuAcessoImags()"/> 
+					<p:commandButton 
+						value="Cancelar" 
+							actionListener="#{minhaContaBean.cancelFoto}" 
+								update="@form"
+								icon="ui-icon-cancel" 
+									rendered="#{not empty minhaContaBean.filename}" /> 
+		        </p:outputPanel>
+		    </h:panelGrid>
+		</p:panel>
+		</h:form>
+
+		<h:form id="edicaoMinhaConta">
+		
+			<p:blockUI block="panelMinhaConta" trigger="btnSalvar" widgetVar="bUIMudarSenha">
+				LOADING<br />
+	        	<p:graphicImage library="images" name="progress_bar.gif"/>
+			</p:blockUI>
+			
+			<p:focus context="panelMinhaConta"/>
+			<p:messages id="msgAdd" showDetail="true" closable="true"/>
+			
+			<p:panel id="panelMinhaConta" widgetVar="panelMinhaConta" header="MEUS DADOS">
+			
+				<div class="ui-fluid">
+					<p:panelGrid columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4, ui-grid-col-2,ui-grid-col-4" layout="grid" styleClass="ui-panelgrid-blank" >
+						<h:outputLabel value="Empresas:" for="empresas"/>
+						<p:dataList id="empresas" value="#{minhaContaBean.selecionada.empresas}" var="t" type="ordered" rendered="#{not empty minhaContaBean.selecionada.empresas}">  
+						    #{t}   
+						</p:dataList>  
+						
+						<h:outputLabel value="Login:" for="login"/>
+						<h:outputLabel value="#{minhaContaBean.selecionada.login}" id="login" styleClass="txt_bold" />
+					</p:panelGrid>
+					
+					<p:panelGrid columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4,ui-grid-col-2,ui-grid-col-4" layout="grid" styleClass="ui-panelgrid-blank" >
+					
+						<h:outputLabel value="Apelido:" for="apelido"/>
+						<p:inputText id="apelido" value="#{minhaContaBean.selecionada.apelido}" />
+						
+						<h:outputLabel value="Nome:" for="nome"/>
+						<p:inputText id="nome" value="#{minhaContaBean.selecionada.nome}" required="true" requiredMessage="Nome é obrigatório" />
+						
+						<h:outputLabel value="E-mail:" for="email"/>
+						<p:inputText id="email" value="#{minhaContaBean.selecionada.email}" required="true" requiredMessage="E-mail é obrigatório" validatorMessage="E-mail inválido"  >
+							<f:validateRegex pattern="^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$" />
+						</p:inputText>
+						
+					</p:panelGrid>
+					
+					<p:panelGrid columns="2" columnClasses="ui-grid-col-2,ui-grid-col-4" layout="grid" styleClass="ui-panelgrid-blank" >
+						
+						<h:outputLabel value="Senha:" for="senha"/>
+						<p:password id="senha" value="#{minhaContaBean.selecionada.senha}" label="Senha" maxlength="10" match="senha2" redisplay="true" required="true" requiredMessage="Senha é obrigatório" feedback="true" />
+						
+						<h:outputLabel value="Senha-confirma:" for="senha2"/>
+						<p:password id="senha2" value="#{minhaContaBean.senha2}" label="Senha-confirma" maxlength="10" required="true" redisplay="true" requiredMessage="Confirme sua a senha." />
+						
+					</p:panelGrid>	
+				
+				</div>
+				<br/>
+				<p:commandButton id="btnSalvar" 
+						value="Salvar" 
+							actionListener="#{minhaContaBean.salvar}" 
+								update="@form"
+								icon="ui-icon-disk" 
+								oncomplete="updateMenuAcessoBasicUser()" /> 
+								
+				<p:commandButton id="btnOpenCam" 
+					rendered="false" 
+						value="Camera" 
+							actionListener="#{minhaContaBean.openCam}" 
+								update=":capturarMinhaConta" icon="icon-photo"/> 
+				
+				<p:commandButton id="btnOpenUpload" 
+						value="Minha Foto" 
+							actionListener="#{minhaContaBean.openUpload}" 
+								update=":formUploadUsuario" icon="icon-photo"/> 
+							
+			</p:panel>
+		</h:form>
+		
+		
+		<h:form id="formUploadUsuario">
+		
+	    	<p:panel id="panelUploadUsuario" widgetVar="panelUploadUsuario" closable="true" header="MINHA FOTO">
+	    	
+	    		<p:focus context="panelUploadUsuario" />
+	    		<p:messages id="msgUpload" showDetail="true" closable="true" />
+	    		
+					<p:panel header="Preparar" rendered="#{fileUploadController.exibeBotao}">  
+						<div class="ui-fluid">
+							<p:panelGrid columns="2" columnClasses="ui-grid-col-0,ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+								<h:panelGroup>
+									<p:imageCropper
+										id="imageCropperImagemTemporaria" 
+											value="#{fileUploadController.croppedImage}" 
+												image="#{pageContext.servletContext.contextPath}/uploads/crop/#{fileUploadController.imagemTemporaria}"
+													initialCoords="0,0,300,300" 
+														rendered="#{fileUploadController.exibeBotao}"
+																boxWidth="260" 
+																  	 aspectRatio="1.1"/>
+									<p:panelGrid columns="2" columnClasses="ui-grid-col-6,ui-grid-col-6" layout="grid" styleClass="ui-panelgrid-blank" >
+										<p:commandButton action="#{fileUploadController.rotate}" icon="ui-icon-arrowrefresh-1-w" update="@form" value="Rotate" rendered="#{fileUploadController.exibeBotao}" />
+										<p:commandButton id="btnCropUsuarioBean" action="#{fileUploadController.crop}" icon="ui-icon-scissors" update="@form" value="Cortar" rendered="#{fileUploadController.exibeBotao}"/>
+									</p:panelGrid>
+								</h:panelGroup>		
+								
+								<h:panelGroup>
+									<p:graphicImage value="#{fileUploadController.imagemEnviada}" cache="false" rendered="#{fileUploadController.exibeBotaoSalvar}" styleClass="clip-circle" height="200" />
+									<p:commandButton action="#{fileUploadController.cropSave}" icon="ui-icon-disk" update="@form" value="Salvar" rendered="#{fileUploadController.exibeBotaoSalvar}" oncomplete="updateMenuAcessoImags()" onsuccess="closeFormUploadUsuario()"/>
+								</h:panelGroup>
+							</p:panelGrid>
+							
+						</div> 
+						
+					</p:panel>
+					
+					<p:fileUpload
+						fileUploadListener="#{fileUploadController.enviarImagem}" auto="true"
+						mode="advanced" dragDropSupport="true" update="@form" previewWidth="50"
+						label="Selecione" sizeLimit="100000000" multiple="false" messageTemplate="{size}"
+						allowTypes="/(\.|\/)(jpe?g)$/" />
+					
+			</p:panel>
+			
+		</h:form>
+		
+		<script>
+			$('#formUploadUsuario\\:panelUploadUsuario').hide();
+			function closeFormUploadUsuario(){
+				$('#formUploadUsuario\\:panelUploadUsuario').hide();
+			}
+		</script>
+		
+	</div>
+</ui:composition>
+

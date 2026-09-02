@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+	
+<h:body>
+	<ui:composition template="../templates/common2/principal.xhtml">
+	
+		<ui:define name="content"> 
+			<!-- Navbar -->
+			<ul class="w3-navbar w3-theme w3-top w3-left-align w3-large" style="z-index:4000;">
+			  <li class="w3-opennav w3-left">
+			    <a class="w3-hover-white w3-theme-l1" href="javascript:void(0)" onclick="w3_open()"><i class="fa fa-bars"></i></a>
+			  </li> 
+			  <li>
+			  	<a href="#" class="w3-theme-l1"><h:graphicImage library="images" name="LogoTrivia_3_311x80.png" height="25" /></a>
+			  </li>
+			  <li class="w3-theme-d1 w3-right w3-hide-small">
+			  	<a href="javascript:document.getElementById('menuAcessoBasicUser:btnSair').click();" class="w3-hover-white" title="Sair"><i class="fa fa-close"></i></a>
+			  </li>
+  			  <!-- <li class="w3-theme-d1 w3-right w3-hide-small"><a href="#" class="w3-hover-white" title="Minha Conta"><i class="fa fa-user"></i></a></li> -->
+			</ul>
+			
+			<!-- Sidenav -->
+		    <nav class="w3-sidenav w3-top w3-theme-l5 w3-animate-left" style="display:none;z-index:3000;width:250px;padding-top:44px;" id="mySidenav">
+		    <!-- Profile -->
+		      <div class="ui-tabs-panel ui-widget-content ui-corner-bottom">
+		        <div class="w3-container w3-center">
+			         <p class="w3-center">
+			         <h:form id="menuAcessoImags">
+			         	<p:remoteCommand name="updateMenuAcessoImags" update="menuAcessoImags" />
+			         </h:form>
+			         </p>
+			         <hr style="margin: 10px;" />
+		        </div>
+		        <div class="w3-center">
+			         <h:form id="menuAcessoBasicUser">
+			         	 <!--  -->
+			         	 <p:remoteCommand name="updateMenuAcessoBasicUser" update="menuAcessoBasicUser" />
+				         <!--  
+				         <p:button title="Minha Conta" icon="ui-icon-person" href="javascript:;" onclick="javascript:openTab(-1, 'Minha Conta', 'Minha Conta', 'minhaconta.jsf');"/>
+				         -->
+				         <h:outputLabel style="margin-left:4px;"><b>#{contextoBean.usuarioLogado.nome}</b></h:outputLabel>
+				         
+				         <br />
+				         
+				         <p:commandButton actionListener="#{mudarSenhaBean.editar}" 
+								update="@none"
+								process="@this" 
+								icon="ui-icon-locked" 
+								title="Editar" 
+								onclick="closeTab('mudarSenhaBean')"
+								oncomplete="javascript:openTab('mudarSenhaBean', 'Alterar Senha', 'Alterar Senha', 'password.jsf');"
+								>
+							<f:setPropertyActionListener target="#{mudarSenhaBean.selecionadaId}" value="#{contextoBean.usuarioLogado.id}" />
+						</p:commandButton>
+				         
+				         <p:commandButton id="btnSair" title="Sair" icon="ui-icon-close" oncomplete="window.location.href = '#{request.contextPath}/j_spring_security_logout'" style="margin-bottom:10px;">
+				         	<p:confirm header="Confirme" message="Deseja realmente sair?" icon="ui-icon-alert" />
+				         </p:commandButton>
+				         
+				         <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" closeOnEscape="true" responsive="true">
+							<p:commandButton value="Sim" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+							<p:commandButton value="Não" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+						</p:confirmDialog>
+			         </h:form>
+		         </div>
+		      </div>
+				
+				<h:form id="formMenuHome">
+					
+					<h:inputHidden id="menuHomeSelecionado" value="#{menuHomeView.menuAcessoIdForDelete}"  />
+					
+					<p:remoteCommand name="updateMenuHome" update="@form" process="@this" action="#{menuHomeView.updateMenu}" />
+					<p:remoteCommand name="deleteMenuFavoritos" update="@form" process="@this" actionListener="#{menuHomeView.deleteMenuFavoritos}" />
+					<!--  -->
+					<p:panelMenu id="panelMenuHome" model="#{menuHomeView.model}" stateful="false" styleClass="customTitleBar" />
+					<!--  -->
+					<p:contextMenu id="contextMenu" for="panelMenuHome" widgetVar="contextMenu" selectionMode="single" targetFilter="li a[rel='menufavoritos'], li a[rel='menufavoritos'] span">
+					     <p:menuitem value="Remover" icon="ui-icon-trash" update="@none" process="@this" onclick="montaDeleteMenuAcesso();"  /> 
+					</p:contextMenu> 
+				
+					<h:outputScript>findDefaultMenuItem();</h:outputScript>
+				
+				 </h:form>
+			  
+			</nav>
+			
+			<!-- Overlay effect when opening sidenav on small screens -->
+			<div class="w3-overlay" onclick="w3_close()" style="cursor:pointer; z-index: 2000;" title="Clique aqui para fechar o menu" id="myOverlay"></div> <!-- w3-hide-large -->
+			
+			<!-- Main content: shift it to the right by 250 pixels when the sidenav is visible -->
+			<div class="w3-main" style="padding:4px;">
+			  <div class="w3-row w3-padding-16" style="margin-top:40px;">
+				 <p:tabView id="tabViewVar" widgetVar="tabWidgetVar" prependId="true" scrollable="true" dynamic="false" cache="false" onTabClose="" onTabChange="" styleClass="tabHomeContent">
+			        <p:tab title="Home" id="tab_home">
+			        	<div id="content_home">
+			        		<div id="sejabemvindotexto" style="display: none;">
+				        		<h2>Seja Bem-vindo!</h2>
+				        		<p>Dica: Defina sua funcionalidade mais utilizada como Home!</p>
+				        	</div>
+			        	</div>
+			        	<input type="hidden" id="tab_home_id" value="0" />
+			     	</p:tab>
+			     </p:tabView>
+			  </div>
+			
+			  <footer>
+			    <div class="w3-container w3-theme-l1" style="padding-top:5px; padding-bottom:5px;">
+			      <div style="float: left;">Versão 3.1.3</div>
+			      <div style="text-align: right; float: right;">by <a href="http://www.corptech.com.br" target="_blank">Corptech</a></div>
+			    </div>
+			  </footer>
+			
+			<!-- END MAIN -->
+			</div>
+			
+			<div id="pollStart"></div>
+
+			<h:outputScript rendered="#{contextoBean.usuarioLogado.home != null ? true : false}">openHome('#{contextoBean.usuarioLogado.home.id}', '#{contextoBean.usuarioLogado.home.descricao}', '#{contextoBean.usuarioLogado.home.caminho} / #{contextoBean.usuarioLogado.home.descricao}', '#{contextoBean.usuarioLogado.home.pgm}');</h:outputScript>
+			<h:outputScript rendered="#{contextoBean.usuarioLogado.home == null ? true : false}">showSejaBemVindo();</h:outputScript>
+			<h:outputScript>pollStart();</h:outputScript>
+			
+		</ui:define>
+
+	</ui:composition>
+</h:body>
+</html>

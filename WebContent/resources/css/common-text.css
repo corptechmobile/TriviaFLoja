@@ -1,0 +1,118 @@
+.tx_right{
+	text-align: right;
+}
+
+.tx_right_16{
+	font-size: 16px;
+	text-align: right;
+}
+
+.tx_left{
+	text-align: left;
+}
+
+.tx_center{
+	text-align: center;
+}
+
+.tx_item_corte { 
+	color: white;
+	background: red; /*  */
+}
+
+.tx_bold{
+	font-weight: bold;
+}
+
+.tx_branco{
+	color: #fff;
+}
+
+.tx_branco_bold{
+	color: #fff;
+	font-weight: bold;
+}
+
+.tx_azul{
+	color:#0000ff;
+}
+
+.tx_azul_bold{
+	color:#0000ff;
+	font-weight: bold;
+}
+
+.tx_azul_14{
+	color:#0000ff;
+}
+
+.tx_azul_bold_14{
+	font-size: 14px !important;
+	color:#0000ff;
+	font-weight: bold;
+}
+
+.tx_14{
+	font-size: 14px !important;
+}
+
+.tx_14{
+	font-size: 14px !important;
+}
+
+.tx_bold_14{
+	font-size: 14px !important;
+	font-weight: bold !important;
+}
+
+.tx_16{
+	font-size: 16px !important;
+}
+
+.tx_bold_16{
+	font-size: 16px !important;
+	font-weight: bold !important;
+}
+
+.tx_azul_16{
+	font-size: 16px !important;
+	color:#0000ff;
+}
+
+.tx_azul_bold_16{
+	font-size: 16px !important;
+	color:#0000ff;
+	font-weight: bold;
+}
+
+.tx_red_14{
+	font-size: 14px !important;
+	color: red;
+}
+
+.tx_bold_red_14{
+	font-size: 14px !important;
+	font-weight: bold !important;
+	color: red;
+}
+
+.tx_red_16{
+	font-size: 16px !important;
+	color: red;
+}
+
+.tx_bold_red_16{
+	font-size: 16px !important;
+	font-weight: bold !important;
+	color: red;
+}
+
+
+
+.tx_14_selectOneMenu .ui-selectonemenu-label { 
+    font-size: 14px !important;
+}
+
+.tx_14_panelSelectOneMenu .ui-selectonemenu-list { 
+    font-size: 14px !important;
+}

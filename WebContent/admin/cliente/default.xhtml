@@ -1,0 +1,161 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+    
+    <div class="tab-content-space">
+    <div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+    <f:metadata>
+      <f:viewAction action="#{clienteConsultaBean.clearSession}"/>
+    </f:metadata>
+    
+     
+     <!-- Filtro -->
+     <h:form id="consultaCliente">
+     
+     	<p:growl id="msg" showDetail="true" life="3000"/>
+     	<p:focus context="panelFiltroCliente"/>
+    	<p:defaultCommand target="btnBuscar" />
+    	
+    	<p:toolbar id="tb">
+	        <f:facet name="left">
+	            <p:commandButton value="Novo" 
+								 actionListener="#{clienteNovoBean.novo}"
+								 update="@none"
+								 process="@this"
+								 icon="icon-new" 
+								 onstart="closeTab('clienteNovoBean')" 
+								 oncomplete="openTab('clienteNovoBean', 'Cliente', 'Cliente', 'cliente/form.jsf?id=1')"
+								 />						 
+	        </f:facet>
+	        <f:facet name="right">
+		        <p:commandButton id="menuHome" icon="ui-icon-home" actionListener="#{clienteConsultaBean.addHome}" update="@form:msg" process="@this" title="Home" />
+		        <p:commandButton icon="ui-icon-star" actionListener="#{clienteConsultaBean.addFavoritos}" update="@form:msg" process="@this" title="Favoritos" oncomplete="updateMenuHome();" />
+        	</f:facet>
+	    </p:toolbar>
+	    
+	    <p:sticky target="tb" margin="50"/>
+	    
+	    <p:panel id="panelFiltroCliente" widgetVar="panelFiltroCliente" >
+	    	<div class="ui-g">
+				<div class="ui-g-12 ui-md-2 ui-lg-0">
+					<p:inputText id="descricaoFilter" value="#{clienteConsultaBean.descricaoFilter}" placeholder="Nome fantasia / Razão Social" style="width:100%;" />
+				</div>
+				<div class="ui-g-0 ui-md-0 ui-lg-0">
+					<p:commandButton 
+						 id="btnBuscar" 
+						 value="Buscar"
+						 actionListener="#{clienteConsultaBean.buscar}"
+						 update="exportExcel :listagemCliente"
+						 icon="icon-search"  
+						 onclick="PF('bUIDataTableCliente').show()"
+						 />
+				</div>
+				<div class="ui-g-0 ui-md-0 ui-lg-0">	 
+					 <p:commandButton 
+						 id="btnLimpar" 
+						 value="Limpar"
+						 action="#{clienteConsultaBean.limpar}"
+						 update=" @form :listagemCliente "
+						 icon="ui-icon-close" 
+						 onclick="PF('bUIDataTableCliente').show()"
+						 />
+				</div>
+				<div class="ui-g-0 ui-md-0 ui-lg-0">
+					<h:panelGroup id="exportExcel"> 
+						<p:commandButton icon="icon-excel" disabled="#{empty clienteConsultaBean.lista}" title="Exportar para excel" ajax="false">
+				            <p:dataExporter type="xls" target=":listagemCliente:dtCliente" fileName="clientes"  />
+				        </p:commandButton>
+			    	</h:panelGroup>
+				</div>
+	    	</div>
+	    </p:panel>
+     	
+     </h:form>
+     
+     <!-- Listagem -->
+     <h:form id="listagemCliente">
+     	
+     	<p:remoteCommand name="updateListClienteProjetoBean" update="@form" />
+     	
+     	<p:blockUI block="dtCliente" widgetVar="bUIDataTableCliente">
+			LOADING<br />
+        	<p:graphicImage library="images" name="progress_bar.gif"/>
+		</p:blockUI>
+		
+		<p:dataTable id="dtCliente" var="cliente" reflow="true"
+			value="#{clienteConsultaBean.lista}" emptyMessage="Nenhum registro encontrado."
+			rows="20" paginator="true"
+			paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+			rowsPerPageTemplate="10,20,40">
+
+				<p:column sortBy="#{cliente.id}" styleClass="customCollumnId" priority="4">
+					<f:facet name="header">COD</f:facet>
+					<h:outputText value="#{cliente.id} " />
+	        	</p:column>
+
+				<p:column sortBy="#{cliente.cnpjCpf}"
+					styleClass="customCollumnCpfCnpj" priority="1">
+					<f:facet name="header">CPF/CNPJ</f:facet>
+					<h:outputText value="#{cliente.cnpjCpf}"
+						rendered="#{cliente.tipoPessoa == 'J' or cliente.tipoPessoa == 'O'}"
+						converter="converter.CNPJConverter" />
+					<h:outputText value="#{cliente.cnpjCpf}"
+						rendered="#{cliente.tipoPessoa == 'F'}"
+						converter="converter.CPFConverter" />
+				</p:column>
+
+				<p:column sortBy="#{cliente.razaoSocial}" priority="5">
+					<f:facet name="header">Razão Social</f:facet>
+					<h:outputText value="#{cliente.razaoSocial}" />
+	        </p:column>
+
+				<p:column sortBy="#{cliente.nomeFantasia}" priority="1">
+					<f:facet name="header">Nome Fantasia</f:facet>
+					<h:outputText value="#{cliente.nomeFantasia}" />
+	        </p:column>
+
+				<p:column sortBy="#{cliente.bairro}" priority="5" styleClass="customCollumnBairro">
+					<f:facet name="header">Bairro</f:facet>
+					<h:outputText value="#{cliente.bairro}" />
+	        </p:column>
+
+			<p:column sortBy="#{cliente.cidade}" priority="4">
+					<f:facet name="header">Cidade</f:facet>
+					<h:outputText value="#{cliente.cidade}" />
+	        </p:column>
+	        
+	        <p:column sortBy="#{cliente.estado.id}" styleClass="customCollumnEstado" priority="4" >
+					<f:facet name="header">UF</f:facet>
+					<h:outputText value="#{cliente.estadoId}" />
+	        </p:column>
+
+			<p:column sortBy="#{cliente.ativo}" styleClass="customCollumnId" priority="4">
+				<f:facet name="header">Ativo</f:facet>
+				<h:outputText value="#{cliente.ativo == 1 ? 'Ativo' : 'Inativo' }" />
+	        </p:column>
+
+				<p:column styleClass="customCollumn1Icon" exportable="false">
+					<f:facet name="header"></f:facet>
+					<p:commandButton action="#{clienteNovoBean.editar}"
+						update="@none" process="@this" icon="ui-icon-pencil" title="Editar"
+						onstart="closeTab('clienteNovoBean')" 
+						oncomplete="openTab('clienteNovoBean', 'Cliente / #{cliente.id}', 'Cliente / #{cliente.id}', 'cliente/form.jsf?id=1')"
+						>
+						<f:setPropertyActionListener target="#{clienteNovoBean.selecionada}" value="#{cliente}" />
+					</p:commandButton>
+				</p:column>
+
+			</p:dataTable>
+			<p:toolbar id="tbTotal">
+		        <f:facet name="right">
+		        	Total: #{clienteConsultaBean.lista.size()}
+		        </f:facet>
+	        </p:toolbar>
+			
+		</h:form>
+     
+    </div>
+    
+</ui:composition>

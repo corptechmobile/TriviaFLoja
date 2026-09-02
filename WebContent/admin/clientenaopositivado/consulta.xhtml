@@ -1,0 +1,183 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"> 
+<style>
+tr:nth-child(even) {
+  background-color: #f2f2f2
+}
+</style>
+   	
+    <f:metadata>
+      <f:viewAction action="#{clienteNaoPositivadoBean.clearSession}"/>
+    </f:metadata>
+
+		<h:form id="formConsClienteNaoPositivadoBuscar">
+
+			<p:growl id="msg" showDetail="true" life="3000" />
+			<p:focus context="panelFilterConsultaClienteNaoPositivadoBean" />
+			<p:defaultCommand target="btnBuscarConsulta" />
+
+		    <p:toolbar id="tb">
+		        <f:facet name="right">
+					<p:commandButton id="menuHome" icon="ui-icon-home"
+						actionListener="#{clienteNaoPositivadoBean.addHome}" update="@form:msg"
+						process="@this" title="Home" />
+					<p:commandButton icon="ui-icon-star"
+						actionListener="#{clienteNaoPositivadoBean.addFavoritos}"
+						update="@form:msg" process="@this" title="Favoritos"
+						oncomplete="updateMenuHome();" />
+	        	</f:facet>
+		    </p:toolbar>
+
+			<p:sticky target="tb" margin="50" />
+
+			<p:panel id="panelFilterConsultaClienteNaoPositivadoBean" widgetVar="panelFilterConsultaClienteNaoPositivadoBean" >
+				<div class="ui-fluid">
+				<p:panelGrid columns="9" columnClasses="ui-grid-col-0,ui-grid-col-0, ui-grid-col-0,ui-grid-col-0,ui-grid-col-0,ui-grid-col-0,ui-grid-col-0,ui-grid-col-0,ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+				<h:panelGroup>
+					<p:outputLabel value="Período:" /><br/>
+					<p:panelGrid columns="3" styleClass="ui-panelgrid-blank">
+						<p:calendar id="dataFilter1"
+							value="#{clienteNaoPositivadoBean.dataFilter1}" pattern="dd/MM/yyyy"
+							size="10" mask="99/99/9999" label="Data 'de'"
+							converterMessage="Data inválida" 
+							required="true" requiredMessage="Data 'de' é obrigatório"/>
+						<h:outputLabel value=" à " />
+						<p:calendar id="dataFilter2"
+							value="#{clienteNaoPositivadoBean.dataFilter2}" pattern="dd/MM/yyyy"
+							size="10" mask="99/99/9999" label="Data 'até'"
+							converterMessage="Data inválida" 
+							required="true" requiredMessage="Data 'até' é obrigatório"/>
+					</p:panelGrid>
+				</h:panelGroup>
+				<h:panelGroup>
+					<h:outputLabel value="Cidade:" for="cidade"/><br/>
+			        <p:inputText id="cidade" value="#{clienteNaoPositivadoBean.cidadeFilter}"  />
+				</h:panelGroup>
+				<h:panelGroup>
+					<h:outputLabel value="Bairro:" for="bairro"/><br/>
+			        <p:inputText id="bairro" value="#{clienteNaoPositivadoBean.bairroFilter}"  />
+				</h:panelGroup>
+				<h:panelGroup>
+				<h:outputLabel value=" " /><br/>
+				<p:commandButton id="btnBuscarConsulta" value="Buscar"
+								actionListener="#{clienteNaoPositivadoBean.buscar}"
+								update="@form :listaConsClienteNaoPositivado" 
+								icon="icon-search"
+								onclick="PF('bUIDataTableVendaForn').show()"
+								 />
+				</h:panelGroup>				 	
+				<h:panelGroup>
+					<h:outputLabel value=" " /><br/>
+					<p:commandButton 
+									 id="btnLimparConsultaMeta" 
+									 value="Limpar"
+									 action="#{clienteNaoPositivadoBean.limpar}"
+									 update="@form :listaConsClienteNaoPositivado "
+									 icon="ui-icon-close" 
+								 />	
+				</h:panelGroup>
+				<h:panelGroup id="exportExcel"> 
+					<h:outputLabel value=" " /><br/>
+					<p:commandButton icon="icon-excel" disabled="#{empty clienteNaoPositivadoBean.listaItens}" title="Exportar para excel" ajax="false">
+			            <p:dataExporter type="xls" target=":listaConsClienteNaoPositivado:tabview" fileName="ClientesNaoPositivados"  />
+			        </p:commandButton>
+		    	</h:panelGroup>
+								
+				</p:panelGrid>
+				</div>
+			</p:panel>
+
+		</h:form>
+
+		<h:form id="listaConsClienteNaoPositivado">
+		
+				<p:blockUI block="tabview" widgetVar="bUIDataTableVendaForn">
+					LOADING<br />
+					<p:graphicImage library="images" name="progress_bar.gif" />
+				</p:blockUI>
+		
+				<p:dataTable id="tabview" 
+							 var="consClienteNaoPositivadoItens" 
+							 reflow="true"
+							 value="#{clienteNaoPositivadoBean.listaItens}" 
+							 emptyMessage="Nenhum registro encontrado."
+			                 rows="20" 
+			                 paginator="true"
+							 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							 rowsPerPageTemplate="10,20,40">
+				<p:columnGroup type="header">
+		            <p:row>
+		                <p:column rowspan="2" headerText="Cidade"   />		                
+		                <p:column rowspan="2" headerText="Bairro"  />		                
+		                <p:column rowspan="2" headerText="CNPJ/CPF" style="width:150px;"  />
+		                <p:column rowspan="2" headerText="Cliente" />		                
+		                <p:column colspan="4" headerText="Compras" style="width:460px;" />
+		            </p:row>
+		            <p:row>
+		                <p:column headerText="Última" />		                
+		                <p:column headerText="Maior" />		                
+		                <p:column headerText="Frequência" />		                
+		                <p:column headerText="Média" />
+		            </p:row>
+		        </p:columnGroup>
+				
+				<p:column sortBy="#{cliente.id}" styleClass="customCollumnId" style="text-align:left;" priority="4">
+					<f:facet name="header">Cidade</f:facet>
+					<h:outputText value="#{consClienteNaoPositivadoItens.cidade}" />
+	        	</p:column>
+
+				<p:column sortBy="#{cliente.id}" styleClass="customCollumnId" style="text-align:left;" priority="4">
+					<f:facet name="header">Bairro</f:facet>
+					<h:outputText value="#{consClienteNaoPositivadoItens.bairro}" />
+	        	</p:column>
+
+				<p:column sortBy="#{cliente.cnpjCpf}"
+					styleClass="customCollumnId" priority="1">
+					<f:facet name="header">CPF/CNPJ</f:facet>
+					<h:outputText value="#{consClienteNaoPositivadoItens.cnpj}"
+						rendered="#{consClienteNaoPositivadoItens.tipoPessoa == 'J' or consClienteNaoPositivadoItens.tipoPessoa == 'O'}"
+						converter="converter.CNPJConverter" />
+					<h:outputText value="#{consClienteNaoPositivadoItens.cnpj}"
+						rendered="#{consClienteNaoPositivadoItens.tipoPessoa == 'F'}"
+						converter="converter.CPFConverter" />
+				</p:column>				
+
+				<p:column sortBy="#{cliente.id}" styleClass="customCollumnCodEdt" priority="4">
+					<f:facet name="header">Cliente</f:facet>
+					<h:outputText value="#{consClienteNaoPositivadoItens.descricao}" />
+	        	</p:column>
+
+				<p:column sortBy="#{cliente.id}" styleClass="customCollumn1Icon" priority="4">
+					<f:facet name="header">Ultima Cpr.</f:facet>
+					<h:outputText value="#{consClienteNaoPositivadoItens.dtUltimaCompra}" >
+						<f:convertDateTime pattern="dd/MM/yyyy" />
+					</h:outputText>
+	        	</p:column>
+				<p:column sortBy="#{cliente.id}" styleClass="customCollumnValor" priority="4">
+					<f:facet name="header">Maior Cpr.</f:facet>
+					<h:outputText value="#{consClienteNaoPositivadoItens.maiorCompra}" converter="currencyFormat" />
+	        	</p:column>
+
+				<p:column sortBy="#{cliente.id}" styleClass="customCollumnQtd" priority="4">
+					<f:facet name="header">Freq. Cpr.</f:facet>
+					<h:outputText value="#{consClienteNaoPositivadoItens.freqCompra}" converter="currencyFormat" >
+						<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+					</h:outputText>
+	        	</p:column>
+
+				<p:column sortBy="#{cliente.id}" styleClass="customCollumnValor" priority="4">
+					<f:facet name="header">Média Cpr.</f:facet>
+					<h:outputText value="#{consClienteNaoPositivadoItens.mediaCompra}" converter="currencyFormat" />
+	        	</p:column>
+			</p:dataTable>	
+		</h:form>
+		
+		<script>
+			//$('#edicaoClienteNaoPositivado\\:panelClienteNaoPositivado').hide();
+			//$('#formClienteNaoPositivadoBuscar\\:panelFilterClienteNaoPositivadoBean').hide();
+		</script>
+		
+</ui:composition> 

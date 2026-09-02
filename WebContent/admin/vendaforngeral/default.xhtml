@@ -1,0 +1,1275 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+	<div class="tab-content-space">
+		<div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+		<f:metadata>
+			<f:viewAction action="#{vendaGeralBean.clearSession}" />
+		</f:metadata>
+
+
+		<!-- Filtro -->
+		<h:form id="consultaVendaGeralBean">
+
+			<p:growl id="msg" showDetail="true" life="6000" />
+			<p:focus context="panelFiltroVendaGeral" />
+			<p:defaultCommand target="btnBuscar" />
+
+			<p:toolbar id="tb">
+				<f:facet name="right">
+					<p:commandButton id="menuHome" icon="ui-icon-home" actionListener="#{vendaGeralBean.addHome}" update="@form:msg" process="@this" title="Home" />
+					<p:commandButton icon="ui-icon-star" actionListener="#{vendaGeralBean.addFavoritos}" update="@form:msg" process="@this" title="Favoritos" oncomplete="updateMenuHome();" />
+				</f:facet>
+			</p:toolbar>
+
+			<p:sticky target="tb" margin="50" />
+
+			<p:panel id="panelFiltroVendaGeral" widgetVar="panelFiltroVendaGeral">
+				<div class="ui-fluid">
+					<div class="ui-g">
+
+						<div class="ui-g-0 ui-md-0 ui-lg-0">
+							<h:panelGroup>
+								<h:outputLabel for="empresa" value="Empresa: " />
+								<br />
+								<p:selectOneMenu id="empresa"
+									value="#{vendaGeralBean.empresaFilter}" filter="false"
+									autoWidth="true">
+									<f:selectItem itemLabel="Todas" itemValue="#{null}" />
+									<f:selectItems value="#{vendaGeralBean.empresasSelect}" />
+								</p:selectOneMenu>
+							</h:panelGroup>
+						</div>
+						
+						<div class="ui-g-0 ui-md-0 ui-lg-0">
+						<h:panelGroup>
+								<h:outputLabel value="Fornecedor:" for="fornecedorIdFilter"/> <br />
+						        <p:selectOneMenu  id="fornecedorIdFilter" value="#{vendaGeralBean.fornecedorFilter}" converter="fornecedorFBConverter" filter="true" autoWidth="true" >
+									<f:selectItem itemLabel="Todos" itemValue="#{null}" />  
+									<f:selectItems value="#{vendaGeralBean.fornecedorSelect}" />  
+								</p:selectOneMenu>
+							</h:panelGroup>
+						</div>	
+						
+						<div class="ui-g-0 ui-md-0 ui-lg-0">
+							<h:panelGroup>
+								<h:outputLabel for="segmento" value="Segmento: " />
+								<br />
+								<p:selectOneMenu id="segmento"
+									value="#{vendaGeralBean.segmentoFilter}" filter="false"
+									autoWidth="true"> 
+									<f:selectItem itemLabel="Todos" itemValue="null" />
+									<f:selectItem itemLabel="Atacado" itemValue="atacado" />
+									<f:selectItem itemLabel="Varejo" itemValue="varejo" />
+								</p:selectOneMenu>
+							</h:panelGroup> 
+						</div>	
+						
+						<div class="ui-g-0 ui-md-0 ui-lg-0">
+							<h:panelGroup>
+								<h:outputLabel for="vendasPor" value="Vendas Por: " />
+								<br />
+								<p:selectOneMenu id="vendasPor"
+									value="#{vendaGeralBean.vendasPorFilter}" filter="false"
+									autoWidth="true"> 
+									<f:selectItem itemLabel="Pedido" itemValue="pedido" />
+									<f:selectItem itemLabel="Nota Fiscal" itemValue="notafiscal" />
+								</p:selectOneMenu>
+							</h:panelGroup>
+						</div>	
+						
+											
+<!-- 
+						<div class="ui-g-0 ui-md-0 ui-lg-0">
+					        <h:panelGroup>
+								<h:outputLabel value="Vendedor:" for="vendedorIdFilter"/> <br />
+						        <p:selectOneMenu  id="vendedorIdFilter" value="#{vendaGeralBean.vendedorFilter}" converter="vendedorFBConverter" filter="true" autoWidth="true" >
+									<f:selectItem itemLabel="Todos" itemValue="#{null}" />  
+									<f:selectItems value="#{vendaGeralBean.vendedorSelect}" /> 
+								</p:selectOneMenu>
+							</h:panelGroup>
+						</div>							
+ -->						
+						<div class="ui-g-0 ui-md-0 ui-lg-0">
+							<h:panelGroup>
+								<p:outputLabel value="Período:" />
+								<br />
+								<p:panelGrid columns="3" styleClass="ui-panelgrid-blank">
+									<p:calendar id="dataFilter1"
+										value="#{vendaGeralBean.dataFilter1}" pattern="dd/MM/yyyy"
+										size="10" mask="99/99/9999" label="Data 'de'"
+										converterMessage="Data inválida" 
+										required="true" requiredMessage="Data 'de' é obrigatório"/>
+									<h:outputLabel value=" à " />
+									<p:calendar id="dataFilter2"
+										value="#{vendaGeralBean.dataFilter2}" pattern="dd/MM/yyyy"
+										size="10" mask="99/99/9999" label="Data 'até'"
+										converterMessage="Data inválida" 
+										required="true" requiredMessage="Data 'até' é obrigatório"/>
+								</p:panelGrid>
+							</h:panelGroup>
+						</div>
+						
+						<div class="ui-g-0 ui-md-0 ui-lg-0">
+						<h:panelGroup>
+							<p:outputLabel value=" " />
+							<br />
+							<p:commandButton id="btnBuscar" 
+											value="Pesquisar" 
+											actionListener="#{vendaGeralBean.buscar}" 
+											update="@form :listagemVendaGeralBean"
+											icon="icon-search" 
+											onclick="PF('bUIDataTableVendaGeral').show()" />
+						</h:panelGroup>
+						</div>
+						
+						<div class="ui-g-0 ui-md-0 ui-lg-0">
+						<h:panelGroup>
+							<p:outputLabel value=" " />
+							<br />
+							<p:commandButton id="btnLimpar" 
+										value="Limpar"
+										actionListener="#{vendaGeralBean.limpar}" 
+										update=":listagemVendaGeralBean @form"
+										icon="ui-icon-close"
+										onclick="PF('bUIDataTableVendaGeral').show()" />
+						</h:panelGroup>
+						</div>
+					</div>
+				</div>
+
+			</p:panel>
+
+		</h:form>
+
+		<!-- Listagem -->
+
+		<h:form id="listagemVendaGeralBean">
+			
+			<p:blockUI block="tabview" widgetVar="bUIDataTableVendaGeral">
+				LOADING<br />
+				<p:graphicImage library="images" name="progress_bar.gif" />
+			</p:blockUI>
+			
+			<p:tabView id="tabview" widgetVar="tabPanelWidget" activeIndex="#{vendaGeralBean.currentTab}" styleClass="tabContent">
+			
+				<p:ajax event="tabChange" listener="#{vendaGeralBean.onTabChange}" update="@none"/>
+				<p:ajax event="tabClose" listener="#{vendaGeralBean.onTabClose}" update="@form"/>
+
+				<p:tab title="Vendas" id="tab0">
+					
+					<p:panelGrid columns="2" columnClasses="ui-grid-col-8, ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+						<h:panelGroup>
+						<p:fieldset styleClass="painelFieldset">
+							<div id="collumnLineDBEmp" ></div>
+						</p:fieldset>					
+						<p:remoteCommand id="rcDashBoardMes" autoRun="true" async="false" update="@none" oncomplete="handleDashBoardVenda(xhr, status, args)" actionListener="#{vendaGeralBean.buscarDashBoardMes()}"  />
+						</h:panelGroup>
+						<h:panelGroup>
+						<p:fieldset styleClass="painelFieldset">
+							<div id="collumnBarDB" ></div>
+						</p:fieldset>					
+						<p:remoteCommand id="rcDashBoardCompMes" autoRun="true" async="false" update="@none" oncomplete="handleDashBoardVendaAnual(xhr, status, args)" actionListener="#{vendaGeralBean.buscarDashBoardComAno()}"  />
+						</h:panelGroup>
+					</p:panelGrid>
+
+					<div class="ui-g" style="margin-top: 10px;">
+						<div class="ui-g-12 ui-md-6 ui-lg-4">
+							<p:panel>
+								<f:facet name="header">
+									<p:outputLabel value="Posição em: " /> 
+									<p:outputLabel value="#{vendaGeralBean.dataFilter2}" styleClass="tx_bold">
+										<f:convertDateTime pattern="dd/MM" />
+									</p:outputLabel>
+								</f:facet>
+								<table width="100%">
+									<tr>
+										<td>
+											<p:outputLabel value="Clientes:" />
+										</td>
+										<td align="right" width="10"><h:outputText value="#{vendaGeralBean.numClientesDoDia}" styleClass="tx_bold" /></td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="Faturado: " />
+										</td>
+										<td align="right" width="10">
+											<p:commandLink update=":listagemVendaGeralBean" 
+											               action="#{vendaGeralBean.openDetalhe}" 
+											               styleClass="txAzulDashBoardComPO" 
+															onstart="PF('bUIDataTableVendaGeral').show();"
+															oncomplete="focusInPainel('#listagemVendaGeralBean\\:tabview', 100);"										
+													       >
+												<h:outputText value="#{vendaGeralBean.faturamentoDia}" converter="currencyFormat" styleClass="tx_bold" />	
+		            							<f:setPropertyActionListener target="#{vendaGeralBean.tipoPosicao}" value="noDia" />
+		        							</p:commandLink>											
+											
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="Devolvido: " />
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.devolucaoDia}" converter="currencyFormat" styleClass="tx_bold" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="Venda Liq.: " />
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.faturamentoDia - vendaGeralBean.devolucaoDia}" converter="currencyFormat" styleClass="tx_bold" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="Ticket Médio: " />
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.ticketMedioDia}" converter="currencyFormat" styleClass="tx_bold" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="Desconto Médio: " />
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.descontoDia}" converter="currencyFormat" styleClass="tx_bold" />%
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="Margem: " />
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.margem}" styleClass="tx_bold" >
+												<f:convertNumber minFractionDigits="2" maxFractionDigits="2" locale="pt_BR" />
+											</h:outputText>%
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="MarkUp: " />
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.markup}" styleClass="tx_bold" >
+												<f:convertNumber minFractionDigits="2" maxFractionDigits="2" locale="pt_BR" />
+											</h:outputText>%
+										</td>
+									</tr>
+								</table>
+							</p:panel>
+						</div>
+						<div class="ui-g-12 ui-md-6 ui-lg-4">
+							<p:panel>
+								<f:facet name="header">
+									<p:outputLabel value="Posição até: " /> 
+									<p:outputLabel value="#{vendaGeralBean.dataFilter2}" styleClass="tx_bold">
+										<f:convertDateTime pattern="dd/MM" />
+									</p:outputLabel>
+								</f:facet>
+								<table width="100%">
+									<tr>
+										<td>
+											<p:outputLabel value="Clientes: " />
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.numClientes}" styleClass="tx_bold" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="Faturado: " /> 
+										</td>
+										<td align="right" width="10"> 
+											<p:commandLink update=":listagemVendaGeralBean" 
+											               action="#{vendaGeralBean.openDetalhe}" 
+											               styleClass="txAzulDashBoardComPO" 
+															onstart="PF('bUIDataTableVendaGeral').show();"
+															oncomplete="focusInPainel('#listagemVendaGeralBean\\:tabview', 100);"										
+													       >
+		            							<h:outputText value="#{vendaGeralBean.resumo.faturamento}" converter="currencyFormat" styleClass="tx_bold" />
+		            							<f:setPropertyActionListener target="#{vendaGeralBean.tipoPosicao}" value="noMes" />
+		        							</p:commandLink>											
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="Devolvido: " />
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.resumo.devolucao}" converter="currencyFormat" styleClass="tx_bold" />											
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="Venda Liq.: " />
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.resumo.faturamento - vendaGeralBean.resumo.devolucao}" converter="currencyFormat" styleClass="tx_bold" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="Ticket Médio: " />
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.resumo.ticketMedio}" converter="currencyFormat" styleClass="tx_bold" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="Desconto Médio: " />
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.resumo.desconto}" converter="currencyFormat" styleClass="tx_bold" />%
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="Margem: " />
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.resumo.margem}" styleClass="tx_bold" >
+												<f:convertNumber minFractionDigits="2" maxFractionDigits="2" locale="pt_BR" />
+											</h:outputText>%
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="MarkUp: " />
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.resumo.markup}" styleClass="tx_bold" >
+												<f:convertNumber minFractionDigits="2" maxFractionDigits="2" locale="pt_BR" />
+											</h:outputText>%
+										</td>
+									</tr>									
+								</table>
+							</p:panel>
+						</div>
+						<div class="ui-g-12 ui-md-6 ui-lg-4">
+							<p:panel header="Outros">
+								<table width="100%">
+									<tr>
+										<td>
+											<p:outputLabel value="Fat. Mês Anterior: " />
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.resumo.fatAnt}" converter="currencyFormat" styleClass="tx_bold" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="Tendência: " />
+								
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.resumo.getTendencia(vendaGeralBean.diasUteis)}" converter="currencyFormat" styleClass="tx_bold"  />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="Crescimento: " />
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.resumo.getCrescimento(vendaGeralBean.diasUteis)}" converter="currencyFormat" styleClass="#{(vendaGeralBean.resumo.getCrescimento(vendaGeralBean.diasUteis) gt 0)?'tx_bold':'tx_bold_red_14'}" />%
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="Lucro Projetado: " rendered="#{vendaGeralBean.diasUteis.prazoDecorrido!=vendaGeralBean.diasUteis.diasUteis}" />
+											<p:outputLabel value="Lucro Realizado: " rendered="#{vendaGeralBean.diasUteis.prazoDecorrido==vendaGeralBean.diasUteis.diasUteis}" />
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.resumo.getLucroLiq(vendaGeralBean.diasUteis)}" rendered="#{vendaGeralBean.diasUteis.prazoDecorrido!=vendaGeralBean.diasUteis.diasUteis}" converter="currencyFormat" styleClass="tx_bold" />
+											<h:outputText value="#{vendaGeralBean.resumo.lucroRealizado}" rendered="#{vendaGeralBean.diasUteis.prazoDecorrido==vendaGeralBean.diasUteis.diasUteis}" converter="currencyFormat" styleClass="tx_bold" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="Média Diária: " /> 
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.mediaDia}" converter="currencyFormat" styleClass="tx_bold" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="Custo: " />
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.resumo.valorCusto}" converter="currencyFormat" styleClass="tx_bold" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="Custo Devolvido: " />
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.resumo.valorCustoDevolvido}" converter="currencyFormat" styleClass="tx_bold" />
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<p:outputLabel value="Prazo Decorrido: " />
+										</td>
+										<td align="right" width="10">
+											<h:outputText value="#{vendaGeralBean.diasUteis.prazoDecorrido} / #{vendaGeralBean.diasUteis.diasUteis}" styleClass="tx_bold" />
+										</td>
+									</tr>
+								</table>
+							
+							</p:panel>
+						</div>
+					</div>
+
+				</p:tab>
+				
+				<p:tab title="Detalhe Vendas #{vendaGeralBean.tipoPosicao == 'noMes' ? 'no Mês' : 'no Dia'}" id="tabDetalhe" rendered="#{vendaGeralBean.renderedTabDetVendas}" closable="true">
+					
+						<p:panelGrid columns="3" columnClasses="ui-grid-col-0, ui-grid-col-0, ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+							<p:selectOneMenu id="opcoes" value="#{vendaGeralBean.porFilter}">
+								<!-- <p:ajax update="@form:opcoes1" />  -->
+								<f:selectItem itemLabel="Linha de Produto" itemValue="linhaProduto" />	
+								<f:selectItem itemLabel="Fornecedor" itemValue="fornecedor" />
+								<f:selectItem itemLabel="Vendedor" itemValue="vendedor" />
+								<f:selectItem itemLabel="Tipo Vendedor" itemValue="tipovend" />
+								<f:selectItem itemLabel="F. Pagto" itemValue="fpagto" />
+							</p:selectOneMenu>
+							
+							<p:commandButton id="btnPesquisarPor" 
+											action="#{vendaGeralBean.buscarPor}" 
+											update="@form :listagemVendaGeralBean" 
+											icon="icon-search" 
+											onclick="PF('bUIDataTableVendaGeral').show()" />
+							<p:commandButton rendered="#{vendaGeralBean.porFilter ne 'fpagto'}" icon="icon-excel" disabled="#{empty vendaGeralBean.lista}" title="Exportar para excel" ajax="false">
+					            <p:dataExporter type="xls" target="dtVendaForn" fileName="#{vendaGeralBean.porFilterLabel}"  />
+					        </p:commandButton>
+																			
+				    	</p:panelGrid>					
+					
+					<ui:fragment rendered="#{vendaGeralBean.porFilter ne 'fpagto'}">
+						
+						<!-- Linha produto, Vendedor, Fornecedor -->
+						
+	
+						<p:remoteCommand name="updateListVendaFornProjetoBean" update="@form" />
+	
+						<p:dataTable id="dtVendaForn" var="vendaForn"
+							value="#{vendaGeralBean.lista}"
+							emptyMessage="Nenhum registro encontrado."
+							reflow="true">
+	
+							<p:column sortBy="#{vendaForn.descricao}">
+							<f:facet name="header">#{vendaGeralBean.porFilterColumn}</f:facet>
+								<h:outputText value="#{car.id} " />
+								<h:outputText value="#{vendaForn.descricao}" />
+							</p:column>
+	
+							<p:column sortBy="#{vendaForn.valor}" styleClass="customCollumnValorGrande">
+								<f:facet name="header">Valor</f:facet>
+								<h:outputText value="#{vendaForn.valor}" converter="currencyFormat" />
+							</p:column>
+							
+							<p:column sortBy="#{vendaForn.vlDevolvido}" styleClass="customCollumnValorGrande">
+								<f:facet name="header">Dev.</f:facet>
+								<h:outputText value="#{vendaForn.vlDevolvido}" converter="currencyFormat" rendered="#{vendaForn.vlDevolvido gt 0}" />
+							</p:column>
+							
+							<p:column sortBy="#{vendaForn.margem}" styleClass="customCollumnValorGrande">
+								<f:facet name="header">Margem</f:facet>
+								<h:outputText value="#{vendaForn.margem}" >
+									<f:convertNumber minFractionDigits="2" maxFractionDigits="2" locale="pt_BR" />
+							</h:outputText>%
+							</p:column>							
+
+							<p:column sortBy="#{vendaForn.markup}" styleClass="customCollumnValorGrande">
+								<f:facet name="header">MarkUp</f:facet>
+								<h:outputText value="#{vendaForn.markup}" >
+									<f:convertNumber minFractionDigits="2" maxFractionDigits="2" locale="pt_BR" />
+								</h:outputText>%
+							</p:column>							
+
+							<p:column sortBy="#{vendaForn.desconto}" styleClass="customCollumnValor">
+								<f:facet name="header">Desc.</f:facet>
+								<h:outputText value="#{vendaForn.desconto}" converter="currencyFormat" />
+							</p:column>
+							
+							<p:column sortBy="#{vendaForn.percValor}" styleClass="customCollumnValor">
+								<f:facet name="header">%</f:facet>
+								<h:outputText value="#{vendaForn.percValor}">
+									<f:convertNumber minFractionDigits="2" maxFractionDigits="2" locale="pt_BR" />
+								</h:outputText>
+							</p:column>
+							
+							<p:column styleClass="customCollumn1Icon" exportable="false" priority="1">
+								<f:facet name="header"></f:facet>
+								<p:commandButton id="btnOpenProduto"
+											actionListener="#{vendaGeralBean.openProduto}"
+											update=":listagemVendaGeralBean" 
+											process="@this" 
+											icon="ui-icon-plus"
+											title="Mostrar Produtos"
+											onstart="PF('bUIDataTableVendaGeral').show();"
+											oncomplete="focusInPainel('#listagemVendaGeralBean\\:tabview', 100);">
+									<f:setPropertyActionListener target="#{vendaGeralBean.selecionada}" value="#{vendaForn}" />
+								</p:commandButton>
+							</p:column>
+							
+							<p:columnGroup type="footer">
+	               				<p:row>
+						            <p:column footerText="Total:" style="text-align:right;" styleClass="tx_bold" />
+						            <p:column style="text-align:right;" >
+						            	<f:facet name="footer">
+						                	<h:outputText value="#{vendaGeralBean.valorTotal}" converter="currencyFormat" styleClass="tx_bold"/>
+					                	</f:facet>
+						            </p:column>
+						            <p:column style="text-align:right;" >
+						            	<f:facet name="footer">
+						                	<h:outputText value="#{vendaGeralBean.valorTotalDev}" converter="currencyFormat" styleClass="tx_bold"/>
+						                </f:facet>
+						            </p:column>
+						            <p:column />
+						            <p:column />
+						            <p:column />
+						            <p:column />
+						            <p:column />
+						        </p:row>
+	        				</p:columnGroup>
+	
+						</p:dataTable>
+						
+						<div class="ui-datatable ui-widget w3-hide-large w3-hide-medium">
+				        <div class="ui-datatable-tablewrapper">
+							<table role="grid">
+								<tr>
+									<td class="ui-state-default" style="text-align:right">Total: </td>
+									<td class="ui-state-default" style="text-align:right">
+										<h:outputText value="#{vendaGeralBean.valorTotal}" converter="currencyFormat" styleClass="tx_bold"/>
+									</td>
+								</tr>
+								<tr>
+									<td class="ui-state-default" style="text-align:right">Devolução: </td>
+									<td class="ui-state-default" style="text-align:right">
+										<h:outputText value="#{vendaGeralBean.valorTotalDev}" converter="currencyFormat" styleClass="tx_bold"/>
+									</td>
+								</tr>
+							</table>
+						</div>
+						</div>
+						
+					</ui:fragment>
+					
+					<!-- Forma pagamento -->
+					<ui:fragment rendered="#{vendaGeralBean.porFilter eq 'fpagto'}">
+					
+						<p:commandButton icon="icon-excel" disabled="#{empty vendaGeralBean.formas}" title="Exportar para excel" ajax="false">
+				            <p:dataExporter type="xls" target="dtVendaFornFPagto" fileName="FormaPagtoPainelVendas"  />
+				        </p:commandButton>
+				        
+						<p:dataTable id="dtVendaFornFPagto" 
+									var="vendaFornFPagto" 
+									value="#{vendaGeralBean.formas}" 
+									emptyMessage="Nenhum registro encontrado." 
+									sortBy="#{vendaFornFPagto.valor}" 
+									sortOrder="descending"
+									reflow="true"
+									>
+									
+							<p:column sortBy="#{vendaFornFPagto.descricao}">
+								<f:facet name="header">F. Pagto</f:facet>
+								<h:outputText value="#{vendaFornFPagto.descricao} " />
+								<!-- <h:outputText value="(#{vendaFornFPagto.parcela}x) " rendered="#{not empty vendaFornFPagto.parcela}" /> -->
+							</p:column>
+							
+							<p:column sortBy="#{vendaFornFPagto.valor}" styleClass="customCollumnValor">
+								<f:facet name="header">Valor</f:facet>
+								<h:outputText value="#{vendaFornFPagto.valor}" converter="currencyFormat" />
+							</p:column>
+							
+							<p:column sortBy="#{vendaFornFPagto.desconto}" styleClass="customCollumnValor">
+								<f:facet name="header">Desc.%</f:facet>
+								<h:outputText value="#{vendaFornFPagto.desconto}" converter="currencyFormat" />
+							</p:column>
+							
+							<p:column styleClass="customCollumnValor">
+								<f:facet name="header">%</f:facet>
+								<h:outputText value="#{vendaFornFPagto.perc(vendaGeralBean.somaValorTotalFPagto)}">
+									<f:convertNumber minFractionDigits="2" maxFractionDigits="2" locale="pt_BR" />
+								</h:outputText>
+							</p:column>
+							
+							<p:column styleClass="customCollumn1Icon" exportable="false">
+								<p:commandButton id="btnOpenECFs"
+									icon="ui-icon-search"
+									actionListener="#{vendaGeralBean.buscarNFCes}"
+									update="@form:dtNFCes"
+									onsuccess="PF('dialogOpenECFs').show()" 
+									rendered="#{vendaFornFPagto.descricao eq 'NFC-e SEM REG.PAGTO'}" />
+									
+								<p:commandButton id="btnOpenPedidosPorFPagto"
+											actionListener="#{vendaGeralBean.openPedidoFPagto}"
+											update=":listagemVendaGeralBean" 
+											process="@this" 
+											icon="ui-icon-plus"
+											title="#{vendaGeralBean.vendasPorFilter == 'pedido' ? 'Mostrar Pedidos' : 'Mostrar Notas'}" 
+											rendered="#{empty vendaFornFPagto.filhos and vendaFornFPagto.descricao ne 'NFC-e SEM REG.PAGTO'}"
+											onstart="PF('bUIDataTableVendaGeral').show();"
+											oncomplete="focusInPainel('#listagemVendaGeralBean\\:tabview', 100);"
+											>
+									<f:setPropertyActionListener target="#{vendaGeralBean.selecionadaFPagto}" value="#{vendaFornFPagto}" />
+									<f:setPropertyActionListener target="#{vendaGeralBean.tituloPedidos}" value="#{vendaFornFPagto.descricao}" />
+								</p:commandButton>
+											
+								<p:commandButton id="btnOpenPedidosPorFPagto2"
+											actionListener="#{vendaGeralBean.openFPagto}"
+											update=":listagemVendaGeralBean" 
+											process="@this" 
+											icon="ui-icon-plus"
+											title="Expandir" 
+											rendered="#{not empty vendaFornFPagto.filhos and vendaFornFPagto.descricao ne 'NFC-e SEM REG.PAGTO'}"
+											onstart="PF('bUIDataTableVendaGeral').show();"
+											oncomplete="focusInPainel('#listagemVendaGeralBean\\:tabview', 100);">
+									<f:setPropertyActionListener target="#{vendaGeralBean.selecionadaFPagtoCartoes}" value="#{vendaFornFPagto}" />		
+								</p:commandButton>
+							</p:column>
+							
+							<p:columnGroup type="footer">
+	               				<p:row>
+						            <p:column footerText="Total" style="text-align:right;" styleClass="tx_bold" />
+						            <p:column style="text-align:right;" >
+						            	<f:facet name="footer">
+						                	<h:outputText value="#{vendaGeralBean.somaValorTotalFPagto}" converter="currencyFormat" styleClass="tx_bold"/>
+					                	</f:facet>
+						            </p:column>
+						            <p:column />
+						            <p:column />
+						            <p:column />
+						        </p:row>
+	        				</p:columnGroup>
+							
+						</p:dataTable>
+						
+						<div class="ui-datatable ui-widget w3-hide-large w3-hide-medium">
+					        <div class="ui-datatable-tablewrapper">
+								<table role="grid">
+									<tr>
+										<td class="ui-state-default" style="text-align:right">Total: </td>
+										<td class="ui-state-default" style="text-align:right">
+											<h:outputText value="#{vendaGeralBean.somaValorTotalFPagto}" converter="currencyFormat" styleClass="tx_bold"/>
+										</td>
+									</tr>
+								</table>
+							</div>
+						</div>
+						
+					</ui:fragment>						
+					
+				</p:tab>
+				
+				<p:tab id="tabDtVendaFPagtoBean" title="Cartão" closable="true" rendered="#{vendaGeralBean.renderedTabFPagto}" >
+				
+					<h:outputText value="#{vendaGeralBean.selecionadaFPagtoCartoes.descricao}"/>
+					<!-- <h:outputText value="(#{vendaGeralBean.selecionadaFPagto.parcela}x) " rendered="#{not empty vendaGeralBean.selecionadaFPagto.parcela}" /> --> 
+					
+					<div class="ui-g-0 ui-md-0 ui-lg-0">					
+						<p:commandButton icon="icon-excel" disabled="#{empty vendaGeralBean.selecionadaFPagtoCartoes.filhos}" title="Exportar para excel" ajax="false">
+				            <p:dataExporter type="xls" target="dtVendaFornFPagtoFilho" fileName="FormaPagtoPainelVendas-Cartoes"  />
+				        </p:commandButton>
+			        </div>
+				        
+					<p:dataTable id="dtVendaFornFPagtoFilho" var="vendaFornFPagtoFilho" 
+								value="#{vendaGeralBean.selecionadaFPagtoCartoes.filhos}" 
+								emptyMessage="Nenhum registro encontrado." 
+								sortBy="#{vendaFornFPagtoFilho.valor}" 
+								sortOrder="descending"
+								reflow="true">
+								
+						<p:column sortBy="#{vendaFornFPagtoFilho.descricao}">
+							<f:facet name="header">Descrição</f:facet>
+							<h:outputText value="#{vendaFornFPagtoFilho.descricao} " />
+							<!-- <h:outputText value="(#{vendaFornFPagtoFilho.parcela}x) " rendered="#{not empty vendaFornFPagtoFilho.parcela}" /> -->
+						</p:column>
+						
+						<p:column sortBy="#{vendaFornFPagtoFilho.valor}" styleClass="customCollumnValor">
+							<f:facet name="header">Valor</f:facet>
+							<h:outputText value="#{vendaFornFPagtoFilho.valor}" converter="currencyFormat" />
+						</p:column>
+						
+						<p:column sortBy="#{vendaFornFPagtoFilho.desconto}" styleClass="customCollumnValor">
+								<f:facet name="header">Desc.%</f:facet>
+								<h:outputText value="#{vendaFornFPagtoFilho.desconto}" converter="currencyFormat" />
+							</p:column>
+						
+						<p:column sortBy="#{vendaFornFPagtoFilho.perc(vendaGeralBean.selecionadaFPagtoCartoes.valor)}" styleClass="customCollumnValor">
+							<f:facet name="header">%</f:facet>
+							<h:outputText value="#{vendaFornFPagtoFilho.perc(vendaGeralBean.selecionadaFPagtoCartoes.valor)}">
+								<f:convertNumber minFractionDigits="2" maxFractionDigits="2" locale="pt_BR" />
+							</h:outputText>
+						</p:column>
+						
+						<p:column styleClass="customCollumn1Icon" exportable="false">
+							<p:commandButton id="btnOpenPedidosPorFPagto"
+										actionListener="#{vendaGeralBean.openPedidoPorCartao}"
+										update=":listagemVendaGeralBean" 
+										process="@this" 
+										icon="ui-icon-plus"
+										title="#{vendaGeralBean.vendasPorFilter == 'pedido' ? 'Mostrar Pedidos' : 'Mostrar Notas'}" 
+										onstart="PF('bUIDataTableVendaGeral').show();"
+										oncomplete="focusInPainel('#listagemVendaGeralBean\\:tabview', 100);"										
+										>
+								<f:setPropertyActionListener target="#{vendaGeralBean.selecionadaFPagto}" value="#{vendaFornFPagtoFilho}" />
+								<f:setPropertyActionListener target="#{vendaGeralBean.tituloPedidos}" value="#{vendaFornFPagtoFilho.descricao} (#{vendaFornFPagtoFilho.parcela}x)" />
+							</p:commandButton>
+						</p:column>
+						
+						<p:columnGroup type="footer">
+               				<p:row>
+					            <p:column footerText="Total" style="text-align:right;" styleClass="tx_bold" />
+					            <p:column style="text-align:right;" >
+					            	<f:facet name="footer">
+					                	<h:outputText value="#{vendaGeralBean.selecionadaFPagtoCartoes.valor}" converter="currencyFormat" styleClass="tx_bold"/>
+				                	</f:facet>
+					            </p:column>
+					            <p:column />
+					            <p:column />
+					            <p:column />
+					        </p:row>
+        				</p:columnGroup>
+						
+					</p:dataTable>
+					
+				</p:tab>
+				
+				<p:tab id="tabDtVendaProdBean" title="Produtos" closable="true" rendered="#{vendaGeralBean.renderedTabProduto}">
+				
+					<p:blockUI block="dtVendaProd" widgetVar="bUIDataTableVendaProd">
+					      LOADING<br />
+						<p:graphicImage library="images" name="progress_bar.gif" />
+					</p:blockUI>
+					
+					<h:outputText value="#{vendaGeralBean.selecionada.descricao}"/>
+					
+					<div class="ui-g-0 ui-md-0 ui-lg-0">	 
+						<p:commandButton icon="icon-excel" disabled="#{empty vendaGeralBean.listaProdutos}" title="Exportar para excel" ajax="false">
+				            <p:dataExporter type="xls" target="dtVendaProd" fileName="Produtos"  />
+				        </p:commandButton>
+			    	</div>
+					
+					<p:dataTable id="dtVendaProd" var="vendaProd" value="#{vendaGeralBean.listaProdutos}" emptyMessage="Nenhum registro encontrado." reflow="true">
+
+						<p:column sortBy="#{vendaProd.produtoCod}" styleClass="customCollumnId">
+							<f:facet name="header">Cod.</f:facet>
+							<h:outputText value="#{vendaProd.produtoCod}" />
+						</p:column>
+
+						<p:column sortBy="#{vendaProd.produto}" styleClass="customCollumnProduto">
+							<f:facet name="header">Produto</f:facet>
+							<h:outputText value="#{vendaProd.produto}" />
+						</p:column>
+
+						<p:column sortBy="#{vendaProd.qtdeAuto}" styleClass="customCollumnValor">
+							<f:facet name="header">Qtd.</f:facet>
+							<h:outputText value="#{vendaProd.qtdeAuto}" converter="currencyFormat" />
+						</p:column>
+
+						<p:column sortBy="#{vendaProd.un}" styleClass="customCollumnValor">
+							<f:facet name="header">UN</f:facet>
+							<h:outputText value="#{vendaProd.un}" />
+						</p:column>
+
+						<p:column sortBy="#{vendaProd.preco}" styleClass="customCollumnValor">
+							<f:facet name="header">Preço</f:facet>
+							<h:outputText value="#{vendaProd.preco}" converter="currencyFormat" />
+						</p:column>
+
+						<p:column sortBy="#{vendaProd.valor}" styleClass="customCollumnValorGrande">
+							<f:facet name="header">Valor</f:facet>
+							<h:outputText value="#{vendaProd.valor}" converter="currencyFormat" />
+						</p:column>
+						
+						<p:column sortBy="#{vendaProd.vlDevolvido}" styleClass="customCollumnValorGrande">
+							<f:facet name="header">Dev.</f:facet>
+							<h:outputText value="#{vendaProd.vlDevolvido}" converter="currencyFormat" rendered="#{vendaProd.vlDevolvido gt 0}" />
+						</p:column>
+						
+						<p:column sortBy="#{vendaProd.margem}" styleClass="customCollumnValorGrande">
+							<f:facet name="header">Margem</f:facet>
+							<h:outputText value="#{vendaProd.margem}" >
+								<f:convertNumber minFractionDigits="2" maxFractionDigits="2" locale="pt_BR" />
+							</h:outputText>%
+						</p:column>							
+
+						<p:column sortBy="#{vendaProd.markup}" styleClass="customCollumnValorGrande">
+							<f:facet name="header">MarkUp</f:facet>
+							<h:outputText value="#{vendaProd.markup}" >
+								<f:convertNumber minFractionDigits="2" maxFractionDigits="2" locale="pt_BR" />
+							</h:outputText>%
+						</p:column>							
+						
+
+						<p:column sortBy="#{vendaProd.desconto}" styleClass="customCollumnValor">
+							<f:facet name="header">Desc.%</f:facet>
+							<h:outputText value="#{vendaProd.desconto}" converter="currencyFormat" />
+						</p:column>
+						
+						<p:column styleClass="customCollumn1Icon" rendered="#{vendaGeralBean.autoServicoPedAmbos ne 'autoServico'}" exportable="false">
+							<p:commandButton id="btnOpenPedidos"
+										actionListener="#{vendaGeralBean.openPedido}"
+										update=":listagemVendaGeralBean" 
+										process="@this" 
+										icon="ui-icon-plus"
+										title="#{vendaGeralBean.vendasPorFilter == 'pedido' ? 'Mostrar Pedidos' : 'Mostrar Notas'}"
+										onstart="PF('bUIDataTableVendaGeral').show();"
+										oncomplete="focusInPainel('#listagemVendaGeralBean\\:tabview', 100);">
+								<f:setPropertyActionListener target="#{vendaGeralBean.selecionadaProduto}" value="#{vendaProd}" />
+								<f:setPropertyActionListener target="#{vendaGeralBean.tituloPedidos}" value="#{vendaProd.produto}" />
+							</p:commandButton>
+						</p:column>
+						
+						<p:columnGroup type="footer">
+               				<p:row>
+					            <p:column rowspan="#{vendaGeralBean.totalUNListaProdutos.size()+1}" colspan="2" footerText="Total" style="text-align:right;" styleClass="tx_bold" />
+					            <p:column />
+					            <p:column />
+					            <p:column />
+					            <p:column style="text-align:right;" >
+					            	<f:facet name="footer">
+					                	<h:outputText value="#{vendaGeralBean.valorTotalProd}" converter="currencyFormat" styleClass="tx_bold"/>
+				                	</f:facet>
+					            </p:column>
+					            <p:column style="text-align:right;" >
+					            	<f:facet name="footer">
+					                	<h:outputText value="#{vendaGeralBean.valorTotalProdDev}" converter="currencyFormat" styleClass="tx_bold"/>
+					                </f:facet>
+					            </p:column>
+					            <p:column />
+					             <p:column />
+					              <p:column />
+					            <p:column rendered="#{vendaGeralBean.autoServicoPedAmbos ne 'autoServico'}" />
+					        </p:row>
+					        
+					        <p:repeat var="un" value="#{vendaGeralBean.totalUNListaProdutos.entrySet().toArray()}">
+					        <p:row>
+					            <p:column style="text-align:right;" >
+					            	<f:facet name="footer">
+					            		<h:outputText value="#{un.value}" converter="currencyFormat" />
+				                	</f:facet>
+					            </p:column>
+					            <p:column style="text-align:right;" >
+					            	<f:facet name="footer">
+					            		<h:outputText value="#{un.key}" />
+				                	</f:facet>
+					            </p:column>
+					            <p:column style="text-align:right;" >
+					            	<f:facet name="footer">
+				                	</f:facet>
+					            </p:column>
+					            <p:column style="text-align:right;" >
+					            	<f:facet name="footer">
+				                	</f:facet>
+					            </p:column>
+					            <p:column style="text-align:right;" >
+					            	<f:facet name="footer">
+					                </f:facet>
+					            </p:column>
+					            <p:column />
+					            <p:column />
+					            <p:column />
+					            <p:column rendered="#{vendaGeralBean.autoServicoPedAmbos ne 'autoServico'}" />
+					        </p:row>
+					        </p:repeat>
+        				</p:columnGroup>
+
+					</p:dataTable>
+					
+				</p:tab>
+				
+				<p:tab id="tabDtVendaProdBeanPedVenda" title="#{vendaGeralBean.vendasPorFilter == 'pedido' ? 'Pedidos' : 'Notas'}" closable="true" rendered="#{vendaGeralBean.renderedTabPedido}">
+					
+					<h:outputText value="#{vendaGeralBean.tituloPedidos}" />
+					
+					<div class="ui-g-0 ui-md-0 ui-lg-0">	 
+						<p:commandButton icon="icon-excel" disabled="#{empty vendaGeralBean.listaPedidos}" title="Exportar para excel" ajax="false">
+				            <p:dataExporter type="xls" target="dtVendaProd" fileName="Pedidos"  />
+				        </p:commandButton>
+			    	</div>
+					
+					<p:dataTable id="dtVendaFornPedVenda" var="vendaPed"
+						value="#{vendaGeralBean.listaPedidos}"
+						emptyMessage="Nenhum registro encontrado."
+						sortBy="#{vendaPed.valor}" 
+						sortOrder="descending"
+						reflow="true">
+						
+						<p:column styleClass="customCollumnValor" sortBy="#{vendaPed.id}">
+							<f:facet name="header">Num.</f:facet>
+							<h:outputText value="#{vendaPed.id}"/>
+						</p:column>
+						
+						<p:column styleClass="customCollumnValor" style="text-align:center;" sortBy="#{vendaPed.tipo}">
+							<f:facet name="header">Tipo</f:facet>
+							<h:outputText value="#{vendaPed.tipo}"/>
+						</p:column>
+						
+						<p:column sortBy="#{vendaPed.cliente}">
+							<f:facet name="header">Cliente</f:facet>
+							<h:outputText value="#{vendaPed.cliente}"/>
+						</p:column>
+						
+						<p:column sortBy="#{vendaPed.condPagto}">
+							<f:facet name="header">Cond. Pagto</f:facet>
+							<h:outputText value="#{vendaPed.condPagto}"/>
+						</p:column>
+						
+						<p:column sortBy="#{vendaPed.qtde}" styleClass="customCollumnValor" rendered="#{vendaGeralBean.porFilter ne 'fpagto'}">
+							<f:facet name="header">Qtd.</f:facet>
+							<h:outputText value="#{vendaPed.qtde}" converter="currencyFormat"/>
+						</p:column>
+						
+						<p:column sortBy="#{vendaPed.un}" styleClass="customCollumnId" rendered="#{vendaGeralBean.porFilter ne 'fpagto'}">
+							<f:facet name="header">UN</f:facet>
+							<h:outputText value="#{vendaPed.un}"/>
+						</p:column>
+						
+						<p:column styleClass="customCollumnValor" sortBy="#{vendaPed.preco}" rendered="#{vendaGeralBean.porFilter ne 'fpagto'}">
+							<f:facet name="header">Preço</f:facet>
+							<h:outputText value="#{vendaPed.preco}" converter="currencyFormat"/>
+						</p:column>
+						
+						<p:column styleClass="customCollumnValor" sortBy="#{vendaPed.valor}">
+							<f:facet name="header">Valor</f:facet>
+							<h:outputText value="#{vendaPed.valor}" converter="currencyFormat"/>
+						</p:column>
+						
+						<p:column styleClass="customCollumnValor" sortBy="#{vendaPed.desconto}">
+							<f:facet name="header">Desc.%</f:facet>
+							<h:outputText value="#{vendaPed.desconto}" converter="currencyFormat"/>
+						</p:column>
+						
+						<p:column styleClass="customCollumn1Icon" rendered="#{vendaGeralBean.autoServicoPedAmbos ne 'autoServico'}" exportable="false">
+							<p:commandButton id="btnOpenPedidoTela" action="#{pedVendaNovoBean.visualizar}" rendered="#{vendaPed.tipo == 'Pedido'}"
+										update="@none" process="@this"
+										icon="ui-icon-plus"
+										title="Mostrar Pedido Completo"
+										onstart="closeTab('pedVendaNovoBean')" 
+										oncomplete="openTab('pedVendaNovoBean', '#{vendaPed.encomendaToString} #{vendaPed.id}', '#{vendaPed.encomendaToString} #{vendaPed.id}', 'pedvenda/novo.jsf?id=1')"
+										>
+									<f:setPropertyActionListener target="#{pedVendaNovoBean.selecionadaId}" value="#{vendaPed.id}" />
+							</p:commandButton>
+						</p:column>
+						
+						<p:columnGroup type="footer">
+               				<p:row>
+					            <p:column />
+					            <p:column />
+					            <p:column />
+					            <p:column rendered="#{vendaGeralBean.porFilter ne 'fpagto'}" />
+					            <p:column style="text-align:right;" rendered="#{vendaGeralBean.porFilter ne 'fpagto'}">
+					            	<f:facet name="footer">
+					                	<h:outputText value="#{vendaGeralBean.qtdTotalPedVenda}" converter="currencyFormat" styleClass="tx_bold" />
+				                	</f:facet>
+					            </p:column>
+					            <p:column rendered="#{vendaGeralBean.porFilter ne 'fpagto'}" />
+					            <p:column rendered="#{vendaGeralBean.porFilter ne 'fpagto'}" />
+					            
+					            <p:column footerText="Total" style="text-align:right;" styleClass="tx_bold" rendered="#{vendaGeralBean.porFilter eq 'fpagto'}"/>
+					            <p:column style="text-align:right;" >
+					            	<f:facet name="footer">
+					                	<h:outputText value="#{vendaGeralBean.valorTotalPedVenda}" converter="currencyFormat" styleClass="tx_bold" />
+				                	</f:facet>
+					            </p:column>
+					            
+					            <p:column />
+					            <p:column  />
+					        </p:row>
+						</p:columnGroup>
+					</p:dataTable>
+				</p:tab>								
+				
+				<p:tab title="Financeiro" id="tabFinanceiro">
+					
+		    		<p:panelGrid columns="4" columnClasses="ui-grid-col-0, ui-grid-col-0, ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+								<p:selectOneMenu id="grupofinanceiro"
+									value="#{vendaGeralBean.grupoFinanceiroFilter}" filter="true"
+									autoWidth="true"
+									required="false"
+									converter="grupoFinanceiroFBConverter"
+									>
+									<f:selectItem itemLabel="Grupo Financeiro" itemValue="#{null}" />
+									<f:selectItems value="#{vendaGeralBean.gruposFinanceiroSelect}" />
+								</p:selectOneMenu>
+								<p:commandButton id="btnPesquisar" 
+											action="#{vendaGeralBean.buscarFinanceiro}" 
+											update="@form :listagemVendaGeralBean" 
+											icon="icon-search" 
+											onclick="PF('bUIDataTableVendaGeral').show()" />								
+								<p:commandButton icon="icon-excel" disabled="#{empty vendaGeralBean.listaFinanceiro}" title="Exportar para excel" ajax="false">
+						            <p:dataExporter type="xls" target="dtFinanceiro" fileName="Financeiro"  />
+						        </p:commandButton>
+					</p:panelGrid>
+					
+					
+				        
+					<p:dataTable id="dtFinanceiro" var="financeiro" 
+								value="#{vendaGeralBean.listaFinanceiro}" 
+								emptyMessage="Nenhum registro encontrado." 
+								sortOrder="descending"
+								sortBy="#{financeiro.valorPago}" 
+								reflow="true">
+								
+						<p:column sortBy="#{financeiro.descGrupoFinanceiro}">
+							<f:facet name="header">Grupo Financeiro</f:facet>
+							<h:outputText value="#{financeiro.descGrupoFinanceiro} " />
+						</p:column>
+						
+						<p:column sortBy="#{financeiro.descEventoFinanceiro}" >
+							<f:facet name="header">Evento Financeiro</f:facet>
+							<h:outputText value="#{financeiro.descEventoFinanceiro}" />
+						</p:column>
+						
+						<p:column sortBy="#{financeiro.valorPago}" styleClass="customCollumnValorGrande">
+								<f:facet name="header">Pago</f:facet>
+								<h:outputText value="#{financeiro.valorPago}" converter="currencyFormat" />
+						</p:column>
+						
+						<p:column sortBy="#{financeiro.valorAvencer}" styleClass="customCollumnValorGrande">
+								<f:facet name="header">A Vencer</f:facet>
+								<h:outputText value="#{financeiro.valorAvencer}" converter="currencyFormat" />
+						</p:column>
+
+						<p:column sortBy="#{financeiro.valorVencido}" styleClass="customCollumnValorGrande">
+								<f:facet name="header">Vencido</f:facet>
+								<h:outputText value="#{financeiro.valorVencido}" converter="currencyFormat" />
+						</p:column>
+						
+						<p:column sortBy="#{financeiro.valorTotal}" styleClass="customCollumnValorGrande">
+								<f:facet name="header">Total</f:facet>
+								<h:outputText value="#{financeiro.valorTotal}" converter="currencyFormat" />
+						</p:column>
+						
+						<p:column sortBy="#{financeiro.percentual}" styleClass="customCollumnPerc">
+								<f:facet name="header">(%)</f:facet>
+								<h:outputText value="#{financeiro.percentual}">
+									<f:convertNumber minFractionDigits="0" maxFractionDigits="0" locale="pt_BR" />
+								</h:outputText>
+						</p:column>
+						
+						<p:column styleClass="customCollumn1Icon" exportable="false">
+							<p:commandButton id="btnOpenFinanceiro"
+										action="#{vendaGeralBean.openFinanceiro}"
+										update=":listagemVendaGeralBean" 
+										process="@this" 
+										icon="ui-icon-plus"
+										title="Mostrar Detalhe" 
+										onstart="PF('bUIDataTableVendaGeral').show();"
+										oncomplete="focusInPainel('#listagemVendaGeralBean\\:tabview', 100);"										
+										>
+								<f:setPropertyActionListener target="#{vendaGeralBean.eventoFinanceiroId}" value="#{financeiro.eventoFinanceiroId}" />
+								<f:setPropertyActionListener target="#{vendaGeralBean.grupoFinanceiroId}" value="#{financeiro.grupoFinanceiroId}" />
+								<f:setPropertyActionListener target="#{vendaGeralBean.selecionadaEventoFinanceiroFB}" value="#{financeiro}" />
+							</p:commandButton>
+						</p:column>
+						
+						<p:columnGroup type="footer">
+               				<p:row>
+					            <p:column colspan="2" footerText="Total" style="text-align:right;" styleClass="tx_bold" />
+					            <p:column style="text-align:right;" >
+					            	<f:facet name="footer">
+					                	<h:outputText value="#{vendaGeralBean.valorTotalPago}" converter="currencyFormat" styleClass="tx_bold"/>
+				                	</f:facet>
+					            </p:column>
+					            <p:column style="text-align:right;" >
+					            	<f:facet name="footer">
+					                	<h:outputText value="#{vendaGeralBean.valorTotalAVencer}" converter="currencyFormat" styleClass="tx_bold"/>
+				                	</f:facet>
+					            </p:column>
+					            <p:column style="text-align:right;" >
+					            	<f:facet name="footer">
+					                	<h:outputText value="#{vendaGeralBean.valorTotalVencido}" converter="currencyFormat" styleClass="tx_bold"/>
+				                	</f:facet>
+					            </p:column>
+					            <p:column style="text-align:right;" >
+					            	<f:facet name="footer">
+					                	<h:outputText value="#{vendaGeralBean.valorTotalFinanceiro}" converter="currencyFormat" styleClass="tx_bold"/>
+				                	</f:facet>
+					            </p:column>
+					            <p:column />
+					            <p:column />
+					        </p:row>
+        				</p:columnGroup>
+						
+					</p:dataTable>
+
+
+				</p:tab>
+
+				<p:tab title="Detalhe Financeiro" id="tab3" closable="true" rendered="#{vendaGeralBean.renderedTabFinanceiro}">
+					 
+					<div class="ui-g-0 ui-md-0 ui-lg-0">					
+				        <p:outputLabel styleClass="tx_bold_16" value="#{vendaGeralBean.selecionadaEventoFinanceiroFB.descGrupoFinanceiro}"/>/
+   				        <p:outputLabel styleClass="tx_bold_16" value="#{vendaGeralBean.selecionadaEventoFinanceiroFB.descEventoFinanceiro}   "/>
+						<p:commandButton icon="icon-excel" disabled="#{empty vendaGeralBean.listaFinanceiroDetalhe}" title="Exportar para excel" ajax="false">
+				            <p:dataExporter type="xls" target="dtDetalheFinanceiro" fileName="DetalheFinanceiro"  />
+				        </p:commandButton>
+					</div>				        
+					<p:dataTable id="dtDetalheFinanceiro" var="detfinanceiro" 
+								value="#{vendaGeralBean.listaFinanceiroDetalhe}" 
+								emptyMessage="Nenhum registro encontrado." 
+								sortOrder="descending"
+								sortBy="#{detfinanceiro.valorPago}"  
+								reflow="true">
+								
+						
+						<p:column sortBy="#{detfinanceiro.id}" styleClass="customCollumnData">
+							<f:facet name="header">Id</f:facet>
+							<h:outputText value="#{detfinanceiro.id} " />
+						</p:column>
+						
+						<p:column sortBy="#{detfinanceiro.numTitulo}" styleClass="customCollumnData">
+							<f:facet name="header">Titulo</f:facet>
+							<h:outputText value="#{detfinanceiro.numTitulo} " />
+						</p:column>
+						
+						<p:column sortBy="#{detfinanceiro.fornecedorDesc}" >
+							<f:facet name="header">Fornecedor</f:facet>
+							<h:outputText value="#{detfinanceiro.fornecedorDesc}" />
+						</p:column>
+						
+						<p:column sortBy="#{detfinanceiro.dtVencimento}" styleClass="customCollumnData">
+							<f:facet name="header">Data</f:facet>
+							<h:outputText value="#{detfinanceiro.dtVencimento}"> 
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+						</p:column>
+
+						<p:column sortBy="#{detfinanceiro.valorPago}" styleClass="customCollumnValorGrande">
+								<f:facet name="header">Pago</f:facet>
+								<h:outputText value="#{detfinanceiro.valorPago}" converter="currencyFormat" />
+						</p:column>
+						
+						<p:column sortBy="#{detfinanceiro.valorAvencer}" styleClass="customCollumnValorGrande">
+								<f:facet name="header">A Vencer</f:facet>
+								<h:outputText value="#{detfinanceiro.valorAvencer}" converter="currencyFormat" />
+						</p:column>
+
+						<p:column sortBy="#{detfinanceiro.valorVencido}" styleClass="customCollumnValorGrande">
+								<f:facet name="header">Vencido</f:facet>
+								<h:outputText value="#{detfinanceiro.valorVencido}" converter="currencyFormat" />
+						</p:column>
+						
+						<p:column sortBy="#{detfinanceiro.valorTotal}" styleClass="customCollumnValorGrande">
+								<f:facet name="header">Total</f:facet>
+								<h:outputText value="#{detfinanceiro.valorTotal}" converter="currencyFormat" />
+						</p:column>
+						
+						<p:column sortBy="#{detfinanceiro.percentual}" styleClass="customCollumnPerc">
+								<f:facet name="header">(%)</f:facet>
+								<h:outputText value="#{detfinanceiro.percentual}">
+									<f:convertNumber minFractionDigits="0" maxFractionDigits="0" locale="pt_BR" />
+								</h:outputText>
+						</p:column>						
+
+						<p:columnGroup type="footer">
+               				<p:row>
+					            <p:column colspan="4" footerText="Total" style="text-align:right;" styleClass="tx_bold" />
+					            <p:column style="text-align:right;" >
+					            	<f:facet name="footer">
+					                	<h:outputText value="#{vendaGeralBean.valorTotalDetPago}" converter="currencyFormat" styleClass="tx_bold"/>
+				                	</f:facet>
+					            </p:column>
+					            <p:column style="text-align:right;" >
+					            	<f:facet name="footer">
+					                	<h:outputText value="#{vendaGeralBean.valorTotalDetAVencer}" converter="currencyFormat" styleClass="tx_bold"/>
+				                	</f:facet>
+					            </p:column>
+					            <p:column style="text-align:right;" >
+					            	<f:facet name="footer">
+					                	<h:outputText value="#{vendaGeralBean.valorTotalDetVencido}" converter="currencyFormat" styleClass="tx_bold"/>
+				                	</f:facet>
+					            </p:column>
+					            <p:column style="text-align:right;" >
+					            	<f:facet name="footer">
+					                	<h:outputText value="#{vendaGeralBean.valorTotalDetFinanceiro}" converter="currencyFormat" styleClass="tx_bold"/>
+				                	</f:facet>
+					            </p:column>
+					            <p:column />
+					        </p:row>
+        				</p:columnGroup>
+						
+					</p:dataTable>
+
+
+				</p:tab>
+
+			</p:tabView>
+								
+			<p:dialog id="dialogOpenECFs" 
+						widgetVar="dialogOpenECFs" 
+						header="NFC-e SEM REG.PAGTO" 
+						modal="true" 
+						closable="true" 
+						closeOnEscape="true" 
+						draggable="false" 
+						responsive="true" 
+						resizable="false"
+						height="300"
+						>
+						
+					<div class="ui-g-0 ui-md-0 ui-lg-0">	 
+						<p:commandButton icon="icon-excel" title="Exportar para excel" ajax="false">
+				            <p:dataExporter type="xls" target="dtNFCes" fileName="NFCe_SEM_REGPAGTO"  />
+				        </p:commandButton>
+			    	</div>
+					
+					<p:dataTable id="dtNFCes" 
+									var="ecfs" 
+									value="#{vendaGeralBean.listaECFs}" 
+									emptyMessage="Nenhum registro encontrado." 
+									reflow="true" 
+									scrollHeight="300" 
+									sortBy="#{ecfs.dtVenda}" 
+									sortOrder="ascending">
+	
+						<p:column sortBy="#{ecfs.dtVenda}" styleClass="customCollumnData">
+							<f:facet name="header">Data</f:facet>
+							<h:outputText value="#{ecfs.dtVenda}"> 
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+						</p:column>
+						
+						<p:column sortBy="#{ecfs.numNFCe}" styleClass="tx_center">
+							<f:facet name="header">N./Série NFC</f:facet>
+							<h:outputText value="#{ecfs.numNFCeToString}" /> / <h:outputText value="#{ecfs.serieNFCe}" />
+						</p:column>
+						
+						<p:column sortBy="#{ecfs.idECFERP}" styleClass="tx_center">
+							<f:facet name="header">ID ERP</f:facet>
+							<h:outputText value="#{ecfs.idECFERP}" />
+						</p:column>
+						
+						<p:column sortBy="#{ecfs.idECFPONTOPDV}" styleClass="tx_center">
+							<f:facet name="header">CAIXA</f:facet>
+							<h:outputText value="#{ecfs.idECFPONTOPDV}" />
+						</p:column>
+						
+						<p:column sortBy="#{ecfs.valor}" styleClass="customCollumnValor">
+							<f:facet name="header">Valor</f:facet>
+							<h:outputText value="#{ecfs.valor}" converter="currencyFormat" />
+						</p:column>
+						
+					</p:dataTable>
+					
+				</p:dialog>					
+			
+		</h:form>
+
+	</div>
+
+
+</ui:composition>

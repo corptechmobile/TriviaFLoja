@@ -1,0 +1,484 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+    
+    <div class="tab-content-space">
+    <div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+    
+    <f:metadata>
+      <f:viewAction action="#{coletorPCGerenciarBean.clearSession}"/>
+    </f:metadata>
+    
+    <!--  -->
+    <h:form id="msgPlanilhaCegaGerenciar">
+     	<p:growl id="msg" showDetail="true" showSummary="false" life="3000"/>	
+    </h:form>
+     
+    <!-- Cadastro -->
+    <h:form id="edicaoPlanilhaCegaGerenciar">
+     
+     	<p:toolbar id="tb">
+	        <f:facet name="left">
+	        	<p:commandButton id="btnRefresh" 
+		 						value="Atualizar" 
+		 						actionListener="#{coletorPCGerenciarBean.atualizar}" 
+		 						icon="ui-icon-refresh" 
+		 						update="@form" />
+		 						
+		 		<p:commandButton id="btnReAbrirConf" 
+		 						value="Re-Abrir" 
+		 						actionListener="#{coletorPCGerenciarBean.reAbrirConferencia}" 
+		 						icon="icon-planilhacega-liberar" 
+		 						update="@form"
+		 						rendered="#{coletorPCGerenciarBean.selecionada.status == 'F'}" >
+					<p:confirm header="Confirme" message="Deseja liberar para conferência novamente?" icon="ui-icon-alert" />	
+		 		</p:commandButton>
+		 						
+	            <p:commandButton id="btnFinalizarConf" 
+		 						value="Finalizar" 
+		 						actionListener="#{coletorPCGerenciarBean.finalizar}" 
+		 						icon="icon-planilhacega-finalizar" 
+		 						update="@form"
+		 						rendered="#{coletorPCGerenciarBean.renderedBtnFinalizar}">
+					<p:confirm header="Confirme" message="Deseja finalizar a conferência?" icon="ui-icon-alert" />	
+		 		</p:commandButton>
+		 		<p:commandButton id="btnTransmitirConf" 
+		 						value="Transmitir" 
+		 						actionListener="#{coletorPCGerenciarBean.transmitir}" 
+		 						icon="ui-icon-arrowreturn-1-e" 
+		 						update="@form"
+		 						rendered="#{coletorPCGerenciarBean.btnTransmitir and coletorPCGerenciarBean.selecionada.status == 'F'}">
+					<p:confirm header="Confirme" message="Deseja transmitir a conferência?" icon="ui-icon-alert" />	
+		 		</p:commandButton>
+		 		
+	        </f:facet>
+	        <f:facet name="right">
+        	</f:facet>
+	    </p:toolbar>
+     
+     	<p:blockUI block="panelPlanilhaCegaGerenciar" trigger="btnFinalizarConf btnRefresh btnFinalizarConf btnTransmitirConf" widgetVar="bUIPlanilhaCegaGerenciar">
+			LOADING<br />
+        	<p:graphicImage library="images" name="progress_bar.gif"/>
+		</p:blockUI>
+		 
+		<p:panel id="panelPlanilhaCegaGerenciar" widgetVar="panelPlanilhaCegaGerenciar" closable="true">
+			
+			<p:focus context="panelPlanilhaCegaGerenciar"/>
+			<p:messages id="msgAdd" showDetail="true" showSummary="false" closable="false"/>
+			
+			<!-- Detalhes -->
+			<div class="ui-fluid">
+				<p:panelGrid id="painelEdicaoItem2" columns="4" columnClasses="ui-grid-col-3,ui-grid-col-3,ui-grid-col-3,ui-grid-col-3" layout="grid" styleClass="ui-panelgrid-blank">
+					<h:panelGroup>
+						<p:outputLabel value="Liberado: " />
+		              	<h:outputText value="#{coletorPCGerenciarBean.selecionada.dtLiberacao}" >
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+						</h:outputText><br />
+		              	<p:outputLabel value="Início: " />
+		              	<h:outputText value="#{coletorPCGerenciarBean.selecionada.dtInicio}" >
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+						</h:outputText><br />
+						<p:outputLabel value="Término: " />
+						<h:outputText value="#{coletorPCGerenciarBean.selecionada.dtTermino}" >
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+						</h:outputText><br />
+						<p:outputLabel value="Status: " />
+						<h:graphicImage library="images" name="cancel.png" rendered="#{coletorPCGerenciarBean.selecionada.status=='E'}" title="Cancelada"/>
+						<h:graphicImage library="icons" name="status_planilhacega_0.png" rendered="#{coletorPCGerenciarBean.selecionada.status=='A'}" title="Em digitação"/>
+						<h:graphicImage library="icons" name="status_planilhacega_1.png" rendered="#{coletorPCGerenciarBean.selecionada.status=='L'}" title="Liberado para conferência" />
+						<h:graphicImage library="icons" name="status_planilhacega_2.png" rendered="#{coletorPCGerenciarBean.selecionada.status=='C'}" title="Em conferência"/>
+						<h:graphicImage library="icons" name="status_planilhacega_3.png" rendered="#{coletorPCGerenciarBean.selecionada.status=='F'}" title="Finalizada"/>
+			        </h:panelGroup>
+					<h:panelGroup>
+						<h:outputText value="Empresa:" /> <br/>
+						<h:outputText value="#{coletorPCGerenciarBean.empresa.cnpjCpf}" converter="converter.CNPJConverter" styleClass="tx_bold" /> <br/>
+						<h:outputText value="#{coletorPCGerenciarBean.empresa.nomeFantasia}" /><br />
+						<h:outputText value="#{coletorPCGerenciarBean.empresa.razaoSocial}" />
+					</h:panelGroup>
+	                <h:panelGroup>
+	               		<h:outputText value="Fornecedor:" /> <br/>
+	                	<h:outputText value="#{coletorPCGerenciarBean.fornecedor.id}" styleClass="tx_bold"/> <br/>
+	                	<h:outputText value="#{coletorPCGerenciarBean.fornecedor.cnpjCpf}" rendered="#{coletorPCGerenciarBean.fornecedor.tipoPessoa == 'J' or coletorPCGerenciarBean.fornecedor.tipoPessoa == 'O'}" converter="converter.CNPJConverter" />
+						<h:outputText value="#{coletorPCGerenciarBean.fornecedor.cnpjCpf}" rendered="#{coletorPCGerenciarBean.fornecedor.tipoPessoa == 'F'}" converter="converter.CPFConverter" /><br/> 
+	                	<h:outputText value="#{coletorPCGerenciarBean.fornecedor.nomeFantasia}" />
+	                </h:panelGroup>
+				</p:panelGrid>
+			</div>
+			
+			<br />
+				
+				<div class="w3-row">
+				  <div class="w3-col m12 s12 l8">
+				  	<p:fieldset id="fildSetDivergencia" 
+			 						legend="Divergencias (#{coletorPCGerenciarBean.listaDivergencia.size()})" 
+			 							rendered="#{not empty coletorPCGerenciarBean.listaDivergencia}" 
+			 							 styleClass="painelFieldset">
+			 			<!-- Divergencias --> 
+				 		<p:dataTable id="dataTableDivergencia" 
+				 				emptyMessage="Nenhuma Divergência encontrada"
+				 				value="#{coletorPCGerenciarBean.listaDivergencia}"  
+				 				var="d"
+								rowKey="#{d.divergenciaId}"
+								sortBy="#{d.divergenciaDesc}"
+								reflow="true"
+								>
+								 
+				 				<p:column headerText="Descrição" sortBy="#{d.divergenciaDesc}">
+				 					 <h:outputText value="#{d.divergenciaDesc}" />
+				 				</p:column>
+				 				
+				 				<p:column headerText="Aprovado por" sortBy="#{d.dtAprovacao}">
+				 					<h:outputText value="#{d.usuarioNome}" styleClass="tx_bold" />
+				 					<h:outputText value=" em " rendered="#{not empty d.dtAprovacao}" />
+				 					<h:outputText value="#{d.dtAprovacao}" styleClass="tx_bold">
+										<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+									</h:outputText>
+				 				</p:column>
+				 				
+				 				<p:column styleClass="customCollumn1Icon">
+				 					 <p:commandButton 
+											 actionListener="#{coletorPCGerenciarBean.aprovarDivergencia(d)}"
+											 update="@form"
+											 process="@this"
+											 title="Aprovar"
+											 icon="icon-finalizado" 
+											 disabled="#{coletorPCGerenciarBean.verAprovarDivergencia(d)}"
+											 rendered="#{empty d.dtAprovacao}"
+											 >
+										<p:confirm header="Confirme" message="Deseja realmente aprovar a Divergência?" icon="ui-icon-alert" />	
+									 </p:commandButton>
+									 <h:graphicImage library="images" name="check.png" rendered="#{not empty d.dtAprovacao}" width="12"/>
+				 				</p:column>
+				 				
+				 		</p:dataTable>
+				 		
+			 		</p:fieldset>
+				    <p:fieldset id="fildSetNFCompra" 
+			 						legend="Notas Fiscais (#{coletorPCGerenciarBean.listaNFCompra.size()})" 
+			 							rendered="#{not empty coletorPCGerenciarBean.listaNFCompra}" 
+			 							 styleClass="painelFieldset">
+			 			<!-- Notas Fiscais -->
+				 		<p:dataTable id="dataTableNFCompra" 
+				 				emptyMessage="Nenhuma Nota Fiscal encontrada"
+				 				value="#{coletorPCGerenciarBean.listaNFCompra}" 
+				 				var="nf"
+								rowKey="#{nf.id}"
+								sortBy="#{nf.id}"
+								reflow="true"
+								>
+								 
+				 				<p:column headerText="Número - Série">
+				 					<h:outputText value="#{nf.numNf}" /> - <h:outputText value="#{nf.serieNf}" />
+				 				</p:column>
+				 				
+				 				<p:column headerText="Itens" styleClass="customCollumnValor">
+				 					#{nf.itens}
+				 				</p:column>
+				 				
+				 				<p:column headerText="Volume" styleClass="customCollumnValor">
+				 					<h:outputText value="#{nf.volume}">
+				 						<f:convertNumber minFractionDigits="0" />
+				 					</h:outputText>
+				 				</p:column>
+				 				
+				 				<p:column headerText="Emissão" styleClass="customCollumnData">
+				 					<h:outputText value="#{nf.dtEmissao}" >
+										<f:convertDateTime pattern="dd/MM/yyyy" />
+									</h:outputText>
+				 				</p:column>
+				 				
+				 				<p:column headerText="Entrada" styleClass="customCollumnData">
+				 					<h:outputText value="#{nf.dtEntrada}" >
+										<f:convertDateTime pattern="dd/MM/yyyy" />
+									</h:outputText>
+				 				</p:column>
+				 				
+				 				<p:column headerText="Valor" styleClass="customCollumnValor">
+				 					<h:outputText value="#{nf.valorTotalNf}" converter="currencyFormat" />
+				 				</p:column>
+				 				
+				 				<p:column headerText="Status">
+				 					<h:outputText value="#{nf.statusDesc}" />
+				 				</p:column>
+				 			
+				 		</p:dataTable>
+				 		
+			 		</p:fieldset>
+				  </div>
+				  <div class="w3-col m8 s12 l12">  
+				    <p:fieldset id="fildSetPlanilhaCegaItens" 
+			 						legend="Planilha Cega" 
+			 							 styleClass="painelFieldset">
+			 				
+			 				<p:tabView id="tabViewItensMov" widgetVar="tabViewItensMov">
+			 					<p:ajax event="tabClose" listener="#{coletorPCGerenciarBean.onTabCloseAssocCodBarras}" update="@form:fildSetPlanilhaCegaItens"/>
+    							<p:tab title="Itens (#{coletorPCGerenciarBean.itens.size()})">
+    								<!-- Itens  -->
+    								<!-- 
+    								<ui:param name="totalListaCodBarras" value="#{coletorPCGerenciarBean.listaCodBarras.size()}" />
+					 				 -->
+					 				<p:dataTable id="dataTablePlanilhaCegaItens" 
+						 				value="#{coletorPCGerenciarBean.itens}" 
+						 				var="item"
+						 				reflow="true"
+						 				emptyMessage="Nenhuma item encontrado." 
+						 				rowStyleClass="#{item.qtdAvaria gt 0 or ((item.quantidade-(item.qtdLeitura+item.qtdAvaria+item.qtdDevolvida)) lt 0) or (!(item.produtoPrazo > item.tolShelfLife) and item.controlaLote == 1) ? 'customRowColorAvaria' : null}">
+						 				
+						 				<p:column headerText="Produto">
+						 					<h:outputText value="#{item.produtoCod} " /> <br />
+						 					<h:outputText value="#{item.produtoDesc}" />
+						 				</p:column>
+						 				
+						 				<p:column headerText="Qtd NF" styleClass="customCollumnValor">
+						 					<h:outputText value="#{item.quantidade}" styleClass="tx_bold">
+						 						<f:convertNumber minFractionDigits="#{item.qtdDecimal}" locale="pt_BR" />
+						 					</h:outputText> #{item.unidadeDesc} 
+						 				</p:column>
+						 				
+						 				<p:column headerText="Leituras" styleClass="customCollumnValor">
+						 					<h:outputText value="#{item.qtdLeitura}" styleClass="tx_bold">
+						 						<f:convertNumber minFractionDigits="#{item.qtdDecimal}" locale="pt_BR" />
+						 					</h:outputText> #{item.unidadeDesc}
+						 				</p:column>
+						 				
+						 				<p:column headerText="Avarias" styleClass="customCollumnValor">
+						 					<h:outputText value="#{item.qtdAvaria}">
+						 						<f:convertNumber minFractionDigits="#{item.qtdDecimal}" />
+						 					</h:outputText> #{item.unidadeDesc}
+						 				</p:column>
+						 				
+						 				<p:column headerText="Devolvida" styleClass="customCollumnValor">
+						 					<h:outputText value="#{item.qtdDevolvida}">
+						 						<f:convertNumber minFractionDigits="#{item.qtdDecimal}" />
+						 					</h:outputText> #{item.unidadeDesc}
+						 				</p:column>
+						 				
+						 				<p:column headerText="Diferença" styleClass="customCollumnValor">
+						 					<h:outputText value="#{item.quantidade - item.totLeituras}" styleClass="tx_bold">
+						 						<f:convertNumber minFractionDigits="#{item.qtdDecimal}" locale="pt_BR" />
+						 					</h:outputText> #{item.unidadeDesc}
+						 				</p:column>
+						 				
+						 				<p:column headerText="Shelflife" styleClass="customCollumnDataHora">
+						 					<ui:fragment rendered="#{item.controlaLote eq 1}">
+							 					<h:outputText value="Tol: " rendered="#{not empty item.tolShelfLife}" />
+							 					<h:outputText value="#{item.tolShelfLife}" styleClass="tx_bold">
+							 						<f:convertNumber maxFractionDigits="0" locale="pt_BR" />
+							 					</h:outputText> 
+							 					<h:outputText value=" dias" rendered="#{not empty item.tolShelfLife}" />
+						 						<br />
+							 					<h:outputText value="Prz: " rendered="#{not empty item.dtVencLot}" />
+							 					<h:outputText value="#{item.produtoPrazo}" rendered="#{not empty item.dtVencLot}" styleClass="tx_bold"><f:convertNumber maxFractionDigits="0" /></h:outputText>
+							 					<h:outputText value=" (" rendered="#{not empty item.dtVencLot}" /> 
+							 					<h:outputText value="#{item.percProdPrazo}" rendered="#{not empty item.dtVencLot}">
+							 						<f:convertNumber maxFractionDigits="0" />
+							 					</h:outputText>
+							 					<h:outputText value="%)" rendered="#{not empty item.dtVencLot}" />
+							 					
+							 					<br />
+							 					
+							 					<h:outputText value="#{coletorPCGerenciarBean.produtoDtShelflite(item.produtoPrazo)}">
+													<f:convertDateTime pattern="dd/MM/yyyy" />
+												</h:outputText>
+							 					
+						 					</ui:fragment>
+						 				</p:column>
+						 				
+						 				<p:column headerText="" styleClass="customCollumn1Icon">
+						 					<h:graphicImage library="images" name="#{item.quantidade!=item.totLeituras ? 'help_C.png' : 'help_F.png'}" width="12" />
+						 					<h:graphicImage library="images" name="warning.png" rendered="#{(!(item.produtoPrazo > item.tolShelfLife) and item.controlaLote == 1)}" width="12"/>
+						 				</p:column>
+						 				
+						 				<p:column headerText="" styleClass="customCollumn1Icon">
+						 					<p:commandButton 
+												 id="btnVisualizarLeituras" 
+												 actionListener="#{coletorPCGerenciarBean.visualizarLeituras}"
+												 update="@form:fildSetPlanilhaCegaItens :msgPlanilhaCegaGerenciar"
+												 process="@this"
+												 title="Visualizar Leituras"
+												 icon="icon-search" 
+												 disabled="#{item.leituras==0}"
+												 oncomplete="PF('tabViewItensMov').select(1);"
+												 >
+												 <f:setPropertyActionListener target="#{coletorPCGerenciarBean.planilhaCegaItemMov}" value="#{item}" />
+											</p:commandButton> 
+											
+											<!-- <p:commandButton 
+												 id="btnAssocCodigoBarras" 
+												 actionListener="#{coletorPCGerenciarBean.associarCodigoBarras}"
+												 update="@form:fildSetPlanilhaCegaItens :msgPlanilhaCegaGerenciar"
+												 process="@this"
+												 title="Associar Código de Barras" 
+												 icon="icon-codebar" 
+												 disabled="#{coletorPCGerenciarBean.selecionada.status == 3 or item.produtoQtd == 0 or totalListaCodBarras == 0}"
+												 oncomplete="PF('tabViewItensMov').select(1);"
+												 >
+												 <f:setPropertyActionListener target="#{coletorPCGerenciarBean.planilhaCegaItemMovDTO}" value="#{item}" />
+											</p:commandButton> -->
+						 				</p:column>
+						 				
+						 				<p:columnGroup type="footer">
+								            <p:row>
+								                <p:column style="text-align:right">
+								                	<f:facet name="footer">
+								                		<h:outputText value="Total:" styleClass="tx_bold" />
+								                	</f:facet>
+								                </p:column>
+								                <p:column>
+								                	<f:facet name="footer">
+								                		<h:outputText value="#{coletorPCGerenciarBean.totalQtdNF}" styleClass="tx_bold"><f:convertNumber maxFractionDigits="0" locale="pt_BR" /></h:outputText>
+								                	</f:facet>
+								                </p:column>
+								                <p:column>
+								                	<f:facet name="footer">
+								                		<h:outputText value="#{coletorPCGerenciarBean.totalQtdLeituras}" styleClass="tx_bold"><f:convertNumber maxFractionDigits="0" locale="pt_BR" /></h:outputText>
+								                	</f:facet>
+								                </p:column>
+								                <p:column>
+								                	<f:facet name="footer">
+								                		<h:outputText value="#{coletorPCGerenciarBean.totalQtdAvarias}" styleClass="tx_bold"><f:convertNumber maxFractionDigits="0" locale="pt_BR" /></h:outputText>
+							                		</f:facet>
+								                </p:column>
+								                <p:column>
+								                	<f:facet name="footer">
+								                		<h:outputText value="#{coletorPCGerenciarBean.totalQtdDevolvida}" styleClass="tx_bold"><f:convertNumber maxFractionDigits="0" locale="pt_BR" /></h:outputText>
+							                		</f:facet>
+								                </p:column>
+								                <p:column>
+								                	<f:facet name="footer">
+								                		<h:outputText value="#{coletorPCGerenciarBean.totalQtdNF - (coletorPCGerenciarBean.totalQtdLeituras+coletorPCGerenciarBean.totalQtdAvarias+coletorPCGerenciarBean.totalQtdDevolvida)}" styleClass="tx_bold"><f:convertNumber maxFractionDigits="0" locale="pt_BR" /></h:outputText>
+								                	</f:facet>
+								                </p:column>
+								                <p:column footerText="" />
+								                <p:column footerText="" />
+								                <p:column footerText="" />
+								            </p:row>
+								        </p:columnGroup>
+						 				
+						 		</p:dataTable>
+						 	</p:tab>
+						    <p:tab title="Leituras #{coletorPCGerenciarBean.planilhaCegaItemMovDTO.produtoCod}" rendered="#{coletorPCGerenciarBean.tabVisualizarLeituras}" id="tabLeiturasItemMov" closable="true">
+						    	#{coletorPCGerenciarBean.planilhaCegaItemMov.produtoCod} - #{coletorPCGerenciarBean.planilhaCegaItemMov.produtoDesc}
+					     		<p:toolbar id="tbDlgPlanilhaCegaGerenciar">
+							        <f:facet name="left"> 
+							     		<p:commandButton id="btnExcluirLeituras" 
+								 						value="Excluir" 
+								 						action="#{coletorPCGerenciarBean.excluirTodasLeituras}" 
+								 						icon="ui-icon-trash" 
+								 						update="@form:fildSetPlanilhaCegaItens  :msgPlanilhaCegaGerenciar"
+								 						oncomplete="PF('tabViewItensMov').select(0);"
+								 						disabled="#{coletorPCGerenciarBean.disableExcluirLeituras or empty coletorPCGerenciarBean.itensMov or coletorPCGerenciarBean.selecionada.status == 'F'}">
+											<p:confirm header="Confirme" message="Todas as leituras de todos os produtos serão excluídas, deseja confirmar?" icon="ui-icon-alert" />	
+								 		</p:commandButton>		
+						     		</f:facet>
+						     		<f:facet name="right">
+						     			<h:outputText value="Tolerância Shelf Life: " rendered="#{not empty coletorPCGerenciarBean.planilhaCegaItemMov.tolShelfLife}" />
+								    	<h:outputText value="#{coletorPCGerenciarBean.planilhaCegaItemMov.tolShelfLife}" rendered="#{not empty coletorPCGerenciarBean.planilhaCegaItemMov.tolShelfLife}" >
+					 						<f:convertNumber maxFractionDigits="0" />
+					 					</h:outputText>  
+					 					<h:outputText value=" dias" rendered="#{not empty coletorPCGerenciarBean.planilhaCegaItemMov.tolShelfLife}" /> 
+						     		</f:facet>
+						     		
+					     		</p:toolbar>
+					     		<!-- Itens Leitura -->
+							    <p:dataTable id="dataTablePlanilhaCegaItensMov" 
+							 				value="#{coletorPCGerenciarBean.itensMov}" 
+							 				var="item"
+							 				reflow="true"
+							 				emptyMessage="Nenhuma leitura para esse produto." 
+							 				>
+							 				
+							 				<p:column headerText="Código">
+							 					<h:outputText value="#{item.codBarras}" />
+							 				</p:column>
+							 				
+							 				<p:column headerText="Registrado" styleClass="customCollumnDataHora">
+							 					<h:outputText value="#{item.dtLeitura}" >
+													<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+												</h:outputText>
+							 				</p:column>
+							 				
+							 				<p:column headerText="Usuário">
+							 					<h:outputText value="#{item.usuarioNome}" />
+							 				</p:column>
+							 				
+							 				<p:column headerText="Qtd" styleClass="customCollumnValor">
+							 					<h:outputText value="#{item.qtdConferida}">
+							 						<f:convertNumber minFractionDigits="#{item.qtdDecimal}" locale="pt_BR" />
+							 					</h:outputText>
+							 				</p:column>
+							 				
+							 				<p:column headerText="Avaria" styleClass="customCollumnValor">
+							 					<h:outputText value="#{item.qtdAvaria}">
+							 						<f:convertNumber minFractionDigits="#{item.qtdDecimal}" locale="pt_BR" />
+						 						</h:outputText>
+							 				</p:column>
+							 				
+							 				<p:column headerText="Devolvido" styleClass="customCollumnValor">
+							 					<h:outputText value="#{item.qtdDevolvida}">
+							 						<f:convertNumber maxFractionDigits="1" locale="pt_BR" />
+						 						</h:outputText>
+							 				</p:column>
+							 				
+							 				<p:column headerText="Código Lote" styleClass="customCollumnDataHora" rendered="#{coletorPCGerenciarBean.planilhaCegaItemMov.controlaLote==1}">
+							 					<h:outputText value="#{item.codLote}" />
+							 				</p:column>
+							 				
+							 				<p:column headerText="Venc.Lote" styleClass="customCollumnData" rendered="#{coletorPCGerenciarBean.planilhaCegaItemMov.controlaLote==1}">
+							 					<h:outputText value="#{item.dtVencLote}" >
+													<f:convertDateTime pattern="dd/MM/yyyy" />
+												</h:outputText>
+							 				</p:column>
+							 				
+							 				<p:column headerText="Prazo" styleClass="customCollumnDataHora" rendered="#{coletorPCGerenciarBean.planilhaCegaItemMov.controlaLote==1}">
+							 				
+							 					<ui:param name="varProdPrazo" value="#{coletorPCGerenciarBean.produtoPrazo(item.dtVencLote)}" />
+							 					<ui:param name="varPercProdPrazo" value="#{coletorPCGerenciarBean.percProdPrazo(item.dtVencLote)}" />
+							 					
+							 					<h:outputText value="Prz: " />
+							 					<h:outputText value="#{varProdPrazo}" />
+							 					<h:outputText value=" (" />
+							 					<h:outputText value="#{varPercProdPrazo}" >
+							 						<f:convertNumber maxFractionDigits="0" />
+						 						</h:outputText>
+							 					<h:outputText value="%) " /> 
+							 					<h:graphicImage library="images" name="warning.png" rendered="#{!(varProdPrazo > coletorPCGerenciarBean.planilhaCegaItemMov.tolShelfLife)}" />
+							 				</p:column>
+							 				
+							 				<p:column headerText="" styleClass="customCollumn2Icon">
+							 				
+							 					<p:commandButton id="btnExcluirItemMov" 
+								 						title="Excluir" 
+								 						action="#{coletorPCGerenciarBean.excluirLeitura}" 
+								 						icon="ui-icon-trash" 
+								 						update="@form:fildSetPlanilhaCegaItens :msgPlanilhaCegaGerenciar"
+								 						disabled="#{coletorPCGerenciarBean.disableExcluirLeituras or coletorPCGerenciarBean.selecionada.status == 'F'}">
+							 							
+							 							<f:setPropertyActionListener target="#{coletorPCGerenciarBean.coletorPCFBContagem}" value="#{item}" />
+														<p:confirm header="Confirme" message="Deseja realmente excluir a leitura para o produto?" icon="ui-icon-alert" />
+														
+										 		</p:commandButton>	
+										 		
+							 					
+							 				</p:column>
+							 				
+							 		</p:dataTable>
+						    </p:tab>
+						    <!-- Tab - Codigo Barras para associar -->
+						    
+					    </p:tabView>	
+					    		 
+			 		</p:fieldset>
+				  </div>
+				  
+				</div>
+				
+	 	</p:panel>
+	 	
+     </h:form>
+     
+    </div>
+    
+</ui:composition>

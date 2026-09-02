@@ -1,0 +1,1026 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+	<div class="tab-content-space">
+		<div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+		<f:metadata>
+			<f:viewAction action="#{inventarioBean.clearSession}" />
+		</f:metadata>
+
+		<!--  -->
+		<h:form id="msgInvGerenciar">
+			<p:growl id="msg" showDetail="true" showSummary="false" life="3000" />
+		</h:form>
+
+		<!-- Filtro -->
+		<h:form id="consultaInventario">
+
+			<p:growl id="msg" showDetail="true" life="3000" />
+			<p:focus context="panelFiltroInventario" />
+			<p:defaultCommand target="btnBuscar" />
+
+			<p:toolbar id="tb">
+				<f:facet name="left">
+					<p:commandButton value="Novo"
+						actionListener="#{inventarioBean.novoInventario}"
+						update=":edicaoInventario" process="@this" icon="icon-new">
+						<p:resetInput target=":edicaoInventario" />
+
+					</p:commandButton>
+
+				</f:facet>
+				<f:facet name="right">
+					<p:commandButton id="menuHome" icon="ui-icon-home"
+						action="#{inventarioBean.addHome}" update="@form:msg"
+						process="@this" title="Home" />
+					<p:commandButton icon="ui-icon-star"
+						actionListener="#{inventarioBean.addFavoritos}" update="@form:msg"
+						process="@this" title="Favoritos" oncomplete="updateMenuHome();" />
+				</f:facet>
+			</p:toolbar>
+
+			<p:panel id="panelFiltroInventario" widgetVar="panelFiltroInventario">
+				<div class="ui-fluid">
+					<p:panelGrid columns="5"
+						columnClasses="ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0"
+						layout="grid" styleClass="ui-panelgrid-blank">
+
+						<p:selectOneMenu id="empresaFilter"
+							value="#{inventarioBean.empresaFilter}">
+							<f:selectItem itemLabel="Empresa" />
+							<f:selectItems value="#{inventarioBean.empresasSelect}" />
+						</p:selectOneMenu>
+
+						<p:panelGrid columns="3" styleClass="ui-panelgrid-blank">
+							<p:calendar id="data1Filter"
+								value="#{inventarioBean.data1Filter}" pattern="dd/MM/yyyy"
+								size="10" mask="99/99/9999" label="Data"
+								converterMessage="Data inválida" />
+			        à
+			        <p:calendar id="data2Filter"
+								value="#{inventarioBean.data2Filter}" pattern="dd/MM/yyyy"
+								size="10" mask="99/99/9999" label="Data"
+								converterMessage="Data inválida" />
+						</p:panelGrid>
+
+						<h:panelGroup>
+							<p:selectBooleanCheckbox id="concluidoFilter"
+								value="#{inventarioBean.concluidoFilter}">
+								<p:ajax update="@form:data1Filter @form:data2Filter "
+									listener="#{inventarioBean.onStartDatas}" />
+							</p:selectBooleanCheckbox>
+							<p:outputLabel value=" Concluído" for="concluidoFilter" />
+						</h:panelGroup>
+
+						<p:commandButton id="btnBuscar" value="Buscar"
+							actionListener="#{inventarioBean.buscar}"
+							update=":listagemInventario " icon="icon-search"
+							onclick="PF('bUIDataTableInventario').show()" />
+
+						<p:commandButton id="btnLimpar" value="Limpar"
+							action="#{inventarioBean.limpar}"
+							update="@form :listagemInventario " icon="ui-icon-close"
+							onclick="PF('bUIDataTableInventario').show()" />
+
+					</p:panelGrid>
+				</div>
+
+			</p:panel>
+
+			<p:sticky target="tb" margin="50" />
+
+		</h:form>
+
+		<!-- Cadastro -->
+		<h:form id="edicaoInventario"
+			onkeypress="if( event.keyCode == 13){event.keyCode=0;}">
+
+			<p:blockUI block="panelInventario" trigger="btnSalvar"
+				widgetVar="bUIInventario">
+			LOADING<br />
+				<p:graphicImage library="images" name="progress_bar.gif" />
+			</p:blockUI>
+
+			<p:panel id="panelInventario" widgetVar="panelInventario"
+				header="#{inventarioBean.tituloAdd}" closable="true">
+
+				<p:focus context="panelInventario" />
+				<p:messages id="msgAdd" showDetail="true" showSummary="false"
+					closable="true" />
+
+				<div class="ui-fluid">
+
+					<p:fieldset id="fildSetInventario" legend="Dados do Inventário"
+						rendered="#{inventarioBean.selecionadaId != null}"
+						styleClass="painelFieldset">
+						<p:panelGrid columns="2"
+							columnClasses="ui-grid-col-0, ui-grid-col-0" layout="grid"
+							styleClass="ui-panelgrid-blank">
+							<h:outputText value="Número: " />
+							<h:outputText value="#{inventarioBean.selecionada.id}"
+								class="tx_bold"></h:outputText>
+							<h:outputText value="Data Criação: " />
+							<h:outputText value="#{inventarioBean.selecionada.dtCriacao}"
+								class="tx_bold">
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+							</h:outputText>
+							<h:outputText value="Início: " />
+							<h:outputText value="#{inventarioBean.selecionada.dtInicio}"
+								class="tx_bold">
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+							</h:outputText>
+							<h:outputText value="Fechamento: " />
+							<h:outputText value="#{inventarioBean.selecionada.dtTermino}"
+								class="tx_bold">
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+							</h:outputText>
+						</p:panelGrid>
+
+					</p:fieldset>
+
+					<p:fieldset id="fildSetEmpresa" legend="Selecione a Empresa"
+						styleClass="painelFieldset">
+
+						<h:panelGroup rendered="#{not empty inventarioBean.empresa}">
+							<h:outputText value="#{inventarioBean.empresa.cnpjCpf}"
+								converter="converter.CNPJConverter" styleClass="tx_bold" />
+							<br />
+							<h:outputText value="#{inventarioBean.empresa.nomeFantasia}" />
+							<br />
+							<h:outputText value="#{inventarioBean.empresa.razaoSocial}" />
+						</h:panelGroup>
+						<p:selectOneMenu id="empresa" value="#{inventarioBean.empresa}"
+							required="true" requiredMessage="Selecione uma Empresa"
+							rendered="#{empty inventarioBean.empresa}" filter="true"
+							filterMatchMode="contains" autoWidth="false">
+							<p:ajax
+								update="@form:fildSetEmpresa @form:fildSetComplemento @form:groupBtnInventario" />
+							<f:selectItem itemLabel="Empresa" itemValue="#{null}"></f:selectItem>
+							<f:selectItems value="#{inventarioBean.empresasSelect}" />
+						</p:selectOneMenu>
+
+					</p:fieldset>
+					<p:fieldset id="fildSetComplemento"
+						legend="Informe o complemento das informações"
+						styleClass="painelFieldset">
+						<p:panelGrid columns="2"
+							columnClasses="ui-grid-col-1, ui-grid-col-0" layout="grid"
+							styleClass="ui-panelgrid-blank">
+							<p:outputLabel value="Descrição: " for="descricao" />
+							<p:inputMask id="descricao"
+								value="#{inventarioBean.selecionada.descricao}" size="50"
+								onkeypress="if(event.keyCode == 13){ $('#edicaoInventario\\:btnSalvar').focus(); return false; }" />
+
+						</p:panelGrid>
+					</p:fieldset>
+
+				</div>
+
+				<br />
+
+				<h:panelGroup id="groupBtnInventario">
+
+					<p:commandButton id="btnSalvar" value="Salvar"
+						actionListener="#{inventarioBean.salvar}" icon="icon-save"
+						update="@form :listagemInventario"
+						disabled="#{inventarioBean.empresa == null}" />
+
+				</h:panelGroup>
+
+			</p:panel>
+
+
+		</h:form>
+
+		<!-- Gerenciar -->
+		<h:form id="gerenciarInventario">
+
+			<p:blockUI block="gerenciarInventario"
+				widgetVar="bUIGerenciarInventario">
+			LOADING<br />
+				<p:graphicImage library="images" name="progress_bar.gif" />
+			</p:blockUI>
+
+			<p:panel id="panelGerenciarInventario"
+				widgetVar="panelGerenciarInventario"
+				header="Gerenciar: #{inventarioBean.selecionada.id} - #{inventarioBean.selecionada.descricao}"
+				closable="true" rendered="#{inventarioBean.openGerenciar}">
+
+				<p:focus context="panelGerenciarInventario" />
+				<p:messages id="msgAdd" showDetail="true" showSummary="false"
+					closable="true" />
+
+				<div class="w3-row">
+					<div class="w3-col m12 s12 l12">
+						<!-- Coleta -->
+						<p:fieldset id="fildSetInvItemMov" legend="Contagem"
+							styleClass="painelFieldset">
+
+							<div style="float: right;">
+								<h:outputText
+									value="Produtos: #{inventarioBean.listaProdutoEmbalagem.size()}"
+									rendered="#{inventarioBean.agrupadoPorFilter == 'produto'}"
+									styleClass="tx_bold" />
+								<h:outputText
+									value="Cod. Barras: #{inventarioBean.listaProdutoEmbalagem.size()}"
+									rendered="#{inventarioBean.agrupadoPorFilter == 'codBarra'}"
+									styleClass="tx_bold" />
+								<br />
+								<h:outputText value="Divergências: " />
+								<h:outputText value="Cod. Barras"
+									rendered="#{inventarioBean.qtdDivergCodBarras gt 0 or inventarioBean.qtdDivergProduto gt 0}"
+									styleClass="tx_red_14" />
+								<h:outputText
+									value="(#{inventarioBean.qtdDivergCodBarras+inventarioBean.qtdDivergProduto}) "
+									rendered="#{inventarioBean.qtdDivergCodBarras gt 0 or inventarioBean.qtdDivergProduto gt 0}"
+									styleClass="tx_bold_red_14" />
+								<h:outputText value=" Embalagem"
+									rendered="#{inventarioBean.qtdDivergEmbalagem gt 0}"
+									styleClass="tx_red_14" />
+								<h:outputText value="(#{inventarioBean.qtdDivergEmbalagem}) "
+									rendered="#{inventarioBean.qtdDivergEmbalagem gt 0}"
+									styleClass="tx_bold_red_14" />
+								<h:outputText value=" Sem Produto"
+									rendered="#{inventarioBean.qtdDivergAssocProd gt 0}"
+									styleClass="tx_red_14" />
+								<h:outputText value="(#{inventarioBean.qtdDivergAssocProd})"
+									rendered="#{inventarioBean.qtdDivergAssocProd gt 0}"
+									styleClass="tx_bold_red_14" />
+								<h:outputText value="Nenhuma"
+									rendered="#{inventarioBean.podeFinalizar}"
+									styleClass="tx_azul_bold_14" />
+							</div>
+
+							<!-- <ui:param name="totalListaCodBarras" value="#{inventarioBean.listaCodBarras.size()}" />  -->
+							<p:tabView id="tabViewInvItensMov" widgetVar="tabViewInvItensMov">
+
+								<p:ajax event="tabClose" listener="#{inventarioBean.onTabClose}"
+									update="@form:fildSetInvItemMov" />
+
+								<p:tab title="Itens" id="tabItens">
+
+									<p:panelGrid columns="10"
+										columnClasses="ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0"
+										layout="grid" styleClass="ui-panelgrid-blank">
+										<h:panelGroup>
+											<p:outputLabel value="Produto" />
+											<br />
+											<p:inputText id="produtoFilter"
+												value="#{inventarioBean.produtoFilter}"
+												placeholder="Produto" />
+										</h:panelGroup>
+
+										<h:panelGroup>
+											<p:outputLabel value="Usuário" />
+											<br />
+											<p:inputText id="usuarioFilter"
+												value="#{inventarioBean.usuarioFilter}"
+												placeholder="Usuário" />
+										</h:panelGroup>
+
+										<h:panelGroup>
+											<p:outputLabel value=" " />
+											<br />
+											<p:selectBooleanCheckbox id="divergenciaFilter"
+												value="#{inventarioBean.divergenciaFilter}"
+												style="margin-left:5px;" />
+											<p:outputLabel for="divergenciaFilter" value=" Divergências" />
+										</h:panelGroup>
+
+										<h:panelGroup>
+											<p:outputLabel value=" " />
+											<br />
+											<p:selectBooleanCheckbox id="exibeCustoFilter"
+												value="#{inventarioBean.exibirCustoFilter}"
+												style="margin-left:5px;" />
+											<p:outputLabel for="exibeCustoFilter" value=" Exibir Custo" />
+										</h:panelGroup>
+
+										<h:panelGroup>
+											<p:outputLabel value="Agrupado por:" />
+											<br />
+											<p:selectOneMenu id="agrupadoPor"
+												value="#{inventarioBean.agrupadoPorFilter}">
+												<f:selectItem itemValue="produto" itemLabel="Produto" />
+												<f:selectItem itemValue="codBarra" itemLabel="Cod. Barras" />
+											</p:selectOneMenu>
+										</h:panelGroup>
+
+										<h:panelGroup>
+											<p:outputLabel value=" " />
+											<br />
+											<p:commandButton id="btnBuscarItem" value="Buscar"
+												actionListener="#{inventarioBean.buscarItem}"
+												update="@form :gerenciarInventario" icon="icon-search"
+												onstart="PF('bUIGerenciarInventario').show()"
+												oncomplete="PF('bUIGerenciarInventario').hide()"
+												onerror="PF('bUIGerenciarInventario').hide()" />
+										</h:panelGroup>
+
+										<h:panelGroup>
+											<p:outputLabel value=" " />
+											<br />
+											<p:commandButton id="btnLimparItem" value="Limpar"
+												action="#{inventarioBean.limparItem}"
+												update="@form :gerenciarInventario " icon="ui-icon-close"
+												onclick="PF('bUIGerenciarInventario').show()" />
+										</h:panelGroup>
+
+										<h:panelGroup rendered="#{!inventarioBean.openVisualizar}">
+											<p:outputLabel value=" " />
+											<br />
+											<p:commandButton id="btnImpCusto" value="Carregar Custo"
+												process="@this" action="#{inventarioBean.openCusto}"
+												update="@form:fildSetInvItemMov" icon="ui-icon-refresh"
+												onstart="PF('bUIGerenciarInventario').show()"
+												oncomplete="PF('bUIGerenciarInventario').hide(); PF('tabViewInvItensMov').select(1);"
+												onerror="PF('bUIGerenciarInventario').hide()" />
+										</h:panelGroup>
+
+
+										<h:panelGroup rendered="#{!inventarioBean.openVisualizar}">
+											<p:outputLabel value=" " />
+											<br />
+											<p:commandButton id="btnFinalizar" value="Finalizar"
+												actionListener="#{inventarioBean.finalizar}"
+												update="@form :listagemInventario :gerenciarInventario"
+												icon="icon-planilhacega-finalizar"
+												onstart="PF('bUIGerenciarInventario').show()"
+												oncomplete="PF('bUIGerenciarInventario').hide()"
+												onerror="PF('bUIGerenciarInventario').hide()"
+												disabled="#{!inventarioBean.podeFinalizar}" >
+												<p:confirm header="Confirme" message="Deseja realmente finalizar o inventário?" icon="ui-icon-alert" />
+											</p:commandButton>	
+										</h:panelGroup>
+
+										<h:panelGroup>
+											<p:outputLabel value=" " />
+											<br />
+											<h:commandLink>
+												<p:graphicImage library="images" name="excel16x16.png" />
+												<p:dataExporter type="xls" target="dtInvItemMovGroupDTOs"
+													fileName="inv_#{inventarioBean.selecionada.id}_fechamento" />
+											</h:commandLink>
+										</h:panelGroup>
+
+
+										<!-- 
+								<h:panelGroup>
+								<p:outputLabel value=" " /><br/>
+								<h:commandLink>
+									<p:graphicImage library="images" name="excel16x16.png" />
+									<p:dataExporter type="xls" target="dtInvItemMovGroupDTOs" fileName="inv_#{inventarioBean.selecionada.id}_coleta_#{inventarioBean.coleta.id.coleta}" />	
+								</h:commandLink>
+								</h:panelGroup>
+								 -->
+									</p:panelGrid>
+
+
+									<p:dataTable id="dtInvItemMovGroupDTOs"
+										widgetVar="dtInvItemMovGroupDTOs" var="prod"
+										sortBy="#{prod.produtoDesc}" rows="50" paginator="true"
+										paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+										rowsPerPageTemplate="20,50,100"
+										value="#{inventarioBean.listaProdutoEmbalagem}"
+										rowStyleClass="#{prod.qtdDivergencia gt 1 or prod.produtoId == null or prod.qtdDivEmb gt 1 or prod.qtdDivDescEmb gt 1 ?  'customRowColorAvaria' : null}"
+										emptyMessage="Nenhum produto encontrado" reflow="false">
+
+										<p:columnGroup type="header">
+											<p:row>
+												<p:column rowspan="2" headerText="Código"
+													sortBy="#{prod.produtoCod}"
+													styleClass="customCollumnDataHora" />
+												<p:column rowspan="2" headerText="Produto"
+													sortBy="#{prod.produtoDesc}" />
+												<p:column rowspan="2" headerText="Custo"
+													sortBy="#{prod.custoMedio}"
+													rendered="#{inventarioBean.exibirCustoFilter}"
+													styleClass="customCollumnValor" />
+												<p:column colspan="4" headerText="Contagem" priority="4"
+													style="width:500px;" />
+												<p:column rowspan="2" headerText=""
+													styleClass="customCollumn1Icon" exportable="false"
+													rendered="#{!inventarioBean.openVisualizar}" />
+												<p:column rowspan="2" headerText=""
+													styleClass="customCollumn2Icon" exportable="false"
+													rendered="#{!inventarioBean.openVisualizar}" />
+											</p:row>
+											<p:row>
+												<p:column headerText="Qtd. UN" sortBy="#{prod.qtdUn}"
+													styleClass="customCollumnValor" />
+												<p:column headerText="Qtd. Emb" sortBy="#{prod.qtdEmb}"
+													styleClass="customCollumnValor" />
+												<p:column headerText="Total UN" sortBy="#{prod.qtdConv}"
+													styleClass="customCollumnValor" />
+												<p:column headerText="Emb. Fechada"
+													styleClass="customCollumnId" />
+											</p:row>
+										</p:columnGroup>
+
+										<p:column styleClass="customCollumnCodigoBarra">
+											<h:outputText value="#{prod.produtoCod}" />
+										</p:column>
+
+										<p:column priority="4">
+											<h:outputText value="#{prod.produtoDesc}" />
+										</p:column>
+
+										<p:column styleClass="customCollumnValor"
+											rendered="#{inventarioBean.exibirCustoFilter}">
+											<h:outputText value="#{prod.custoMedio}"
+												converter="currencyFormat" />
+										</p:column>
+
+										<p:column styleClass="customCollumnValor" priority="4">
+											<h:outputText value="#{prod.qtdUn}">
+												<f:convertNumber maxFractionDigits="1" locale="pt_BR" />
+											</h:outputText>
+											<h:outputText value=" UN" rendered="#{prod.qtdUn gt 0}" />
+										</p:column>
+
+										<p:column styleClass="customCollumnValor" priority="4">
+											<h:outputText value="#{prod.qtdEmb}">
+												<f:convertNumber maxFractionDigits="1" locale="pt_BR" />
+											</h:outputText>
+											<h:outputText value=" #{prod.descEmbFechVenda}"
+												rendered="#{prod.qtdEmb gt 0}" />
+										</p:column>
+
+										<p:column styleClass="customCollumnValor" priority="4">
+											<h:outputText value="#{prod.qtdConv}">
+												<f:convertNumber maxFractionDigits="1" locale="pt_BR" />
+											</h:outputText>
+											<h:outputText value=" UN" />
+										</p:column>
+
+										<p:column styleClass="customCollumnId">
+											<h:outputText value="#{prod.qtdEmbFechVenda}">
+												<f:convertNumber maxFractionDigits="1" locale="pt_BR" />
+											</h:outputText>
+											<h:outputText value=" UN = 1 #{prod.descEmbFechVenda}" />
+										</p:column>
+
+										<p:column styleClass="customCollumn2Icon" exportable="false"
+											rendered="#{!inventarioBean.openVisualizar}">
+											<h:graphicImage title="Divergência - Cod. Barras"
+												library="images" name="warning.png"
+												rendered="#{prod.qtdDivergencia gt 1}" />
+											<h:graphicImage
+												title="Divergência - Cod. Barras sem associação com Produto"
+												library="images" name="warning.png"
+												rendered="#{prod.produtoId == null}" />
+											<h:graphicImage
+												title="Divergência - Mais de uma embalagem de venda para o produto"
+												library="images" name="warning.png"
+												rendered="#{prod.qtdDivEmb gt 1 or prod.qtdDivDescEmb gt 1}" />
+										</p:column>
+
+										<p:column exportable="false"
+											rendered="#{!inventarioBean.openVisualizar}">
+											<p:commandButton id="btnVisualizarLeituras"
+												action="#{inventarioBean.visualizarLeituras}"
+												update="@form:fildSetInvItemMov" process="@this"
+												title="Visualizar Leituras" icon="icon-search"
+												onstart="PF('bUIGerenciarInventario').show()"
+												oncomplete="PF('bUIGerenciarInventario').hide();PF('tabViewInvItensMov').select(1);"
+												onerror="PF('bUIGerenciarInventario').hide()">
+												<f:setPropertyActionListener
+													target="#{inventarioBean.itemProdId}"
+													value="#{prod.produtoId}" />
+												<f:setPropertyActionListener
+													target="#{inventarioBean.selecionadaId}"
+													value="#{prod.coletorInvId}" />
+												<f:setPropertyActionListener
+													target="#{inventarioBean.descEmbFechVenda}"
+													value="#{prod.descEmbFechVenda}" />
+												<f:setPropertyActionListener
+													target="#{inventarioBean.leitura}" value="#{prod}" />
+											</p:commandButton>
+
+											<p:commandButton id="btnAssocCodigoBarras"
+												action="#{inventarioBean.associarCodigoBarras}"
+												update="@form:fildSetInvItemMov" process="@this"
+												title="Associar Código de Barras" icon="icon-codebar"
+												disabled="#{prod.produtoId != null}"
+												onstart="PF('bUIGerenciarInventario').show()"
+												oncomplete="PF('bUIGerenciarInventario').hide(); PF('tabViewInvItensMov').select(1);"
+												onerror="PF('bUIGerenciarInventario').hide()">
+												<f:setPropertyActionListener
+													target="#{inventarioBean.leitura}" value="#{prod}" />
+
+											</p:commandButton>
+
+										</p:column>
+									</p:dataTable>
+
+								</p:tab>
+
+								<p:tab title="Leituras "
+									rendered="#{inventarioBean.tabVisualizarLeituras}"
+									id="tabLeiturasInvItemMov" closable="true">
+
+									<p:focus context="dataTableInvItensMov" />
+									<h:outputText
+										value="#{inventarioBean.leitura.produtoCod} - #{inventarioBean.leitura.produtoDesc}"
+										class="tx_bold" />
+
+									<p:toolbar id="tbDlgInvGerenciar"
+										rendered="#{!inventarioBean.openVisualizar}">
+										<f:facet name="left">
+											<p:commandButton id="btnExcluirLeituras" value="Excluir"
+												action="#{inventarioBean.excluirTodasLeituras}"
+												icon="ui-icon-trash"
+												update="@form:fildSetInvItemMov :msgInvGerenciar"
+												oncomplete="PF('tabViewInvItensMov').select(0);"
+												disabled="#{inventarioBean.btnDeletes or inventarioBean.btnDeleteLeituras}">
+												<p:confirm header="Confirme"
+													message="Deseja excluir todas as leituras do produto #{inventarioBean.itemProdId} - #{inventarioBean.leitura.produtoDesc}?"
+													icon="ui-icon-alert" />
+											</p:commandButton>
+										</f:facet>
+									</p:toolbar>
+
+									<p:dataTable id="dataTableInvItensMov"
+										value="#{inventarioBean.listaColetaInvContagem}" var="item"
+										reflow="true"
+										emptyMessage="Nenhuma leitura para esse produto.">
+
+										<p:column headerText="Código de Barras"
+											sortBy="#{item.codBarra}"
+											rendered="#{inventarioBean.agrupadoPorFilter == 'produto'}">
+											<h:outputText value="#{item.codBarra}" />
+										</p:column>
+
+										<p:column headerText="Produto" sortBy="#{item.codBarra}"
+											rendered="#{inventarioBean.agrupadoPorFilter == 'codBarra'}">
+											<h:outputText
+												value="#{item.produtoCod} - #{item.produtoDesc}" />
+										</p:column>
+
+										<p:column headerText="Registrado" sortBy="#{item.dtLeitura}"
+											styleClass="customCollumnDataHora">
+											<h:outputText value="#{item.dtLeitura}">
+												<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+											</h:outputText>
+										</p:column>
+
+										<p:column headerText="Usuário" sortBy="#{item.usuarioDesc}">
+											<h:outputText value="#{item.usuarioDesc}" />
+										</p:column>
+
+										<p:column headerText="Qtd. UN" sortBy="#{item.qtdUn}"
+											styleClass="customCollumnValorGrande">
+											<h:panelGroup>
+												<h:outputText value="#{item.qtdUn}"
+													rendered="#{item.qtdUn gt 0}">
+													<f:convertNumber maxFractionDigits="1" locale="pt_BR" />
+												</h:outputText>
+												<h:outputText value=" UN" rendered="#{item.qtdUn gt 0}" />
+											</h:panelGroup>
+										</p:column>
+
+										<p:column headerText="Qtd. Emb." sortBy="#{item.qtdEmb}"
+											styleClass="customCollumnValorGrande">
+											<h:panelGroup>
+												<h:outputText value="#{item.qtdEmb}"
+													rendered="#{item.qtdEmb gt 0}">
+													<f:convertNumber maxFractionDigits="1" locale="pt_BR" />
+												</h:outputText>
+												<h:outputText value=" #{item.descEmbFechVenda}"
+													rendered="#{item.qtdEmb gt 0}" />
+											</h:panelGroup>
+										</p:column>
+
+										<p:column headerText="Total UN" sortBy="#{item.qtdConv}"
+											styleClass="customCollumnValorGrande">
+											<h:panelGroup>
+												<h:outputText value="#{item.qtdConv}">
+													<f:convertNumber maxFractionDigits="1" locale="pt_BR" />
+												</h:outputText>
+												<h:outputText value=" UN" />
+											</h:panelGroup>
+										</p:column>
+
+										<p:column headerText="Emb. Fechada"
+											styleClass="customCollumnCodEdt">
+											<h:outputText value="#{item.qtdEmbFechVenda}">
+												<f:convertNumber maxFractionDigits="1" locale="pt_BR" />
+											</h:outputText>
+											<h:outputText value=" UN = 1 #{item.descEmbFechVenda}" />
+										</p:column>
+
+										<p:column headerText="" styleClass="customCollumn1Icon"
+											rendered="#{!inventarioBean.openVisualizar}">
+											<p:commandButton id="btnExcluirItemMov" title="Excluir"
+												action="#{inventarioBean.excluirLeitura}"
+												icon="ui-icon-trash"
+												update="@form:fildSetInvItemMov :msgInvGerenciar"
+												disabled="#{inventarioBean.btnDeletes or inventarioBean.btnDeleteLeituras}">
+												<f:setPropertyActionListener
+													target="#{inventarioBean.contagem}" value="#{item}" />
+												<f:setPropertyActionListener
+													target="#{inventarioBean.contagemId}" value="#{item.id}" />
+												<p:confirm header="Confirme"
+													message="Deseja excluir essa leitura?" icon="ui-icon-alert" />
+											</p:commandButton>
+										</p:column>
+
+										<p:columnGroup type="footer">
+											<p:row>
+												<p:column colspan="3" footerText="Total:"
+													style="text-align:right;" styleClass="tx_bold" />
+												<p:column style="text-align:right;">
+													<f:facet name="footer">
+														<h:outputText value="#{inventarioBean.totalQtdUn}"
+															converter="currencyFormat" styleClass="tx_bold" />
+													</f:facet>
+												</p:column>
+												<p:column style="text-align:right;">
+													<f:facet name="footer">
+														<h:outputText value="#{inventarioBean.totalQtdEmb}"
+															converter="currencyFormat" styleClass="tx_bold" />
+													</f:facet>
+												</p:column>
+												<p:column style="text-align:right;">
+													<f:facet name="footer">
+														<h:outputText value="#{inventarioBean.totalQtdConv}"
+															converter="currencyFormat" styleClass="tx_bold" />
+													</f:facet>
+												</p:column>
+												<p:column />
+												<p:column rendered="#{!inventarioBean.openVisualizar}" />
+											</p:row>
+										</p:columnGroup>
+
+									</p:dataTable>
+								</p:tab>
+
+
+								<p:tab title="Associação Cod. Barras/Prod."
+									rendered="#{inventarioBean.tabAssociarCodigoBarras}"
+									id="tabAssocItemMov" closable="true">
+									<p:focus context="inventarioQTDGrid" />
+									<b>Informe o produto referente ao código de barras abaixo:</b>
+									<br />
+									<h:outputText
+										value="#{inventarioBean.leitura.produtoCod} - #{inventarioBean.leitura.produtoDesc}"
+										class="tx_bold" />
+
+
+									<p:panel id="inventarioQTDGrid" widgetVar="inventarioQTDGrid">
+										<div class="ui-fluid">
+											<p:panelGrid columns="2"
+												columnClasses="ui-grid-col-4, ui-grid-col-0" layout="grid"
+												styleClass="ui-panelgrid-blank">
+
+												<h:outputLabel for="produtoSelect" value="Produto:" />
+												<br />
+												<p:autoComplete id="produtoSelect" dropdown="true"
+													scrollHeight="200" queryDelay="1000" minQueryLength="3"
+													completeMethod="#{inventarioBean.completeProduto}"
+													value="#{inventarioBean.produtoSelFilter}" var="prd"
+													itemLabel="#{prd.descricao}" itemValue="#{prd}"
+													converter="produtoFBConverter" forceSelection="true"
+													emptyMessage="Nenhum Produto encontrado"
+													placeholder="Produto">
+
+													<p:ajax event="itemSelect"
+														listener="#{inventarioBean.closeFilterProduto}"
+														update="@this inventarioQTDGrid" />
+
+													<p:column>
+														<h:outputText value="#{prd.codInterno}"
+															styleClass="tx_bold" />
+														<br />
+														<h:outputText value="#{prd.descricao}" />
+													</p:column>
+
+												</p:autoComplete>
+
+												<p:commandButton id="btnConfirmarAssoc" value="Confirmar"
+													actionListener="#{inventarioBean.confirmarAssocProduto}"
+													icon="ui-icon-check"
+													update="inventarioQTDGrid dataTableInvItensMov :msgInvGerenciar"
+													process="inventarioQTDGrid"
+													disabled="#{inventarioBean.btnAssocCodigoBarras}"
+													oncomplete="closeEdicaoNovoProduto();">
+													<p:confirm header="Confirme"
+														message="Deseja realmente associar o código de barras #{inventarioBean.leitura.produtoCod} ao produto #{inventarioBean.produtoSelFilter.codInterno} - #{inventarioBean.produtoSelFilter.descricao}?"
+														icon="ui-icon-alert" />
+												</p:commandButton>
+
+											</p:panelGrid>
+										</div>
+
+									</p:panel>
+
+								</p:tab>
+								<p:tab title="Carregar Custo"
+									rendered="#{inventarioBean.tabCarregarCusto}"
+									id="tabCarregarCusto" closable="true">
+									<p:focus context="panelUploadFollowUp" />
+									<h:panelGroup>
+										<b>Faça o upload do arquivo a importar no formato </b>
+										<h:outputLabel value="  " />
+										<p:graphicImage library="images" name="modelo.jpeg"
+											width="100px;" height="30px;" />
+									</h:panelGroup>
+									<br />
+									<p:panel id="panelUploadFollowUp" header="Anexar"
+										closable="true">
+										<p:fileUpload
+											fileUploadListener="#{inventarioBean.enviarArquivos}"
+											mode="advanced" dragDropSupport="true" cancelLabel="Cancelar"
+											uploadLabel="Enviar" label="Selecionar" multiple="false"
+											update="@form:gerenciarInventario" sizeLimit="100000000"
+											invalidSizeMessage="Tamanho do arquivo maior q o permitido!"
+											fileLimit="1"
+											fileLimitMessage="Quantidade máxima de envio de arquivos é 1!"
+											allowTypes="/(\.|\/)(xls|xlsx?g)$/"
+											invalidFileMessage="Formato de arquivo inválido!" />
+									</p:panel>
+								</p:tab>
+								<p:tab title="(#{inventarioBean.listaProdSemContagem.size()}) Produtos com Estoque sem Leituras"
+									rendered="#{inventarioBean.tabProdutosSemLeituras}"
+									id="tabProdutosSemLeituras" closable="true">
+									<p:panelGrid columns="3"
+										columnClasses="ui-grid-col-3, ui-grid-col-0, ui-grid-col-0"
+										layout="grid" styleClass="ui-panelgrid-blank">
+											<p:inputText id="produtoFilterSC" size="38"
+												value="#{inventarioBean.produtoFilterSC}"
+												placeholder="Código/Cod. Barras/Produto" />
+											<p:commandButton id="btnBuscarItemSC" value="Buscar"
+												actionListener="#{inventarioBean.buscarItemSC}"
+												update="@form :gerenciarInventario" icon="icon-search"
+												onstart="PF('bUIGerenciarInventario').show()"
+												oncomplete="PF('bUIGerenciarInventario').hide()"
+												onerror="PF('bUIGerenciarInventario').hide()" />
+
+											<p:commandButton id="btnLimparItemSC" value="Limpar"
+												action="#{inventarioBean.limparItemSC}"
+												update="@form :gerenciarInventario " icon="ui-icon-close"
+												onclick="PF('bUIGerenciarInventario').show()" />
+
+									</p:panelGrid>
+									
+									
+									<ui:fragment id="bt">
+									
+									<!-- <p:toolbar id="panelFiltro" rendered="#{inventarioBean.prodSelected.size() gt 0}">
+								        <f:facet name="left">
+									 		
+											
+									 		<p:commandButton 
+												 id="addProduto" 
+												 value="Incluir contagem zerada para os produtos (#{inventarioBean.prodSelected.size()})"
+												 actionListener="#{inventarioBean.addLeituras}"
+												 update="@form"
+												 icon="ui-icon-plusthick"  
+												 disabled="#{inventarioBean.prodSelected.size() == 0}" 
+												 oncomplete="closePanelFiltroProdutos()" 
+												 >
+												 <p:confirm header="Confirme" message="Deseja realmente incluir a contagem zerada para os produtos selecionados?" icon="ui-icon-alert" />
+											</p:commandButton>
+									 		
+								        </f:facet>
+								    </p:toolbar> -->
+								     
+								     <p:toolbar id="panelFiltro">
+								        <f:facet name="left">
+											<p:panelGrid columns="3" columnClasses="ui-grid-col-0, ui-grid-col-0, ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >			        
+								            
+															 
+											<p:commandButton 
+												 id="addProduto" 
+												 value="Incluir contagem zerada para os produtos (#{inventarioBean.prodSelected.size()})"
+												 actionListener="#{inventarioBean.addLeituras}"
+												 update="@form"
+												 icon="ui-icon-plusthick"  
+												 disabled="#{inventarioBean.prodSelected.size() == 0}" 
+												 onstart="PF('bUIGerenciarInventario').show()"
+												 oncomplete="PF('bUIGerenciarInventario').hide()"
+												 onerror="PF('bUIGerenciarInventario').hide()"
+												 >
+												 <p:confirm header="Confirme" message="Deseja realmente incluir a contagem zerada para os produtos selecionados?" icon="ui-icon-alert" />
+											</p:commandButton>	 
+											
+											</p:panelGrid>	 
+								        </f:facet>
+								    </p:toolbar>
+									</ui:fragment>
+									<p:focus context="dataTableItensSemLeituras" />
+									<p:dataTable id="dataTableItensSemLeituras"
+										value="#{inventarioBean.listaProdSemContagem}" var="item"
+										reflow="true"
+										selection="#{inventarioBean.prodSelected}" 
+										rowKey="#{item.id}"
+										scrollable="true"
+										emptyMessage="Todos os produtos com estoque foram contados!">
+										
+										<p:ajax event="rowSelect" listener="#{inventarioBean.onRowFilterSelect}" update=":gerenciarInventario:tabViewInvItensMov:addProduto" process="dataTableItensSemLeituras" />
+										<p:ajax event="rowUnselect" listener="#{inventarioBean.unRowFilterSelect}" update=":gerenciarInventario:tabViewInvItensMov:addProduto" process="dataTableItensSemLeituras" />
+										<p:ajax event="rowSelectCheckbox" listener="#{inventarioBean.onRowFilterSelect}" update=":gerenciarInventario:tabViewInvItensMov:addProduto" process="dataTableItensSemLeituras" />
+										<p:ajax event="rowUnselectCheckbox" listener="#{inventarioBean.unRowFilterSelect}" update=":gerenciarInventario:tabViewInvItensMov:addProduto" process="dataTableItensSemLeituras" />
+										<p:ajax event="toggleSelect" listener="#{inventarioBean.onRowFilterSelectAll}" update=":gerenciarInventario:tabViewInvItensMov:addProduto" />
+										
+										<f:facet name="header"></f:facet>
+					 		        	<p:column selectionMode="multiple" style="width:50px;text-align:center"/>
+
+										<p:column headerText="Código de Barras"
+										    styleClass="customCollumnDataHora"
+											sortBy="#{item.produtoCodBarras}">
+											<h:outputText value="#{item.produtoCodBarras}" />
+										</p:column>
+
+										<p:column headerText="Produto" sortBy="#{item.descricao}">
+											<h:outputText
+												value="#{item.descricao} (#{item.codInterno})" />
+										</p:column>
+
+										<p:column headerText="Estoque" sortBy="#{item.qtdDisponivel}"
+											styleClass="customCollumnValorGrande">
+											<h:panelGroup>
+												<h:outputText value="#{item.qtdDisponivel}"
+													rendered="#{item.qtdDisponivel gt 0}">
+													<f:convertNumber maxFractionDigits="1" locale="pt_BR" />
+												</h:outputText>
+												<h:outputText value=" #{item.unidadeDesc}" />
+											</h:panelGroup>
+										</p:column>
+
+									</p:dataTable>
+								</p:tab>
+
+							</p:tabView>
+						</p:fieldset>
+					</div>
+				</div>
+
+			</p:panel>
+
+		</h:form>
+
+		<!-- Listagem -->
+		<h:form id="listagemInventario">
+
+			<p:blockUI block="dtInventario" widgetVar="bUIDataTableInventario">
+			LOADING<br />
+				<p:graphicImage library="images" name="progress_bar.gif" />
+			</p:blockUI>
+
+			<p:dataTable id="dtInventario" var="inventario"
+				value="#{inventarioBean.lista}"
+				emptyMessage="Nenhum registro encontrado" rows="20" paginator="true"
+				paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+				rowsPerPageTemplate="10,20,40" reflow="true">
+
+				<p:column sortBy="#{inventario.id}" styleClass="customCollumnId">
+					<f:facet name="header">ID</f:facet>
+					<h:outputText value="#{inventario.id}" />
+				</p:column>
+
+				<p:column sortBy="#{inventario.dtCriacao}"
+					styleClass="customCollumnDataHora">
+					<f:facet name="header">Criação</f:facet>
+					<h:outputText value="#{inventario.dtCriacao}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</h:outputText>
+				</p:column>
+
+				<p:column sortBy="#{inventario.dtInicio}"
+					styleClass="customCollumnDataHora">
+					<f:facet name="header">Início</f:facet>
+					<h:outputText value="#{inventario.dtInicio}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</h:outputText>
+				</p:column>
+
+				<p:column sortBy="#{inventario.dtTermino}"
+					styleClass="customCollumnDataHora">
+					<f:facet name="header">Fim</f:facet>
+					<h:outputText value="#{inventario.dtTermino}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</h:outputText>
+				</p:column>
+
+				<p:column sortBy="#{inventario.descricao}">
+					<f:facet name="header">Descrição</f:facet>
+					<h:outputText value="#{inventario.descricao}" />
+				</p:column>
+
+				<p:column sortBy="#{inventario.empresaDesc}">
+					<f:facet name="header">Empresa</f:facet>
+					<h:outputText value="#{inventario.empresaDesc}" />
+				</p:column>
+
+				<p:column styleClass="customCollumnId">
+					<f:facet name="header">Concluido</f:facet>
+					<h:graphicImage library="icons" name="status_planilhacega_1.png"
+						rendered="#{inventario.status!='F'}" title="Liberado" />
+					<h:graphicImage library="icons" name="status_planilhacega_3.png"
+						rendered="#{inventario.status=='F'}" title="Finalizada" />
+				</p:column>
+
+				<p:column styleClass="customCollumn3Icon"
+					rendered="#{!inventarioBean.concluidoFilter}">
+					<f:facet name="header"></f:facet>
+					<p:commandButton action="#{inventarioBean.editar}"
+						update=":edicaoInventario :consultaInventario:msg" process="@this"
+						id="editarInventario" icon="ui-icon-pencil" title="Editar"
+						disabled="#{inventario.status=='F'}">
+						<f:setPropertyActionListener
+							target="#{inventarioBean.selecionada}" value="#{inventario}" />
+						<f:setPropertyActionListener
+							target="#{inventarioBean.selecionadaId}" value="#{inventario.id}" />
+					</p:commandButton>
+
+					<p:commandButton action="#{inventarioBean.gerenciar}"
+						update=":gerenciarInventario" process="@this" icon="ui-icon-gear"
+						title="Gerenciar" onclick="PF('bUIGerenciarInventario').show()"
+						oncomplete="closeEdicaoInventario();">
+						<f:setPropertyActionListener
+							target="#{inventarioBean.selecionada}" value="#{inventario}" />
+						<f:setPropertyActionListener
+							target="#{inventarioBean.selecionadaId}" value="#{inventario.id}" />
+					</p:commandButton>
+
+					<p:commandButton action="#{inventarioBean.excluir}"
+						update=":listagemInventario :consultaInventario:msg"
+						process="@this" icon="ui-icon-trash" title="Excluir"
+						oncomplete="closeEdicaoInventario();">
+						<f:setPropertyActionListener
+							target="#{inventarioBean.selecionada}" value="#{inventario}" />
+						<f:setPropertyActionListener
+							target="#{inventarioBean.selecionadaId}" value="#{inventario.id}" />
+						<p:confirm header="Confirme"
+							message="Deseja excluir Inventário #{inventario.id}?"
+							icon="ui-icon-alert" />
+
+					</p:commandButton>
+				</p:column>
+				<p:column styleClass="customCollumn1Icon"
+					rendered="#{inventarioBean.concluidoFilter}">
+					<f:facet name="header"></f:facet>
+					<p:commandButton action="#{inventarioBean.visualizar}"
+						update=":gerenciarInventario" process="@this" icon="icon-search"
+						title="Visualizar" onclick="PF('bUIGerenciarInventario').show()"
+						oncomplete="closeEdicaoInventario();">
+						<f:setPropertyActionListener
+							target="#{inventarioBean.selecionada}" value="#{inventario}" />
+						<f:setPropertyActionListener
+							target="#{inventarioBean.selecionadaId}" value="#{inventario.id}" />
+					</p:commandButton>
+
+				</p:column>
+
+
+			</p:dataTable>
+			<p:toolbar>
+				<f:facet name="right">
+		        	Total: #{inventarioBean.lista.size()}
+		        </f:facet>
+			</p:toolbar>
+
+		</h:form>
+
+	</div>
+
+	<script>
+		function closeEdicaoInventario() {
+			$('#edicaoInventario\\:panelInventario').hide();
+		}
+		closeEdicaoInventario();
+
+		function closeEdicaoNovoProduto() {
+			$('#gerenciarInventario\\:inventarioQTDGrid').hide();
+		}
+		closeEdicaoNovoProduto();
+
+		function focus() {
+			$('#gerenciarInventario\\:inventarioQTDGrid').hide();
+		}
+		
+		function closePanelFiltroProdutos(){
+			$('#edicaoInventario\\:panelFiltroProdutos').hide();
+		}
+		
+		function focus(value){
+			if(value == 'tabProdutosSemLeituras'){
+				//PF('tabViewInvItensMov\\:tabProdutosSemLeituras').select(0);
+				//$('#gerenciarInventario\\:tabViewInvItensMov\\:produtoFilterSC').focus();	
+			}
+			if(value == 'cnpj'){
+				$('#formVerCliPedVendaBean\\:cnpj').focus();	
+			}
+			if(value == 'nomeConsumidor'){
+				$('#formVerCliPedVendaBean\\:tabProdutosSemLeituras').focus();	
+			}
+		
+		}
+	</script>
+
+
+</ui:composition>

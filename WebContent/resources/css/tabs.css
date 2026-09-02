@@ -1,0 +1,14 @@
+#tree,.jquery-tree-controls {
+	margin-left: 10em;
+}
+
+#tree ul li {
+	padding: 2px;
+}
+
+#tabs li .ui-icon-close {
+	float: left;
+	margin: 0.4em 0.2em 0 0;
+	cursor: pointer;
+}
+

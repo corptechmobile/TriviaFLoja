@@ -1,0 +1,471 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+	<div class="tab-content-space">
+		<div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+		<f:metadata>
+			<f:viewAction action="#{devVendaBean.clearSession}" />
+		</f:metadata>
+
+
+		<!-- Filtro -->
+		<h:form id="consultaDevVendaBean">
+
+			<p:growl id="msg" showDetail="true" life="3000" />
+			<p:focus context="panelFiltroDevVenda" />
+			<p:defaultCommand target="btnBuscar" />
+
+			<p:toolbar id="tb">
+				<f:facet name="right">
+					<p:commandButton id="menuHome" icon="ui-icon-home" actionListener="#{devVendaBean.addHome}" update="@form:msg" process="@this" title="Home" />
+					<p:commandButton icon="ui-icon-star" actionListener="#{devVendaBean.addFavoritos}" update="@form:msg" process="@this" title="Favoritos" oncomplete="updateMenuHome();" />
+				</f:facet>
+			</p:toolbar>
+
+			<p:sticky target="tb" margin="50" />
+
+			<p:panel id="panelFiltroDevVenda" widgetVar="panelFiltroDevVenda">
+				<div class="ui-fluid">
+					<p:panelGrid columns="4" columnClasses="ui-grid-col-3,ui-grid-col-3,ui-grid-col-3,ui-grid-col-3" layout="grid" styleClass="ui-panelgrid-blank" >
+							<h:panelGroup>
+								<h:outputLabel for="empresa" value="Empresa: " />
+								<br />
+								<p:selectOneMenu id="empresa"
+									value="#{devVendaBean.empresaFilter}" filter="false"
+									autoWidth="true">
+									<f:selectItem itemLabel="Todas"></f:selectItem>
+									<f:selectItems value="#{devVendaBean.empresasSelect}" />
+								</p:selectOneMenu>
+							</h:panelGroup>
+
+
+					        <h:panelGroup>
+								<h:outputLabel value="Vendedor:" for="vendedorIdFilter"/> <br />
+						        <p:selectOneMenu  id="vendedorIdFilter" value="#{devVendaBean.vendedorFilter}" converter="vendedorFBConverter" filter="true" autoWidth="true" >
+									<f:selectItem itemLabel="Todos" itemValue="#{null}" />  
+									<f:selectItems value="#{devVendaBean.vendedorSelect}" /> 
+								</p:selectOneMenu>
+							</h:panelGroup>
+						
+							<h:panelGroup>
+							<h:outputLabel for="clienteCreateSelect" value="Cliente:"/> <br />
+							<p:autoComplete id="clienteCreateSelect" dropdown="true" scrollHeight="200"
+											queryDelay="1000"
+											minQueryLength="3" 
+											completeMethod="#{devVendaBean.completeCliente}"  
+											value="#{devVendaBean.clienteFilter}" 
+											var="cli" 
+											itemLabel="#{cli.razaoSocial}" 
+											itemValue="#{cli}" 
+											converter="clienteFBConverter" 
+											forceSelection="true"
+											emptyMessage="Nenhum Cliente encontrado"
+											placeholder="Cliente">
+											
+								<p:ajax event="itemSelect" listener="#{devVendaBean.closeFilterCliente}" update="@this"/> 
+								
+								<p:column>
+									<h:outputText value="#{cli.cnpjCpf}" rendered="#{cli.tipoPessoa == 'J' or cli.tipoPessoa == 'O'}" converter="converter.CNPJConverter" styleClass="tx_bold" />
+									<h:outputText value="#{cli.cnpjCpf}" rendered="#{cli.tipoPessoa == 'F'}" converter="converter.CPFConverter" styleClass="tx_bold"/><br/>
+									<h:outputText value="#{cli.razaoSocial}" />
+								</p:column>
+								
+							</p:autoComplete>
+							</h:panelGroup>
+							<h:panelGroup>
+							<h:outputLabel for="produtoSelect" value="Produto:"/> <br />
+							<p:autoComplete id="produtoSelect" dropdown="true" scrollHeight="200"
+											queryDelay="1000"
+											minQueryLength="3" 
+											completeMethod="#{devVendaBean.completeProduto}"  
+											value="#{devVendaBean.produtoFilter}" 
+											var="prd" 
+											itemLabel="#{prd.descricao}"  
+											itemValue="#{prd}" 
+											converter="produtoFBConverter" 
+											forceSelection="true"
+											emptyMessage="Nenhum Produto encontrado"
+											placeholder="Produto">
+											
+								<p:ajax event="itemSelect" listener="#{devVendaBean.closeFilterProduto}" update="@this"/> 
+								
+								<p:column>
+									<h:outputText value="#{prd.codInterno}" styleClass="tx_bold" /><br/>
+									<h:outputText value="#{prd.descricao}" />
+								</p:column>
+								
+							</p:autoComplete>
+							</h:panelGroup>							
+				</p:panelGrid>
+				<p:panelGrid columns="5" columnClasses="ui-grid-col-0,ui-grid-col-0,ui-grid-col-0,ui-grid-col-0,ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >						
+							<h:panelGroup>
+								<p:outputLabel value="Boletim:" />
+								<br />
+								<p:inputText value="#{devVendaBean.boletimFilter}"   />
+							</h:panelGroup>	
+							
+							<h:panelGroup>
+								<p:outputLabel value="Por:" />
+								<br />
+								<p:selectOneMenu id="opcoes" value="#{devVendaBean.porFilter}">
+									<f:selectItem itemLabel="Linha de Produto" itemValue="linhaproduto" />	
+									<f:selectItem itemLabel="Fornecedor" itemValue="fornecedor" />
+									<f:selectItem itemLabel="Vendedor" itemValue="vendedor" />
+									<f:selectItem itemLabel="Empresa" itemValue="empresa" />
+									<f:selectItem itemLabel="Cliente" itemValue="cliente" />
+									<f:selectItem itemLabel="Produto" itemValue="produto" />
+								</p:selectOneMenu>
+							</h:panelGroup>
+ 
+							<h:panelGroup>
+								<p:outputLabel value="Período:" />
+								<br />
+								<p:panelGrid columns="3" styleClass="ui-panelgrid-blank">
+									<p:calendar id="dataFilter1"
+										value="#{devVendaBean.dataFilter1}" pattern="dd/MM/yyyy"
+										size="10" mask="99/99/9999" label="Data 'de'"
+										converterMessage="Data inválida" 
+										required="true" requiredMessage="Data 'de' é obrigatório"/>
+									<h:outputLabel value=" à " />
+									<p:calendar id="dataFilter2"
+										value="#{devVendaBean.dataFilter2}" pattern="dd/MM/yyyy"
+										size="10" mask="99/99/9999" label="Data 'até'"
+										converterMessage="Data inválida" 
+										required="true" requiredMessage="Data 'até' é obrigatório"/>
+								</p:panelGrid>
+							</h:panelGroup>
+
+							<h:panelGroup>
+								<p:outputLabel value=" " />
+								<br />
+								<p:commandButton id="btnBuscar" 
+											value="Pesquisar" 
+											actionListener="#{devVendaBean.buscar}" 
+											update="@form :listagemDevVendaBean"
+											icon="icon-search" 
+											onclick="PF('bUIDataTableVendaForn').show()" />
+							</h:panelGroup>				
+							<h:panelGroup>
+								<p:outputLabel value=" " />
+								<br />
+								<p:commandButton id="btnLimpar" 
+											value="Limpar"
+											actionListener="#{devVendaBean.limpar}" 
+											update=":listagemDevVendaBean @form"
+											icon="ui-icon-close"
+											onclick="PF('bUIDataTableVendaForn').show()" />
+							</h:panelGroup>				
+					</p:panelGrid>
+				</div>
+
+			</p:panel>
+
+		</h:form>
+
+		<!-- Listagem -->
+
+		<h:form id="listagemDevVendaBean">
+			
+			<p:blockUI block="tabview" widgetVar="bUIDataTableVendaForn">
+				LOADING<br />
+				<p:graphicImage library="images" name="progress_bar.gif" />
+			</p:blockUI>
+			
+			<p:tabView id="tabview" widgetVar="tabPanelWidget" activeIndex="#{devVendaBean.currentTab}" styleClass="tabContent">
+			
+				<p:ajax event="tabChange" listener="#{devVendaBean.onTabChange}" update="@none"/>
+				<p:ajax event="tabClose" listener="#{devVendaBean.onTabClose}" update="@form"/>
+
+				<p:tab title="Devoluções no Período" id="tab0">
+					
+						<!-- Linha produto, Vendedor, Fornecedor -->
+						<div class="ui-g-0 ui-md-0 ui-lg-0">	 
+							<p:commandButton icon="icon-excel" disabled="#{empty devVendaBean.lista}" title="Exportar para excel" ajax="false">
+					            <p:dataExporter type="xls" target="dtVendaForn" fileName="#{devVendaBean.porFilterLabel}"  />
+					        </p:commandButton>
+				    	</div>
+	
+						<p:remoteCommand name="updateListVendaFornProjetoBean" update="@form" />
+	
+						<p:dataTable id="dtVendaForn" var="devvenda"
+							value="#{devVendaBean.lista}"
+							emptyMessage="Nenhum registro encontrado."
+							reflow="true">
+
+							<p:column sortBy="#{devvenda.empresaDesc}" rendered="#{devVendaBean.porFilter=='empresa'}">
+							<f:facet name="header">Empresa</f:facet>
+								<h:outputText value="#{devvenda.empresaDesc}" />
+							</p:column>
+							<p:column sortBy="#{devvenda.clienteDesc}" rendered="#{devVendaBean.porFilter=='cliente'}">
+							<f:facet name="header">Cliente</f:facet>
+								<h:outputText value="#{devvenda.clienteDesc}" />
+							</p:column>
+							<p:column sortBy="#{devvenda.vendedorDesc}" rendered="#{devVendaBean.porFilter=='vendedor'}">
+							<f:facet name="header">Vendedor</f:facet>
+								<h:outputText value="#{devvenda.vendedorDesc}" />
+							</p:column>
+							<p:column sortBy="#{devvenda.linhaProdutoDesc}" rendered="#{devVendaBean.porFilter=='linhaproduto'}">
+							<f:facet name="header">Linha de Produto</f:facet>
+								<h:outputText value="#{devvenda.linhaProdutoDesc}" />
+							</p:column>
+							<p:column sortBy="#{devvenda.fornecedorDesc}" rendered="#{devVendaBean.porFilter=='fornecedor'}">
+							<f:facet name="header">Fornecedor</f:facet>
+								<h:outputText value="#{devvenda.fornecedorDesc}" />
+							</p:column>
+							<p:column sortBy="#{devvenda.produtoDesc}" rendered="#{devVendaBean.porFilter=='produto'}">
+							<f:facet name="header">Produto</f:facet>
+								<h:outputText value="#{devvenda.produtoCod} - #{devvenda.produtoDesc}" />
+							</p:column>
+
+							<p:column sortBy="#{devvenda.vlDevolvido}" styleClass="customCollumnValor">
+								<f:facet name="header">Valor</f:facet>
+								<h:outputText value="#{devvenda.vlDevolvido}" converter="currencyFormat" />
+							</p:column>
+							
+							<p:column sortBy="#{devvenda.percValor}" styleClass="customCollumnValor">
+								<f:facet name="header">%</f:facet>
+								<h:outputText value="#{devvenda.percValor}">
+									<f:convertNumber minFractionDigits="2" maxFractionDigits="2" locale="pt_BR" />
+								</h:outputText>
+							</p:column>
+							
+							<p:column styleClass="customCollumn1Icon" exportable="false" priority="1">
+								<f:facet name="header"></f:facet>
+								<p:commandButton id="btnOpenDevCliente"
+											action="#{devVendaBean.openDevCliente}"
+											update=":listagemDevVendaBean" 
+											process="@this" 
+											icon="ui-icon-plus"
+											title="Mostrar Boletins"
+											onstart="PF('bUIDataTableVendaForn').show();"
+											oncomplete="focusInPainel('#listagemDevVendaBean\\:tabview', 100);">
+									<f:setPropertyActionListener target="#{devVendaBean.selecionada}" value="#{devvenda}" />
+								</p:commandButton>
+							</p:column>
+							
+							<p:columnGroup type="footer" rendered="#{not empty devVendaBean.lista}">
+	               				<p:row>
+						            <p:column footerText="Total:" style="text-align:right;" styleClass="tx_bold" />
+						            <p:column style="text-align:right;" >
+						            	<f:facet name="footer">
+						                	<h:outputText value="#{devVendaBean.valorTotalDev}" converter="currencyFormat" styleClass="tx_bold"/>
+						                </f:facet>
+						            </p:column>
+						            <p:column />
+						            <p:column />
+						        </p:row>
+	        				</p:columnGroup>
+	
+						</p:dataTable>
+						
+				</p:tab>
+				<p:tab title="Boletins por Cliente" id="tab1" rendered="#{not empty devVendaBean.listaDevCliente}">
+						
+						<ui:fragment rendered="#{devVendaBean.porFilter=='linhaproduto'}">
+						<h:outputText value="Linha de Produto: "/>
+						<h:outputText value="#{devVendaBean.selecionada.linhaProdutoDesc}" styleClass="tx_bold" />
+						</ui:fragment>
+						<ui:fragment rendered="#{devVendaBean.porFilter=='produto'}">
+						<h:outputText value="Produto: "/>
+						<h:outputText value="#{devVendaBean.selecionada.produtoCod} - #{devVendaBean.selecionada.produtoDesc}" styleClass="tx_bold" />
+						</ui:fragment>
+						<ui:fragment rendered="#{devVendaBean.porFilter=='cliente'}">
+						<h:outputText value="Cliente: "/>
+						<h:outputText value="#{devVendaBean.selecionada.clienteDesc}" styleClass="tx_bold" />
+						</ui:fragment>
+						<ui:fragment rendered="#{devVendaBean.porFilter=='vendedor'}">
+						<h:outputText value="Vendedor: "/>
+						<h:outputText value="#{devVendaBean.selecionada.vendedorDesc}" styleClass="tx_bold" />
+						</ui:fragment>
+						<ui:fragment rendered="#{devVendaBean.porFilter=='fornecedor'}">
+						<h:outputText value="Fornecedor: "/>
+						<h:outputText value="#{devVendaBean.selecionada.fornecedorDesc}" styleClass="tx_bold" />
+						</ui:fragment>
+						<!-- Linha produto, Vendedor, Fornecedor -->
+						<div class="ui-g-0 ui-md-0 ui-lg-0">	 
+							<p:commandButton icon="icon-excel" disabled="#{empty devVendaBean.listaDevCliente}" title="Exportar para excel" ajax="false">
+					            <p:dataExporter type="xls" target="dtdevVendaBoletins" fileName="DevolucoesCliente"  />
+					        </p:commandButton>
+				    	</div>
+	
+						<!-- <p:remoteCommand name="updateListVendaFornProjetoBean" update="@form" />  -->
+	
+						<p:dataTable id="dtdevVendaBoletins" var="devvenda"
+							value="#{devVendaBean.listaDevCliente}"
+							emptyMessage="Nenhum registro encontrado."
+							reflow="true">
+
+							<p:column sortBy="#{devvenda.id}" styleClass="customCollumn4Situacao">
+							<f:facet name="header">Boletim</f:facet>
+								<h:outputText value="#{devvenda.id}" />
+							</p:column>
+
+							<p:column sortBy="#{devvenda.momento}" styleClass="customCollumnDataHora" >
+							<f:facet name="header">Data</f:facet>
+								<h:outputText value="#{devvenda.momento}" >
+									<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+								</h:outputText>
+							</p:column>
+							
+							<p:column sortBy="#{devvenda.clienteDesc}">
+							<f:facet name="header">Cliente</f:facet>
+								<h:outputText value="#{devvenda.clienteDesc}" />
+							</p:column>
+							
+							<p:column sortBy="#{devvenda.motivo}" >
+							<f:facet name="header">Motivo</f:facet>
+								<h:outputText value="#{devvenda.motivo}" />
+							</p:column>
+
+							<p:column sortBy="#{devvenda.vlDevolvido}" styleClass="customCollumnValor">
+								<f:facet name="header">Valor</f:facet>
+								<h:outputText value="#{devvenda.vlDevolvido}" converter="currencyFormat" />
+							</p:column>
+							
+							<p:column sortBy="#{devvenda.percValor}" styleClass="customCollumnValor">
+								<f:facet name="header">%</f:facet>
+								<h:outputText value="#{devvenda.percValor}">
+									<f:convertNumber minFractionDigits="2" maxFractionDigits="2" locale="pt_BR" />
+								</h:outputText>
+							</p:column>
+							
+							<p:column styleClass="customCollumn1Icon" exportable="false" priority="1">
+								<f:facet name="header"></f:facet>
+								<p:commandButton id="btnOpenProduto"
+											action="#{devVendaBean.openDevProduto}"
+											update=":listagemDevVendaBean" 
+											process="@this" 
+											icon="ui-icon-plus"
+											title="Mostrar Produtos"
+											onstart="PF('bUIDataTableVendaForn').show();"
+											oncomplete="focusInPainel('#listagemDevVendaBean\\:tabview', 100);">
+									<f:setPropertyActionListener target="#{devVendaBean.selecionada}" value="#{devvenda}" />
+								</p:commandButton>
+							</p:column>
+							
+							<p:columnGroup type="footer" rendered="#{not empty devVendaBean.lista}">
+	               				<p:row>
+						            <p:column footerText="Total:" style="text-align:right;" colspan="4" styleClass="tx_bold" />
+						            <p:column style="text-align:right;" >
+						            	<f:facet name="footer">
+						                	<h:outputText value="#{devVendaBean.valorTotalDev}" converter="currencyFormat" styleClass="tx_bold"/>
+						                </f:facet>
+						            </p:column>
+						            <p:column />
+						            <p:column />
+						        </p:row>
+	        				</p:columnGroup>
+	
+						</p:dataTable>
+						
+				</p:tab>
+				<p:tab title="Boletim #{devVendaBean.selecionada.id}" id="tab2" rendered="#{not empty devVendaBean.listaDevProduto}">
+						<p:fieldset legend="Boletim #{devVendaBean.selecionada.id}">
+							<p:panelGrid columns="2" columnClasses="ui-grid-col-6,ui-grid-col-6" layout="grid" styleClass="ui-panelgrid-blank" >
+
+							<h:panelGroup>
+								<h:outputText value="Empresa "/><br/>
+								<h:outputText value="#{devVendaBean.selecionada.empresaDesc}" styleClass="tx_bold" />
+							</h:panelGroup>
+
+							<h:panelGroup>
+								<h:outputText value="Cliente "/><br/>
+								<h:outputText value="#{devVendaBean.selecionada.clienteDesc}" styleClass="tx_bold" />
+							</h:panelGroup>
+							<h:panelGroup>
+								<h:outputText value="Vendedor "/><br/>
+								<h:outputText value="#{devVendaBean.selecionada.vendedorDesc}" styleClass="tx_bold" />
+							</h:panelGroup>
+							<h:panelGroup>
+								<h:outputText value="Conferente "/><br/>
+								<h:outputText value="#{devVendaBean.selecionada.conferenteDesc}" styleClass="tx_bold" />
+							</h:panelGroup>
+							<h:panelGroup>
+							<h:outputText value="Emissão "/><br/>
+							<h:outputText value="#{devVendaBean.selecionada.momento}" styleClass="tx_bold" >
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+							</h:outputText>
+							</h:panelGroup>
+							<h:panelGroup>
+							<h:outputText value="Valor Total"/><br/>
+							<h:outputText value="#{devVendaBean.selecionada.valorTotal}" styleClass="tx_bold" >
+								<f:convertNumber minFractionDigits="2" maxFractionDigits="2" locale="pt_BR" />
+							</h:outputText>
+							</h:panelGroup>
+							<h:panelGroup>
+							<h:outputText value="Nota Fiscal"/><br/>
+							<h:outputText value="#{devVendaBean.selecionada.numNF} - #{devVendaBean.selecionada.serieNF}" styleClass="tx_bold" />
+							</h:panelGroup>
+							<h:panelGroup>
+							<h:outputText value="Documento"/><br/>
+							<h:outputText value="#{devVendaBean.selecionada.numTitulo}" styleClass="tx_bold" />
+							</h:panelGroup>
+							<h:panelGroup>
+							<h:outputText value="Saldo Crédito"/><br/>
+							<h:outputText value="#{devVendaBean.selecionada.saldoTitulo}" styleClass="tx_bold" >
+								<f:convertNumber minFractionDigits="2" maxFractionDigits="2" locale="pt_BR" />
+							</h:outputText>
+							</h:panelGroup>
+							<h:panelGroup>
+							<h:outputText value=" "/><br/>
+							</h:panelGroup>
+							<h:panelGroup>
+							<h:outputText value="Observação "/><br/>
+							<h:outputText value="#{devVendaBean.selecionada.motivo}" styleClass="tx_bold" />
+							</h:panelGroup>						
+							</p:panelGrid>
+
+
+						<!-- <p:remoteCommand name="updateListVendaFornProjetoBean" update="@form" />  -->
+						<br/>
+						<p:dataTable id="dtdevVendaProdutos" var="devvenda"
+							value="#{devVendaBean.listaDevProduto}"
+							emptyMessage="Nenhum registro encontrado."
+							reflow="true">
+
+							<p:column sortBy="#{devvenda.produtoDesc}">
+							<f:facet name="header">Produto</f:facet>
+								<h:outputText value="#{devvenda.produtoCod} - #{devvenda.produtoDesc}" />
+							</p:column>
+							
+							<p:column sortBy="#{devvenda.vlDevolvido}" styleClass="customCollumnValor">
+								<f:facet name="header">Valor</f:facet>
+								<h:outputText value="#{devvenda.vlDevolvido}" converter="currencyFormat" />
+							</p:column>
+							
+							<p:column sortBy="#{devvenda.percValor}" styleClass="customCollumnValor">
+								<f:facet name="header">%</f:facet>
+								<h:outputText value="#{devvenda.percValor}">
+									<f:convertNumber minFractionDigits="2" maxFractionDigits="2" locale="pt_BR" />
+								</h:outputText>
+							</p:column>
+							
+							<p:columnGroup type="footer" rendered="#{not empty devVendaBean.lista}">
+	               				<p:row>
+						            <p:column footerText="Total:" style="text-align:right;" styleClass="tx_bold" />
+						            <p:column style="text-align:right;" >
+						            	<f:facet name="footer">
+						                	<h:outputText value="#{devVendaBean.valorTotalDev}" converter="currencyFormat" styleClass="tx_bold"/>
+						                </f:facet>
+						            </p:column>
+						            <p:column />
+						        </p:row>
+	        				</p:columnGroup>
+	
+						</p:dataTable>
+						
+					</p:fieldset>
+						
+				</p:tab>
+				
+			</p:tabView>
+			
+		</h:form>
+
+	</div>
+
+
+</ui:composition>

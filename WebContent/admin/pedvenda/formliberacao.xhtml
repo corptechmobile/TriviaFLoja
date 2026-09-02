@@ -1,0 +1,240 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:util="http://java.sun.com/jsf/composite/components/util">
+   	
+   	<div class="tab-content-space">
+    
+    	<div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+    	
+    	<!-- Cadastro -->
+    	<h:form id="formEntPedLiberacao" onkeypress="if( event.keyCode == 13){event.keyCode=0;}">
+    	
+    		<p:toolbar id="tb">
+		        <f:facet name="left">
+		        	<p:commandButton 
+		        		action="#{pedVendaLiberarBean.liberar}"
+						update="@form" 
+						process="@this" 
+						icon="icon-check" 
+						value="Liberar" 
+						disabled="#{empty pedVendaLiberarBean.divergenciasSelected}" 
+						/>
+						
+					<p:commandButton 
+		        		action="#{pedVendaLiberarBean.naoLiberar}"
+						update="@form" 
+						process="@this" 
+						icon="icon-cancelado" 
+						value="Não Liberar" 
+						disabled="#{empty pedVendaLiberarBean.divergenciasSelected}" 
+						/>
+		        </f:facet>
+		    </p:toolbar>
+    	
+			<p:blockUI block="formEntPedLiberacao" widgetVar="bUIEntradaPedido">
+				LOADING<br />
+	        	<p:graphicImage library="images" name="progress_bar.gif"/>
+			</p:blockUI>
+			
+			<p:messages id="msgEntPedLiberacao" showDetail="true" showSummary="false" closable="true" />
+			<p:focus context="formEntPedLiberacao"/>
+			
+			<p:fieldset styleClass="painelFieldset">
+			
+				<p:fieldset id="fildDivergencias" legend="Divergências" styleClass="painelFieldset" rendered="#{not empty pedVendaLiberarBean.listaDivergencias}" >
+					
+					<p:panel id="panelLiberacao" header="#{pedVendaLiberarBean.tituloAdd}" rendered="#{pedVendaLiberarBean.editando}" closable="true">
+						<div class="ui-fluid">
+							<h:outputText value="Observação: " /> <br />
+							<p:inputTextarea id="obsDivergencia" value="#{pedVendaLiberarBean.obsDivergencia}" maxlength="1000" counter="displayRefEntPedLib" counterTemplate="{0} caracteres restante." autoResize="false"  />
+							<h:outputText id="displayRefEntPedLib" />
+						</div>
+						
+						<p:commandButton 
+			        		actionListener="#{pedVendaLiberarBean.confirmarLiberacao}"
+							update="@form" 
+							process="@form:panelLiberacao" 
+							icon="icon-check" 
+							value="Liberar" 
+							rendered="#{pedVendaLiberarBean.btnLiberar}"
+							onsuccess="verTabsPedidosAfterLiberar();"
+							>
+							<p:confirm header="Confirme" message="Deseja Realmente Liberar?" icon="ui-icon-alert" />
+						</p:commandButton>
+						
+						<!-- onsuccess="focusMsgEntPedLiberacaoBean(); verificarTabsPedidos();" -->
+						
+						<p:commandButton 
+			        		actionListener="#{pedVendaLiberarBean.confirmarNaoLiberacao}"
+							update="@form" 
+							process="@form:panelLiberacao" 
+							icon="icon-cancelado" 
+							value="Não Liberar"
+							rendered="#{pedVendaLiberarBean.btnNaoLiberar}"
+							onsuccess="verTabsPedidosAfterLiberar();"
+							>
+							<p:confirm header="Confirme" message="Deseja Realmente Não Liberar?" icon="ui-icon-alert" />
+						</p:commandButton>
+					</p:panel>
+					
+					<p:dataTable id="dtDivergencias" 
+									var="item" 
+										value="#{pedVendaLiberarBean.listaDivergencias}" 
+											reflow="true" 
+												rowKey="#{item.id}" 
+													selection="#{pedVendaLiberarBean.divergenciasSelected}"
+														disabledSelection="#{item.situacao == 1}">
+													
+						<p:ajax event="rowSelectCheckbox" update="@form" listener="#{pedVendaLiberarBean.listenerSelect}" />
+						<p:ajax event="rowUnselectCheckbox" update="@form" listener="#{pedVendaLiberarBean.listenerSelect}" />
+						<p:ajax event="rowSelect" update="@form" listener="#{pedVendaLiberarBean.listenerSelect}" />
+						<p:ajax event="rowUnselect" update="@form" listener="#{pedVendaLiberarBean.listenerSelect}" />
+						<p:ajax event="toggleSelect" update="@form" listener="#{pedVendaLiberarBean.listenerSelect}" />
+					
+						<p:column selectionMode="multiple" style="width:50px; text-align:center" />
+						
+						<!--
+						 <p:column styleClass="customCollumnId"> 
+							<f:facet name="header">COD</f:facet>
+							<h:outputText value="#{item.id}"/>
+				        </p:column> 
+				        -->
+				        <p:column styleClass="customCollumnDataHora">
+							<f:facet name="header">Registrado</f:facet>
+							<h:outputText value="#{item.dt_create}">
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+							</h:outputText>	
+				        </p:column>
+				        <p:column>
+							<f:facet name="header">Observação</f:facet>
+							<h:outputText value="#{item.observacao}"/>
+				        </p:column>
+				        
+				        <!-- <p:column styleClass="customCollumn1Icon"> 
+							<f:facet name="header"></f:facet>
+							<h:graphicImage library="images" name="clock.png" rendered="#{item.situacao==0}" />
+							<h:graphicImage library="images" name="help_F.png" rendered="#{item.situacao==1}" />
+							<h:graphicImage library="images" name="help_C.png" rendered="#{item.situacao==2}" />
+						</p:column> -->
+						
+				        <p:column> 
+							<f:facet name="header">Tipo</f:facet>
+							
+							<h:panelGroup rendered="#{item.tipo==2}">
+								<h:outputText value="Lotes diferentes no produto "/>
+								<h:outputText value="#{item.produtoCod}" styleClass="tx_bold" />
+								<h:outputText value=" - "/> 
+								<h:outputText value="#{item.produtoDesc}" styleClass="tx_bold" />
+							</h:panelGroup>
+							
+							<h:panelGroup rendered="#{item.tipo==1}">
+								<h:outputText value="Inclusão de desconto "/>
+								<h:outputText value="#{item.desconto}" converter="currencyFormat" styleClass="tx_bold" />
+								<h:outputText value="% " styleClass="tx_bold" />
+								<h:outputText value="(#{item.condPagtoDesc})" styleClass="tx_bold" />
+								<h:outputText value=" no produto " rendered="#{not empty item.produtoCod}" />
+								<h:outputText value="#{item.produtoCod}" styleClass="tx_bold" rendered="#{not empty item.produtoCod}" />
+								<h:outputText value=" - " rendered="#{not empty item.produtoCod}" /> 
+								<h:outputText value="#{item.produtoDesc}" styleClass="tx_bold" rendered="#{not empty item.produtoCod}" />
+							</h:panelGroup>
+							
+							<h:panelGroup rendered="#{item.tipo==3}">
+								<h:outputText value="Encomenda de produto "/>
+								<h:outputText value="#{item.produtoCod}" styleClass="tx_bold" />
+								<h:outputText value=" - "/> 
+								<h:outputText value="#{item.produtoDesc}" styleClass="tx_bold" />
+							</h:panelGroup>
+							
+				        </p:column>
+				        
+				        <p:column> 
+							<f:facet name="header">Situação</f:facet>
+							<h:panelGroup rendered="#{item.situacao==0}">
+								<h:graphicImage library="images" name="clock.png" rendered="#{item.situacao==0}" />
+								<h:outputText value=" Aguardando Liberação"/>
+							</h:panelGroup>
+							
+							<h:panelGroup rendered="#{item.situacao==1}">
+							
+								<h:graphicImage library="images" name="help_F.png" rendered="#{item.situacao==1}" />
+								<h:outputText value=" por "/>
+								<h:outputText value="#{item.usuarioNome}" styleClass="tx_bold" />
+								<h:outputText value=" em "/>
+								<h:outputText value="#{item.dtInteracao}" styleClass="tx_bold" >
+									<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+								</h:outputText>	
+							</h:panelGroup>
+							
+							<h:panelGroup rendered="#{item.situacao==2}">
+								<h:graphicImage library="images" name="help_C.png" rendered="#{item.situacao==2}" />
+								<h:outputText value=" por "/>
+								<h:outputText value="#{item.usuarioNome}" styleClass="tx_bold" />
+								<h:outputText value=" em "/>
+								<h:outputText value="#{item.dtInteracao}" styleClass="tx_bold" >
+									<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+								</h:outputText>	
+							</h:panelGroup>
+				        </p:column>
+				    </p:dataTable>
+				    
+				    
+				</p:fieldset>
+				
+				<util:capaEntradaPedido selecionada="#{pedVendaLiberarBean.selecionada}" vendedor = "#{pedVendaLiberarBean.vendedor}" cliente = "#{pedVendaLiberarBean.cliente}"/>
+				
+				<p:fieldset id="fildItens" legend="#{pedVendaLiberarBean.listaItens.size()} Itens" styleClass="painelFieldset">
+					
+					<p:dataTable id="dtEntPedidoItem" var="item"
+									value="#{pedVendaLiberarBean.listaItens}" 
+									 reflow="true"
+										emptyMessage="Nenhum item incluso"
+										rowStyleClass="#{item.preco lt item.custoGerUltCompraUv ? 'tx_red_14' : ''}">
+									
+						<p:column sortBy="#{item.projProduto.codRefProduto}" styleClass="customCollumnId"> 
+							<f:facet name="header">COD</f:facet>
+							<h:outputText value="#{item.produtoCodInterno}"/>
+				        </p:column>
+				        
+				        <p:column sortBy="#{item.produtoDesc}">
+							<f:facet name="header">Descrição</f:facet>
+							<h:outputText value="#{item.produtoDesc}"/> <br />
+				        </p:column>
+				        
+				        <p:column sortBy="#{item.quantidadeToString}" styleClass="customCollumnValor">
+				        	<f:facet name="header">Qtd</f:facet>
+				        	<h:outputText value="#{item.quantidadeToString}"/> <br />
+				        </p:column>
+				        
+				       <p:column sortBy="#{item.unidadeDesc}" styleClass="customCollumnValor">
+				        	<f:facet name="header">UN</f:facet>
+				        	<h:outputText value="#{item.unidadeDesc}"/> <br />
+				        </p:column> 
+				        
+				        <p:column sortBy="#{item.preco}" styleClass="customCollumnValorGrande">
+				       		<f:facet name="header">Preço</f:facet>
+							<h:outputText value="#{item.preco}" converter="currencyFormat" />
+				        </p:column>
+				        
+				        <p:column sortBy="#{item.percDesconto}" styleClass="customCollumnValorGrande">
+							<f:facet name="header">Desc(%)</f:facet>
+							<h:outputText value="#{item.percDesconto}" converter="currencyFormat"/>
+				        </p:column>
+				        
+				        <p:column sortBy="#{item.subTotal}" styleClass="customCollumnValorGrande">
+				        	<f:facet name="header">Sub Total</f:facet>
+							<h:outputText value="#{item.subTotal}" converter="currencyFormat" />
+				        </p:column>
+					</p:dataTable>
+				
+				</p:fieldset>
+				
+			</p:fieldset>
+			
+		</h:form>
+		
+	</div>
+	
+</ui:composition>

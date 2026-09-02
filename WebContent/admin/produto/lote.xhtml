@@ -1,0 +1,106 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+   	
+   	<div class="tab-content-space">
+    <div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+
+		<h:form id="formResultFilterProdutoBean">
+		
+		     	<p:blockUI block="tabviewProd" widgetVar="bUIDataTableProdutos">
+					LOADING<br />
+		        	<p:graphicImage library="images" name="progress_bar.gif"/>
+				</p:blockUI>
+				<p:tabView id="tabviewProd" widgetVar="tabPanelWidgetProd" styleClass="tabContent">
+				
+				<p:ajax event="tabChange" listener="#{produtoConsultaBean.onTabChange}" update="@none"/>
+				<p:ajax event="tabClose" listener="#{produtoConsultaBean.onTabClose}" update="@form"/>
+				
+				<p:tab title="Produtos" id="tab0">
+				
+				<p:dataTable id="dtItensProdutoBean" widgetVar="UIdtItensProdutoBean"
+								var="prod" 
+								value="#{produtoConsultaBean.listaProdutosLDM}" 
+								paginator="true" 
+			     				rows="10"
+			     				first="0"
+	                 			paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+	                 			rowsPerPageTemplate="10,20,30" 
+	                 			lazy="true"
+	                 			emptyMessage="Nenhum registro encontrado." 
+	                 			reflow="true">
+			
+				    <p:column sortBy="#{prod.codInterno}" styleClass="customCollumnId" priority="1">
+				    	<f:facet name="header">Código</f:facet>
+				    	<h:outputText value="#{prod.codInterno}" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : ''}"/>
+				  	</p:column>
+				
+				  	<p:column sortBy="#{prod.produtoLinhaDesc}" priority="2" styleClass="customCollumnProdutoLinha">
+					   <f:facet name="header">Linha</f:facet>
+					   <h:outputText value="#{prod.produtoLinhaDesc}" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : ''}" style="text-wrap:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>
+				  	</p:column>
+				
+				  	<p:column sortBy="#{prod.descricao}" priority="1">
+					   <f:facet name="header">Descrição</f:facet>
+					   <h:outputText id="descProd" value="#{prod.descricao}" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : 'tx_bold'}" style="text-wrap:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>
+					   <p:tooltip id="toolDescProd" for="descProd" value="#{prod.descricao}" position="top"/>
+				  	</p:column>
+				
+				  	<p:column styleClass="customCollumnQtdEstoque" priority="1">
+				    	<f:facet name="header">Estoque</f:facet>
+				    	<h:outputText value="#{prod.qtdDisponivelToString}" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : ''}" />
+				    	<h:outputText value=" #{prod.unidadeDesc}" styleClass="#{prod.inPromocao ? 'tx_azul' : ''}"/>
+				  	</p:column>
+				
+				  	<p:column sortBy="#{prod.preco}" styleClass="customCollumnValor" priority="1">
+				    	<f:facet name="header">Preço</f:facet>
+				    	<h:outputText value="#{prod.inPromocao ? prod.precoPromo : prod.preco}" converter="currencyFormat" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : 'tx_bold'}"/>
+				  	</p:column>
+				  	
+					<p:column styleClass="customCollumn1Icon" exportable="false" priority="1">
+						<f:facet name="header"></f:facet>
+						<p:commandButton id="btnOpenLotes"
+									actionListener="#{produtoConsultaBean.openLotesProduto}" 
+									update=":formResultFilterProdutoBean" 
+									process="@this" 
+									icon="ui-icon-plus"
+									title="Mostrar Produtos"
+									onstart="closeTab('tabViewProd')" 
+									oncomplete="openTab('tabViewProd', 'Lotes', 'Lotes', 'produto/lote.jsf?id=1')">
+							<f:setPropertyActionListener target="#{produtoConsultaBean.selecionada}" value="#{prod}" />
+						</p:commandButton>
+					</p:column>
+				  	
+			
+			  </p:dataTable>
+			  
+			  	<p:toolbar id="tbTotal">
+			        <f:facet name="right">
+			        	Total: #{produtoConsultaBean.listaProdutosLDM.rowCount}
+			        </f:facet>
+		        </p:toolbar>
+		        </p:tab>
+				<p:tab id="tabLotesProduto" title="Lotes" closable="true" rendered="#{produtoConsultaBean.renderedTabLotesProduto}">
+				 
+					<p:blockUI block="dtVendaProd" widgetVar="bUIDataTableVendaProd">
+					      LOADING<br />
+						<p:graphicImage library="images" name="progress_bar.gif" />
+					</p:blockUI>
+					
+					<h:outputText value="#{produtoConsultaBean.selecionada.descricao}"/>
+					
+					<p:dataTable id="dtVendaProd" var="vendaProd"  emptyMessage="Nenhum registro encontrado." reflow="true">
+
+
+					</p:dataTable>
+					
+				</p:tab>		        
+		        
+		        </p:tabView>
+		</h:form>
+   		
+	</div>
+
+</ui:composition>

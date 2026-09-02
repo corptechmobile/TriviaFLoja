@@ -1,0 +1,253 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+   	
+   	<div class="tab-content-space">
+    
+    	<div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+    	<f:metadata>
+	      <f:viewAction action="#{pedVendaDivergRelBean.clearSession}"/>
+	    </f:metadata>
+    
+	    <!-- Filtro -->
+	     <h:form id="formPedVendaDivergConsulta">
+	     
+	     	<p:growl id="msg" showDetail="true" life="3000"/>
+	     	<p:focus context="panelFiltroPedVendaDivergConsulta"/>
+	    	<p:defaultCommand target="btnBuscar" />
+	    	
+	    	<p:toolbar id="tb">
+		        <f:facet name="right">
+			        <p:commandButton id="menuHome" icon="ui-icon-home" actionListener="#{pedVendaDivergRelBean.addHome}" update="@form:msg" process="@this" title="Home" />
+			        <p:commandButton icon="ui-icon-star" actionListener="#{pedVendaDivergRelBean.addFavoritos}" update="@form:msg" process="@this" title="Favoritos" oncomplete="updateMenuHome();" />
+	        	</f:facet>
+		    </p:toolbar>
+		    
+		    <p:sticky target="tb" margin="50"/>
+		    
+		    <p:panel id="panelFiltroPedVendaDivergConsulta" widgetVar="panelFiltroPedVendaDivergConsulta" >
+		    	<div class="ui-fluid">
+		    	<div class="ui-g">
+        			<ui:fragment>
+        			<div class="ui-g-12 ui-md-3 ui-lg-0">
+						<h:outputLabel for="empresa" value="Empresa: "/> <br/>
+				        <p:selectOneMenu  id="empresa" value="#{pedVendaDivergRelBean.empresaFilter}" filter="false" autoWidth="true">
+							<f:selectItems value="#{pedVendaDivergRelBean.empresaSelect}" /> 
+						</p:selectOneMenu>
+					</div>
+					</ui:fragment>
+					<ui:fragment rendered="#{contextoBean.vendedorFilter}">
+					<div class="ui-g-6 ui-md-3 ui-lg-0">
+						<h:outputLabel for="vendedorCreateSelect" value="Vendedor:"/> <br />
+						<p:autoComplete id="vendedorCreateSelect" dropdown="true" scrollHeight="200"
+										queryDelay="1000"
+										minQueryLength="3" 
+										completeMethod="#{pedVendaDivergRelBean.completeVendedor}" 
+										value="#{pedVendaDivergRelBean.vendedorFilter}" 
+										var="ven" 
+										itemLabel="#{ven.nomeFantasia}" 
+										itemValue="#{ven}" 
+										converter="vendedorFBConverter" 
+										forceSelection="true"
+										emptyMessage="Nenhum Vendedor encontrado"
+										placeholder="Vendedor">
+										
+							
+							<p:column>
+								<h:outputText value="#{ven.id}"/> <br/>
+								<h:outputText value="#{ven.nomeFantasia}"/>
+							</p:column>
+							
+						</p:autoComplete>
+					</div>
+					</ui:fragment>
+					
+					<ui:fragment>
+						<div class="ui-g-6 ui-md-3 ui-lg-0">
+							<h:outputText value="Produto:"/>
+							<p:inputText value="#{pedVendaDivergRelBean.produtoFilter}" placeholder="Código/Descrição"/>
+						</div>		
+					</ui:fragment>
+					
+					<div class="ui-g-6 ui-md-3 ui-lg-0">
+					<h:panelGroup>
+						<h:outputLabel for="status" value="Situação:"/> <br />
+						<p:selectOneMenu  id="status" value="#{pedVendaDivergRelBean.tipoSituacaoFilter}" filter="false" autoWidth="false">
+							<f:selectItems value="#{pedVendaDivergRelBean.situacaoDivergSelect}" /> 
+						</p:selectOneMenu>
+					</h:panelGroup>
+					</div>
+					
+					<div class="ui-g-6 ui-md-3 ui-lg-0">
+					<h:panelGroup>
+						<h:outputLabel for="tipos" value="Tipo:"/> <br />
+						<p:selectOneMenu  id="tipos" value="#{pedVendaDivergRelBean.tipoDivergFilter}" filter="false" autoWidth="false">
+							<f:selectItems value="#{pedVendaDivergRelBean.tipoDivergSelect}" /> 
+						</p:selectOneMenu>
+					</h:panelGroup>
+					</div>
+					
+					<div class="ui-g-0 ui-md-0 ui-lg-6">
+						<p:panelGrid columns="1" styleClass="ui-panelgrid-blank">
+							<h:outputLabel for="tipos" value="Período:"/>
+						</p:panelGrid>
+						
+						<p:panelGrid columns="4" styleClass="ui-panelgrid-blank">
+							<p:selectOneMenu id="tipoData" value="#{pedVendaDivergRelBean.tipoDataFilter}" autoWidth="false">
+								<f:selectItems value="#{pedVendaDivergRelBean.tipoDataSelect}"/>
+							</p:selectOneMenu>
+					        <p:calendar id="dataFilter1" value="#{pedVendaDivergRelBean.dataFilter1}" pattern="dd/MM/yyyy" size="10" mask="99/99/9999" label="Data" converterMessage="Data inválida" />
+					        <h:outputLabel value=" à " />
+					        <p:calendar id="dataFilter2" value="#{pedVendaDivergRelBean.dataFilter2}" pattern="dd/MM/yyyy" size="10" mask="99/99/9999" label="Data" converterMessage="Data inválida" />
+				        </p:panelGrid>
+		        	</div>
+				</div>
+				
+        		
+		        
+		    	<div class="ui-g">
+	     			<div class="ui-g-0 ui-md-0 ui-lg-0">
+			    		<p:commandButton 
+							 id="btnBuscar"
+							 value="Buscar"
+							 actionListener="#{pedVendaDivergRelBean.buscar}"
+							 update=":listagemPedVendaDivergConsulta exportExcel"
+							 icon="icon-search"
+							 onclick="PF('bUIDataTablePedVendaDivergConsulta').show()"
+							 />
+					</div>
+					<div class="ui-g-0 ui-md-0 ui-lg-0">	 
+						 <p:commandButton 
+							 id="btnLimpar" 
+							 value="Limpar"
+							 action="#{pedVendaDivergRelBean.limpar}"
+							 update=" @form :listagemPedVendaDivergConsulta "
+							 icon="ui-icon-close" 
+							 onclick="PF('bUIDataTablePedVendaDivergConsulta').show()"
+							 />
+					</div>
+					<div class="ui-g-0 ui-md-0 ui-lg-0">	 
+						<h:panelGroup id="exportExcel"> 
+							<p:commandButton icon="icon-excel" disabled="#{empty pedVendaDivergRelBean.lista}" title="Exportar para excel" ajax="false">
+					            <p:dataExporter type="xls" target=":listagemPedVendaDivergConsulta:dtPedVendaDivergConsulta" fileName="pedVendas"  />
+					        </p:commandButton>
+				    	</h:panelGroup>
+			    	</div>
+		    	</div>
+		    	</div>
+		    </p:panel>
+	     	
+	     </h:form>
+	   	
+	<!-- Listagem -->
+     <h:form id="listagemPedVendaDivergConsulta">
+     
+     	<p:remoteCommand name="updatepedVendaDivergRelBean" update="@form" actionListener="#{pedVendaDivergRelBean.buscar}" /> 
+     	
+     	<p:blockUI block="dtPedVendaDivergConsulta" widgetVar="bUIDataTablePedVendaDivergConsulta" trigger="dtPedVendaDivergConsulta">
+			LOADING<br />
+        	<p:graphicImage library="images" name="progress_bar.gif"/>
+		</p:blockUI>
+		
+		<p:dataTable id="dtPedVendaDivergConsulta" var="pedVendaDiverg" reflow="true" value="#{pedVendaDivergRelBean.lista}" emptyMessage="Nenhum registro encontrado." scrollHeight="200">
+
+			<p:column sortBy="#{pedVendaDiverg.entrada}" styleClass="customCollumnDataHora">
+					<f:facet name="header">Registro</f:facet>
+					<h:outputText value="#{pedVendaDiverg.entrada}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</h:outputText>	
+		    </p:column>
+		    
+		     <p:column sortBy="#{pedVendaDiverg.interacao}" styleClass="customCollumnDataHora">
+					<f:facet name="header">Interação</f:facet>
+					<h:outputText value="#{pedVendaDiverg.interacao}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</h:outputText>	
+		    </p:column>
+		    
+        	<p:column styleClass="customCollumnId">
+		    	<f:facet name="header">Pedido</f:facet>
+		    	<h:outputText value="#{pedVendaDiverg.pedVendaId}"/>
+		    </p:column>
+		    
+		    <p:column sortBy="#{pedVendaDiverg.vendedor}" rendered="#{pedVendaDivergRelBean.vendedorFilter == null}">
+		    	<f:facet name="header">Vendedor</f:facet>
+		    	<h:outputText value="#{pedVendaDiverg.vendedor}"/>
+		    </p:column>
+		    
+		    <p:column sortBy="#{pedVendaDiverg.produto}">
+		    	<f:facet name="header">Produto</f:facet>
+		    	<h:outputText value="#{pedVendaDiverg.produto}"/>
+		    </p:column>
+		    
+        	 <!-- <p:column exportable="false"> 
+				<f:facet name="header">Tipo</f:facet>
+				<h:outputText value="#{pedVendaDiverg.tipoDivergToString}" escape="false"/>
+			 </p:column> -->
+			 
+			 <p:column exportable="true">
+			 	<f:facet name="header">Tipo</f:facet>
+					<h:outputText value="Lotes diferentes no produto " rendered="#{pedVendaDiverg.tipoDiverg==2}"/>
+					<h:outputText value="#{pedVendaDiverg.produtoCod}" styleClass="tx_bold" rendered="#{pedVendaDiverg.tipoDiverg==2}"/>
+					<h:outputText value=" - " rendered="#{pedVendaDiverg.tipoDiverg==2}"/> 
+					<h:outputText value="#{pedVendaDiverg.produto}" styleClass="tx_bold" rendered="#{pedVendaDiverg.tipoDiverg==2}"/>
+				
+					<h:outputText value="Inclusão de desconto " rendered="#{pedVendaDiverg.tipoDiverg==1}"/>
+					<h:outputText value="#{pedVendaDiverg.desconto}" converter="currencyFormat" styleClass="tx_bold"/>
+					<h:outputText value="% " styleClass="tx_bold" rendered="#{pedVendaDiverg.tipoDiverg==1}"/>
+					<h:outputText value=" no produto " rendered="#{not empty pedVendaDiverg.produtoCod and pedVendaDiverg.tipoDiverg==1}"/>
+					<h:outputText value="#{pedVendaDiverg.produtoCod} " styleClass="tx_bold" rendered="#{not empty pedVendaDiverg.produtoCod and pedVendaDiverg.tipoDiverg==1}" />
+					<h:outputText value=" - " rendered="#{not empty pedVendaDiverg.produtoCod and pedVendaDiverg.tipoDiverg==1}"/> 
+					<h:outputText value="#{pedVendaDiverg.produto}" styleClass="tx_bold" rendered="#{not empty pedVendaDiverg.produtoCod and pedVendaDiverg.tipoDiverg==1}"/>
+				
+					<h:outputText value="Encomenda de produto " rendered="#{pedVendaDiverg.tipoDiverg==3}"/>
+					<h:outputText value="#{pedVendaDiverg.produtoCod}" styleClass="tx_bold" rendered="#{pedVendaDiverg.tipoDiverg==3}"/>
+					<h:outputText value=" - " rendered="#{pedVendaDiverg.tipoDiverg==3}"/> 
+					<h:outputText value="#{pedVendaDiverg.produto}" styleClass="tx_bold" rendered="#{pedVendaDiverg.tipoDiverg==3}"/>
+			 </p:column>
+			 
+			 <p:column>
+		    	<f:facet name="header">Situação</f:facet>
+		    	<h:outputText value="#{pedVendaDiverg.situacaoDivergToString}"/>
+		    	<h:outputText rendered="#{not empty pedVendaDiverg.interacao}" value=" por "/>
+		    	<h:outputText rendered="#{not empty pedVendaDiverg.interacao}" value="#{pedVendaDiverg.usuario}" styleClass="tx_bold"/>
+		     </p:column>
+		     
+		     <p:column>
+		    	<f:facet name="header">Obs.</f:facet>
+		    	<h:outputText value="#{pedVendaDiverg.observacao}"/>
+		     </p:column>
+		     
+		    
+		    <p:column styleClass="customCollumn3Icon">
+		    	<f:facet name="header">Cond.Pagto.</f:facet>
+		    	<h:outputText value="#{pedVendaDiverg.condPagto}"/>
+		    </p:column>
+		    
+		    <p:column styleClass="customCollumn1Icon" exportable="false" priority="1">
+				<f:facet name="header"></f:facet>
+				<p:commandButton action="#{pedVendaNovoBean.editar}"
+					update="@none" process="@this" icon="ui-icon-pencil" title="Editar"
+					onstart="closeTab('pedVendaNovoBean')" 
+					oncomplete="openTab('pedVendaNovoBean', 'Pedido #{pedVendaDiverg.pedVendaId}', 'Pedido #{pedVendaDiverg.pedVendaId}', 'pedvenda/novo.jsf?id=1')"
+					>
+					<f:setPropertyActionListener target="#{pedVendaNovoBean.selecionadaId}" value="#{pedVendaDiverg.pedVendaId}" />
+				</p:commandButton>
+				
+			</p:column>
+        	
+		</p:dataTable>
+		<!-- <p:toolbar id="tbTotal">
+	        <f:facet name="right">
+	        	<h:outputText value="Total: "/>
+	        	<h:outputText value="#{pedVendaDivergRelBean.valorTotal}" converter="currencyFormat" styleClass="tx_bold" />
+	        </f:facet>
+        </p:toolbar> -->
+		
+	</h:form>
+	
+	</div>
+	
+</ui:composition>

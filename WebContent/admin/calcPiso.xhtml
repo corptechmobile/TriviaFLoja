@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+	
+<h:head> 
+	<title>Calculo de Piso</title>
+</h:head>
+	
+<h:body>
+
+     <!-- Filtro -->
+     <h:form id="consultaCalcPiso">
+ 	
+	    <p:panel id="panelFiltroCalcPiso" >
+	    	<p:outputLabel for="medida" value="Tamanho do ambiente (#{calcularPisoBean.altLargOuAreaTotal}): "/>
+	        <p:selectOneRadio id="medida" value="#{calcularPisoBean.altLargOuAreaTotal}" valueChangeListener="#{calcularPisoBean.changeRadio}">
+	            <f:selectItem itemLabel="Medidas" itemValue="altLarg"  />
+	            <f:selectItem itemLabel="Área" itemValue="areaTotal" />  
+	            <p:ajax update="@form" />
+	        </p:selectOneRadio>
+	        
+	    	<div class="ui-fluid">
+	    	
+	    	<h:panelGroup id="input" columns="4" columnClasses="ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank">
+				
+				<p:panelGrid rendered="#{calcularPisoBean.altLargOuAreaTotal eq 'altLarg'}">
+				
+					<p:outputLabel value="Comprimento (m): " for="comp"/>
+					<p:inputNumber value="#{calcularPisoBean.comprimento}" id="comp" decimalSeparator="," thousandSeparator="" decimalPlaces="2">
+						<p:ajax event="blur" update="btnCalcular"/>
+					</p:inputNumber>
+					
+					<p:outputLabel value="Largura (m): " for="larg"/>
+					<p:inputNumber value="#{calcularPisoBean.largura}" id="larg" decimalSeparator="," thousandSeparator="" decimalPlaces="2">
+						<p:ajax event="blur" update="btnCalcular"/>
+					</p:inputNumber>
+					
+					<p:commandButton id="btnCalcular" 
+							value="Calcular" 
+							actionListener="#{calcularPisoBean.calcularCompAlt}" 
+							update="fragmentResult"
+							icon="ui-icon-calculator"  
+							disabled="#{(calcularPisoBean.comprimento == 0.0) or (calcularPisoBean.largura == 0.0)}"/> 
+							
+					<h:panelGroup id="fragmentResult">		
+						<h:outputText id="calculoTotal1" rendered="#{calcularPisoBean.renderedCalculoCompLarg == true}" value="Resultado: Para #{calcularPisoBean.areaTotal}m², a quantidade mínima que você deverá adicionar ao carrinho é: #{calcularPisoBean.qtdDecimal} caixas.">
+							<f:convertNumber maxFractionDigits="2" />
+						</h:outputText>
+						 
+						<br/>
+						
+						<p:selectBooleanCheckbox id="dezPorcento" value="#{calcularPisoBean.renderedCalculoCompLarg10PorCento}" rendered="#{calcularPisoBean.renderedCalculoCompLarg == true}">
+		        			<p:ajax update="calculoCompLarCom10PorCento"/>
+		        		</p:selectBooleanCheckbox>
+						<p:outputLabel for="dezPorcento" value="Adicionar 10% para perdas na instalação" rendered="#{calcularPisoBean.renderedCalculoCompLarg == true}"/>
+        				
+						
+						<h:panelGroup id="calculoCompLarCom10PorCento" >
+							<br/>
+							<h:outputText id="calculoTotal10PorCento" rendered="#{calcularPisoBean.renderedCalculoCompLarg10PorCento}" value="Resultado: Para #{calcularPisoBean.areaTotalCom10PorCento}m², a quantidade mínima que você deverá adicionar ao carrinho é: #{calcularPisoBean.qtdDecimalCom10PorCento} caixas.">
+								<f:convertNumber pattern="#0.00" />
+							</h:outputText>
+						</h:panelGroup>
+						 
+						<br/>
+						
+						<p:commandButton id="btnLimpar"
+							value="Refazer Cálculo"
+							actionListener="#{calcularPisoBean.novo}"
+							rendered="#{calcularPisoBean.renderedCalculoCompLarg == true}"
+							update="@form"
+						/>
+					</h:panelGroup>
+										
+				</p:panelGrid>
+				
+				<p:panelGrid columns="2" columnClasses="ui-grid-col-0, ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" rendered="#{calcularPisoBean.altLargOuAreaTotal eq 'areaTotal'}">
+					<p:outputLabel value="Área total (m²): "/>
+					<p:inputNumber value="#{calcularPisoBean.areaTotal}">
+						<p:ajax event="blur" update="btnCalcular2" decimalSeparator="," thousandSeparator="" decimalPlaces="2"/>
+					</p:inputNumber>
+					<p:commandButton id="btnCalcular2" 
+						value="Calcular" 
+						action="#{calcularPisoBean.calcularAreaTotal}"
+						update="calculoTotal3"
+						icon="ui-icon-calculator"  
+						disabled="#{calcularPisoBean.areaTotal == 0.0}"/>
+					
+					<h:panelGroup id="calculoTotal3">		
+						<h:outputText id="calculoTotal" rendered="#{calcularPisoBean.renderedCalculoAreaTotal == true}" value="Resultado: Para #{calcularPisoBean.areaTotal}m², a quantidade mínima que você deverá adicionar ao carrinho é: #{calcularPisoBean.qtdDecimal} caixas.">
+							<f:convertNumber maxFractionDigits="2" />
+						</h:outputText>
+						
+						<p:selectBooleanCheckbox id="dezPorcento1" value="#{calcularPisoBean.renderedCalculoCompLarg10PorCento}" rendered="#{calcularPisoBean.renderedCalculoAreaTotal == true}">
+		        			<p:ajax update="calculoCompLarCom10PorCento1"/>
+		        		</p:selectBooleanCheckbox>
+						<p:outputLabel for="dezPorcento1" value="Adicionar 10% para perdas na instalação" rendered="#{calcularPisoBean.renderedCalculoAreaTotal == true}"/>
+						
+						<h:panelGroup id="calculoCompLarCom10PorCento1" >
+							<br/>
+							<h:outputText id="calculoTotal10PorCento1" rendered="#{calcularPisoBean.renderedCalculoCompLarg10PorCento}" value="Resultado: Para #{calcularPisoBean.areaTotalCom10PorCento}m², a quantidade mínima que você deverá adicionar ao carrinho é: #{calcularPisoBean.qtdDecimalCom10PorCento} caixas.">
+								<f:convertNumber pattern="#0.00" />
+							</h:outputText>
+						</h:panelGroup>
+						
+						<p:commandButton id="btnLimparAreaTotal"
+							value="Refazer Cálculo"
+							actionListener="#{calcularPisoBean.novo}"
+							rendered="#{calcularPisoBean.renderedCalculoAreaTotal == true}"
+							update="@form"
+						/>
+					</h:panelGroup>
+		    	</p:panelGrid>
+	    	</h:panelGroup>
+	    	</div>
+	    </p:panel>
+     	
+     </h:form>
+	     
+</h:body>
+
+</html>

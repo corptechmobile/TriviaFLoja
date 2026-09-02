@@ -1,0 +1,252 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+    
+    <div class="tab-content-space">
+    <div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+    <f:metadata>
+      <f:viewAction action="#{produtoCBBean.clearSession}"/>
+    </f:metadata>
+     
+     <!-- Filtro -->
+     <h:form id="consultaProdutoCB">
+     
+     	<p:growl id="msg" showDetail="true" life="3000"/>
+    	<p:focus context="panelFiltroProdutoCB"/>
+    	<p:defaultCommand target="btnBuscar" />
+    	
+    	<p:toolbar id="tb">
+	        <f:facet name="left">
+	            <p:commandButton value="Novo" 
+								 actionListener="#{produtoCBBean.novo}"
+								 update=":edicaoProdutoCB"
+								 process="@this"
+								 icon="icon-new" 
+								 >
+					<p:resetInput target=":edicaoProdutoCB" />
+				</p:commandButton>							 
+	        </f:facet>
+	        <f:facet name="right">
+		        <p:commandButton id="menuHome" icon="ui-icon-home" action="#{produtoCBBean.addHome}" update="@form:msg" process="@this" title="Home" />
+		        <p:commandButton icon="ui-icon-star" actionListener="#{produtoCBBean.addFavoritos}" update="@form:msg" process="@this" title="Favoritos" oncomplete="updateMenuHome();"/>
+        	</f:facet>
+	    </p:toolbar>
+	    
+	    <p:panel id="panelFiltroProdutoCB" widgetVar="panelFiltroProdutoCB" closable="true" >
+	    	<div class="ui-fluid">
+	    	<p:panelGrid columns="6" columnClasses="ui-grid-col-0, ui-grid-col-0, ui-grid-col-1, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+					
+				<p:inputText id="produtoFilter" value="#{produtoCBBean.produtoFilter}" placeholder="Descrição / Código Interno" />
+				<p:inputText id="codigoBarraFilter" value="#{produtoCBBean.codigoBarraFilter}" placeholder="Código de Barras" />
+				
+				<p:selectOneMenu id="produtoLinhaFilter" 
+									value="#{produtoCBBean.produtoLinhaFilter}"
+									filter="true"
+									converter="produtoLinhaFBConverter" 
+									filterMatchMode="contains" 
+									autoWidth="false">
+					<f:selectItem itemLabel="Linha de Produto" />
+					<f:selectItems value="#{produtoCBBean.produtoLinhasSelect}" />
+				</p:selectOneMenu>
+					
+		        <p:commandButton 
+					 id="btnBuscar" 
+					 value="Buscar"
+					 actionListener="#{produtoCBBean.buscar}"
+					 update="@form :listagemProdutoCB"
+					 icon="icon-search" 
+					 />
+
+				 <p:commandButton 
+					 id="btnLimpar" 
+					 value="Limpar"
+					 action="#{produtoCBBean.limpar}"
+					 update="@form :listagemProdutoCB"
+					 icon="ui-icon-close" 
+					 />
+					 
+				<h:commandLink rendered="#{not empty produtoCBBean.lista}">
+					<p:graphicImage library="images" name="excel16x16.png" />
+					<p:dataExporter type="xls" target=":listagemProdutoCB:dtProdutoCB" fileName="ProdutoCB" />	
+				</h:commandLink>
+
+	    	</p:panelGrid>
+	    	</div>
+	    	
+	    </p:panel>
+	    
+	    <p:sticky target="tb" margin="50"/>
+     	
+     </h:form>
+      
+     <!-- Cadastro -->
+     <h:form id="edicaoProdutoCB">
+     
+     	<p:blockUI block="panelProdutoCB" trigger="btnSalvar" widgetVar="bUIProdutoCB">
+			LOADING<br />
+        	<p:graphicImage library="images" name="progress_bar.gif"/>
+		</p:blockUI>
+		 
+		<p:panel id="panelProdutoCB" widgetVar="panelProdutoCB" header="#{produtoCBBean.tituloAdd}" closable="true">
+			
+			<p:focus context="panelProdutoCB"/>
+			<p:messages id="msgAdd" showDetail="true" showSummary="false" closable="false"/>
+			
+			<div class="ui-fluid">
+			    
+		    <p:panelGrid id="produtoCBGrid" columns="2" columnClasses="ui-grid-col-2, ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+		     	
+		    	<p:outputLabel for="codigoBarra" value="Código de Barrras:" styleClass="tx_14" />
+	            <p:inputText id="codigoBarra" value="#{produtoCBBean.codigoBarras}" rendered="#{produtoCBBean.editando==false}" disabled="#{not empty produtoCBBean.codigoBarras}" onkeypress="if(event.keyCode == 13){ $('#edicaoProdutoCB\\:btnSalvar').focus(); return false; }" styleClass="tx_14" size="30" maxlength="30">
+	            	<p:ajax event="blur" process="@this" update="@form:produtoCBGrid @form:produtoCBGrid2" listener="#{produtoCBBean.verCodigoBarras}" /> 
+	            </p:inputText>
+	            <h:outputText value="#{produtoCBBean.selecionada.id.codigoBarras}" rendered="#{produtoCBBean.editando}" styleClass="tx_14"/>
+		     
+		    	<p:outputLabel for="produtoGrid" value="Produto:" styleClass="tx_14" />
+	            <p:panelGrid id="produtoGrid" columns="4" columnClasses="ui-grid-col-0,ui-grid-col-0,ui-grid-col-0,ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" rendered="#{produtoCBBean.editando==false}">
+
+			            <p:commandButton id="btnOpenFilterProduto" 
+			                      actionListener="#{produtoCBBean.openFilterProduto}"
+			                      update="produtoGrid"
+			                      process="produtoGrid" 
+			                      icon="icon-search"  
+			                      rendered="#{!produtoCBBean.filterProduto}"
+			                      disabled="#{empty produtoCBBean.codigoBarras}"
+			                      />
+			                      
+			               <p:panelGrid columns="2" columnClasses="ui-grid-col-0,ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+			               	  <p:focus context="produtoGrid" />
+			                  <p:autoComplete id="produtoCreateSelect" dropdown="true" scrollHeight="200"
+			                              size="40"
+			                              queryDelay="1000" 
+			                              minQueryLength="3" 
+			                              completeMethod="#{produtoCBBean.completeProduto}" 
+			                              value="#{produtoCBBean.produtoFB}"
+			                              var="prod" 
+			                              itemLabel="#{prod.descricao}" 
+			                              itemValue="#{prod}" 
+			                              forceSelection="true"
+			                              emptyMessage="Nenhum Produto encontrada"
+			                              rendered="#{produtoCBBean.filterProduto}"
+			                              styleClass="tx_14"
+			                              >
+			                               
+			                     <p:ajax event="itemSelect" listener="#{produtoCBBean.closeFilterProduto}" update=":edicaoProdutoCB:produtoGrid :edicaoProdutoCB:produtoCBGrid2"/>
+			                     
+			                     <p:column>
+			                        <h:outputText value="#{prod.codInterno}" styleClass="#{prod.ativo==0 ? 'tx_red_14' : 'tx_bold_14'}" /><br/>
+			                        <h:outputText value="#{prod.descricao}" styleClass="#{prod.ativo==0 ? 'tx_red_14' : 'tx_14'}"/>
+			                     </p:column>
+			                     
+			                  </p:autoComplete>
+			                  
+			                  <h:panelGroup rendered="#{!produtoCBBean.filterProduto}">
+			                     <p:outputLabel value="#{produtoCBBean.produtoFB.codInterno}" /> - 
+			                     <p:outputLabel value="#{produtoCBBean.produtoFB.descricao}" />
+			                  </h:panelGroup>
+			                  
+			               </p:panelGrid>
+			               
+			            </p:panelGrid>
+			            
+			            <h:panelGroup rendered="#{produtoCBBean.editando}">
+	               		<p:outputLabel value="#{produtoCBBean.selecionada.produto.codInterno}" styleClass="tx_bold_14" /> - 
+	                    <p:outputLabel value="#{produtoCBBean.selecionada.produto.descricao}" styleClass="tx_14"/>
+	                </h:panelGroup>
+			            
+	         </p:panelGrid>
+	           
+	         <p:panelGrid id="produtoCBGrid2" columns="3" columnClasses="ui-grid-col-2, ui-grid-col-10" layout="grid" styleClass="ui-panelgrid-blank" >
+	               <p:outputLabel for="qtd" value="Quantidade:" rendered="#{produtoCBBean.editando or not empty produtoCBBean.produtoFB}" styleClass="tx_14"/>
+	               <p:panelGrid id="produtoCBQTDGrid" rendered="#{produtoCBBean.editando or not empty produtoCBBean.produtoFB}" columns="3" columnClasses="ui-grid-col-0, ui-grid-col-0, ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+	               		<p:focus context="produtoCBQTDGrid"/>
+		           		<p:inputText id="qtd" value="#{produtoCBBean.selecionada.qtd}" maxlength="6" size="6" styleClass="tx_14"/>
+		           		<p:outputLabel value="UN" />
+		           		<p:defaultCommand target="btnSalvar" />
+		           </p:panelGrid>
+	         </p:panelGrid>
+	         
+ 			</div>
+	 		
+	 		  <p:panelGrid columns="2" columnClasses="ui-grid-col-2, ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+	         		<!--  -->
+	         		<p:commandButton id="btnSalvar" value="Salvar" actionListener="#{produtoCBBean.salvar}" icon="ui-icon-disk" update="@form :listagemProdutoCB" styleClass="tx_14"/>
+	         </p:panelGrid>
+	 		
+	 	</p:panel>
+     </h:form>
+        
+     <!-- Listagem --> 
+     <h:form id="listagemProdutoCB">
+     	
+     	<p:blockUI block="dtProdutoCB" widgetVar="bUIDataTableProdutoCB">
+			LOADING<br />
+        	<p:graphicImage library="images" name="progress_bar.gif"/>
+		</p:blockUI>
+		
+		<p:dataTable id="dtProdutoCB" var="produtoCB"
+			value="#{produtoCBBean.lista}" emptyMessage="Nenhum registro encontrado"
+			rows="20" paginator="true"
+			paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+			rowsPerPageTemplate="10,20,40"
+			reflow="true">
+
+				<p:column sortBy="#{produtoCB.produto.codInterno}" styleClass="customCollumnId">
+					<f:facet name="header">Produto</f:facet>
+					<h:outputText value="#{produtoCB.produto.codInterno}" />
+				</p:column>
+				
+				<p:column sortBy="#{produtoCB.id.codigoBarras}" styleClass="customCollumnCodigoBarra" exportable="false">
+					<f:facet name="header"></f:facet>
+					<p:barcode value="#{produtoCB.id.codigoBarras}" type="ean13" rendered="#{produtoCB.id.codigoBarras.length() == 13}"/>
+					<p:barcode value="#{produtoCB.id.codigoBarras}" type="code128" rendered="#{produtoCB.id.codigoBarras.length() != 13}"/>
+				</p:column>
+				
+				<p:column sortBy="#{produtoCB.id.codigoBarras}" styleClass="customCollumnCodigoBarra">
+					<f:facet name="header">Código de Barras</f:facet>
+					<h:outputText value="#{produtoCB.id.codigoBarras}" />
+				</p:column>
+				
+				<p:column sortBy="#{produtoCB.produto.descricao}">
+					<f:facet name="header">Descrição</f:facet>
+					<h:outputText value="#{produtoCB.produto.descricao}" />
+				</p:column>
+				
+				<p:column sortBy="#{produtoCB.qtd}" styleClass="customCollumnId">
+					<f:facet name="header">Qtd</f:facet>
+					<h:outputText value="#{produtoCB.qtd}">
+						<f:convertNumber minFractionDigits="0"  locale="pt_BR" />
+					</h:outputText>
+				</p:column>
+				
+				<p:column styleClass="customCollumn2Icon" exportable="false">
+					<f:facet name="header"></f:facet>
+					<p:panelGrid columns="2" columnClasses="ui-grid-col-0, ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+					<p:commandButton action="#{produtoCBBean.editar}" 
+									update=":edicaoProdutoCB" 
+									icon="ui-icon-pencil" 
+									title="Editar" 
+									onclick="PF('bUIProdutoCB').show()">
+						<p:resetInput target=":edicaoProdutoCB" />
+						<f:setPropertyActionListener target="#{produtoCBBean.selecionada}" value="#{produtoCB}" />
+					</p:commandButton>
+					<p:commandButton action="#{produtoCBBean.excluir}" update="@form, :edicaoProdutoCB" icon="ui-icon-trash" title="Excluir" >
+						<f:setPropertyActionListener target="#{produtoCBBean.selecionada}" value="#{produtoCB}" />
+						<p:confirm header="Confirme" message="Deseja Excluir o codigo de barras #{produtoCB.id.codigoBarras} para o produto #{produtoCB.produto.codInterno} - #{produtoCB.produto.descricao}?" icon="ui-icon-alert" />	
+					</p:commandButton>
+					</p:panelGrid> 
+				</p:column>
+
+			</p:dataTable>
+			
+		</h:form>
+     
+    </div>
+    
+    <script>
+		$('#edicaoProdutoCB\\:panelProdutoCB').hide();
+    </script>
+    
+</ui:composition>

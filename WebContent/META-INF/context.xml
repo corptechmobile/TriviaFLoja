@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context reloadable="true">
+
+	<Resource name="jdbc/TriviaFLoja"
+		auth="Container"
+		type="javax.sql.DataSource"
+		maxActive="100"
+		maxIdle="100"
+		maxWait="10000"
+		username="SYSDBA"
+		password="masterkey"
+		driverClassName="org.firebirdsql.jdbc.FBDriver"
+		validationQuery="SELECT FIRST 1 * FROM logtriviamobile ORDER BY momentolog DESC" 
+		url="jdbc:firebirdsql:192.168.18.22/3050:C:\Program Files\Trivia\Data\TRIVIA.FDB?lc_ctype=UNICODE_FSS" /> 
+	
+	<!-- TRIVIADEZDEZ1.FDB -->
+	<!-- 177.207.241.213 / 192.168.15.51 -->
+	<!-- url="jdbc:firebirdsql:192.168.0.155/3050:C:\Program Files\Trivia\Data\TRIVIADEZ201907180935.FDB?lc_ctype=UNICODE_FSS" -->
+	<!-- url="jdbc:firebirdsql:localhost/3050:C:\Program Files\Trivia\Data\TRIVIA.FDB?lc_ctype=UNICODE_FSS" -->
+	
+	<!-- 186.227.195.250 triviade TRIVIA.FDB -->
+	<!-- 192.168.0.155 masterkey TRIVIADEZOLD.FDB-->
+	<!-- localhost -->
+	
+	<Resource name="jdbc/TriviaFLojaPostGres"
+		auth="Container"
+		type="javax.sql.DataSource"
+		maxActive="100"
+		maxIdle="100"
+		maxWait="10000"
+		username="triviamobile" 
+		password="TechCorp0710"
+		driverClassName="org.postgresql.Driver"
+		url="jdbc:postgresql://localhost:5432/triviafloja?autoReconnect=true" /> 
+
+	<!-- url="jdbc:postgresql://192.168.0.155:5432/triviafloja_dez_20200113_dev?autoReconnect=true" -->
+	<!-- url="jdbc:postgresql://localhost:5432/triviafloja?autoReconnect=true" -->
+</Context>

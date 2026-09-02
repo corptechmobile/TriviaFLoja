@@ -1,0 +1,101 @@
+package br.com.coletor.model;
+
+import java.io.Serializable;
+import java.util.Date;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
+public class ColetorInv implements Serializable {
+
+	private static final long serialVersionUID = 4241846380379259985L;
+	
+	public static final String STATUS_EM_ABERTO = "A";
+	public static final String STATUS_FINALIZADO = "F";
+	
+	@Id
+	private Integer id;
+
+	private String descricao;
+	private String status;
+	private Date dtInicio;
+	private Date dtTermino;
+	private Date dtCriacao;
+	
+	public ColetorInv(){}
+	
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public String getDescricao() {
+		return descricao;
+	}
+
+	public void setDescricao(String descricao) {
+		this.descricao = descricao;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public Date getDtInicio() {
+		return dtInicio;
+	}
+
+	public void setDtInicio(Date dtInicio) {
+		this.dtInicio = dtInicio;
+	}
+
+	public Date getDtTermino() {
+		return dtTermino;
+	}
+
+	public void setDtTermino(Date dtTermino) {
+		this.dtTermino = dtTermino;
+	}
+
+	public Date getDtCriacao() {
+		return dtCriacao;
+	}
+
+	public void setDtCriacao(Date dtCriacao) {
+		this.dtCriacao = dtCriacao;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ColetorInv other = (ColetorInv) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
+	}
+	
+}

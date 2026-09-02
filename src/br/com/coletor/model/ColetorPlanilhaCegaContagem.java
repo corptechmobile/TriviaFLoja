@@ -1,0 +1,161 @@
+package br.com.coletor.model;
+
+import java.io.Serializable;
+import java.util.Date;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
+
+@Entity
+public class ColetorPlanilhaCegaContagem implements Serializable {
+
+	private static final long serialVersionUID = 8951594448928283979L;
+	
+	@Id
+	private Integer id;
+
+	private String chave;
+	private Integer coletorPlanilhaCegaId;
+	private Integer usuarioId;
+	private Integer produtoId;
+	private String codBarra;
+	private Double qtdConferida;
+	private Double qtdDevolvida;
+	private Double qtdAvaria;
+	private String codLote;
+	private Date dtVencLote;
+	private Date dtLeitura;
+	private Date dtErp;
+	
+	public ColetorPlanilhaCegaContagem(){}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public String getChave() {
+		return chave;
+	}
+
+	public void setChave(String chave) {
+		this.chave = chave;
+	}
+
+	public Integer getColetorPlanilhaCegaId() {
+		return coletorPlanilhaCegaId;
+	}
+
+	public void setColetorPlanilhaCegaId(Integer coletorPlanilhaCegaId) {
+		this.coletorPlanilhaCegaId = coletorPlanilhaCegaId;
+	}
+
+	public Integer getUsuarioId() {
+		return usuarioId;
+	}
+
+	public void setUsuarioId(Integer usuarioId) {
+		this.usuarioId = usuarioId;
+	}
+
+	public Integer getProdutoId() {
+		return produtoId;
+	}
+
+	public void setProdutoId(Integer produtoId) {
+		this.produtoId = produtoId;
+	}
+
+	public String getCodBarra() {
+		return codBarra;
+	}
+
+	public void setCodBarra(String codBarra) {
+		this.codBarra = codBarra;
+	}
+
+	public Double getQtdConferida() {
+		return qtdConferida;
+	}
+
+	public void setQtdConferida(Double qtdConferida) {
+		this.qtdConferida = qtdConferida;
+	}
+
+	public Double getQtdDevolvida() {
+		return qtdDevolvida;
+	}
+
+	public void setQtdDevolvida(Double qtdDevolvida) {
+		this.qtdDevolvida = qtdDevolvida;
+	}
+
+	public Double getQtdAvaria() {
+		return qtdAvaria;
+	}
+
+	public void setQtdAvaria(Double qtdAvaria) {
+		this.qtdAvaria = qtdAvaria;
+	}
+
+	public String getCodLote() {
+		return codLote;
+	}
+
+	public void setCodLote(String codLote) {
+		this.codLote = codLote;
+	}
+
+	public Date getDtVencLote() {
+		return dtVencLote;
+	}
+
+	public void setDtVencLote(Date dtVencLote) {
+		this.dtVencLote = dtVencLote;
+	}
+
+	public Date getDtLeitura() {
+		return dtLeitura;
+	}
+
+	public void setDtLeitura(Date dtLeitura) {
+		this.dtLeitura = dtLeitura;
+	}
+	
+	public Date getDtErp() {
+		return dtErp;
+	}
+
+	public void setDtErp(Date dtErp) {
+		this.dtErp = dtErp;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ColetorPlanilhaCegaContagem other = (ColetorPlanilhaCegaContagem) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		return true;
+	}
+	
+}

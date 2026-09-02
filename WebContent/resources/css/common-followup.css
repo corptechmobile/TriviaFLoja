@@ -1,0 +1,98 @@
+.FollowUp {
+	
+}
+
+.itemPanelHelpdesckGerenciar {
+	padding: 10px;
+	background-color: #ededed;
+	color: #000;
+	font-size: 12px;
+}
+
+.itemPanelTitHelpdesckGerenciar {
+	padding: 10px;
+	background-color: #ededed;
+	color: #000;
+	font-size: 12px;
+	font-weight: bold;
+}
+
+.itemPanelHelpdesckGerenciar span {
+	float: right;
+}
+
+.imagFollowupCircle {
+	width: 60px;
+	height: 60px;
+	margin-right: 10px;
+}
+
+.baseItemFollowUp {
+	display: inline-block;
+	margin-bottom: 10px;
+	font-size: 12px;
+}
+
+.itemLeftFollowUp {
+	display: table-cell;
+	vertical-align: top;
+	padding: 5px;
+	margin: 0px;
+}
+
+.itemLeftFollowUp p {
+	margin: 0px;
+}
+
+.itemRightFollowUp {
+	display: table-cell;
+	vertical-align: top;
+	padding: 5px;
+	margin: 0px;
+}
+
+.itemRightFollowUp h4 {
+	margin: 0px;
+	margin-top: 10px;
+}
+
+.itemRightFollowUp p {
+	margin: 0px;
+}
+
+.itemNomeUsuarioFollowUp {
+	font-weight: bold;
+}
+
+.itemNegritoFollowUp {
+	font-weight: bold;
+}
+
+.itemItalicoFollowUp {
+	font-style: oblique;
+	color: gray;
+}
+
+.itemAnexoFollowUp {
+	padding-right: 10px;
+	padding-bottom: 10px;
+	float: left;
+}
+
+.itemAnexoFollowUp button {
+	margin-left: 2px;
+}
+
+.itemAnexoFollowUp img {
+	margin-right: 2px;
+}
+
+.itemImgAnexoFollowUp {
+	width: 10px;
+	height: 21px;
+	margin-right: 2px;
+}
+
+.itemBlockFollowUp {
+	display: block;
+}

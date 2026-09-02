@@ -1,0 +1,539 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"> 
+<style>
+tr:nth-child(even) {
+  background-color: #f2f2f2
+}
+</style>
+   	
+    <f:metadata>
+      <f:viewAction action="#{consultaOrcamentoMetaBean.clearSession}"/>
+    </f:metadata>
+
+		<h:form id="formConsOrcamentoMetaBuscar">
+
+			<p:growl id="msg" showDetail="true" life="3000" />
+			<p:focus context="panelFilterConsultaOrcamentoMetaBean" />
+			<p:defaultCommand target="btnBuscarConsulta" />
+
+		    <p:toolbar id="tb">
+		        <f:facet name="right">
+					<p:commandButton id="menuHome" icon="ui-icon-home"
+						actionListener="#{consultaOrcamentoMetaBean.addHome}" update="@form:msg"
+						process="@this" title="Home" />
+					<p:commandButton icon="ui-icon-star"
+						actionListener="#{consultaOrcamentoMetaBean.addFavoritos}"
+						update="@form:msg" process="@this" title="Favoritos"
+						oncomplete="updateMenuHome();" />
+	        	</f:facet>
+		    </p:toolbar>
+
+			<p:sticky target="tb" margin="50" />
+
+			<p:panel id="panelFilterConsultaOrcamentoMetaBean" widgetVar="panelFilterConsultaOrcamentoMetaBean" >
+				<div class="ui-fluid">
+				<p:panelGrid columns="5" columnClasses="ui-grid-col-0,ui-grid-col-0, ui-grid-col-0,ui-grid-col-0,ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+				<h:panelGroup>
+					<h:outputLabel value="Ano:" for="ano"/><br/>
+			        <p:inputMask id="ano" value="#{consultaOrcamentoMetaBean.ano}" placeholder="Ano" size="4"  required="true" requiredMessage="Informe o Ano"   />
+				</h:panelGroup>
+				<h:panelGroup>
+					<h:outputLabel value="Empresa:" for="empresaIdFilter"/><br/>
+			        <p:selectOneMenu  id="empresaIdFilter" value="#{consultaOrcamentoMetaBean.empresaFilter}" filter="true" autoWidth="true" required="true" requiredMessage="Selecione uma Empresa">
+						<f:selectItem itemLabel="Todas" itemValue="#{null}" />  
+						<f:selectItems value="#{consultaOrcamentoMetaBean.empresaSelect}" /> 
+					</p:selectOneMenu>
+				</h:panelGroup>	
+				<h:panelGroup>
+					<h:outputLabel value="Grupo:" for="grupoOrcamentoIdFilter"/><br/>
+			        <p:selectOneMenu  id="grupoOrcamentoIdFilter" value="#{consultaOrcamentoMetaBean.orcamentoGrupoFilter}" filter="true" autoWidth="true">
+						<f:selectItem itemLabel="Todos" itemValue="#{null}" />  
+						<f:selectItems value="#{consultaOrcamentoMetaBean.orcamentoGrupoSelect}" /> 
+					</p:selectOneMenu>
+				</h:panelGroup>
+				<h:panelGroup>
+				<h:outputLabel value=" " /><br/>
+				<p:commandButton id="btnBuscarConsulta" value="Buscar"
+								actionListener="#{consultaOrcamentoMetaBean.buscar}"
+								update="@form :listaConsOrcamentoMeta" icon="icon-search"
+								 />
+				</h:panelGroup>				 	
+				<h:panelGroup>
+					<h:outputLabel value=" " /><br/>
+					<p:commandButton 
+									 id="btnLimparConsultaMeta" 
+									 value="Limpar"
+									 action="#{consultaOrcamentoMetaBean.limpar}"
+									 update="@form :listaConsOrcamentoMeta "
+									 icon="ui-icon-close" 
+								 />	
+				</h:panelGroup>				
+				</p:panelGrid>
+				</div>
+			</p:panel>
+
+		</h:form>
+
+		<h:form id="listaConsOrcamentoMeta">
+				<div class="ui-datatable ui-widget">
+					<table role="grid" style="overflow-x: auto"  >
+							<tr class="table-striped">
+								<td class="ui-state-default" style="width:200px;"><b>Grupo Orçamento</b></td>
+								<td class="ui-state-default" style="width:80px;"></td>
+								<td class="ui-state-default" align="center" style="width:80px;"><b>JAN</b></td>
+								<td class="ui-state-default" align="center" style="width:80px;"><b>FEV</b></td>
+								<td class="ui-state-default" align="center" style="width:80px;"><b>MAR</b></td>
+								<td class="ui-state-default" align="center" style="width:80px;"><b>ABR</b></td>
+								<td class="ui-state-default" align="center" style="width:80px;"><b>MAI</b></td>
+								<td class="ui-state-default" align="center" style="width:80px;"><b>JUN</b></td>
+								<td class="ui-state-default" align="center" style="width:80px;"><b>JUL</b></td>
+								<td class="ui-state-default" align="center" style="width:80px;"><b>AGO</b></td>
+								<td class="ui-state-default" align="center" style="width:80px;"><b>SET</b></td>
+								<td class="ui-state-default" align="center" style="width:80px;"><b>OUT</b></td>
+								<td class="ui-state-default" align="center" style="width:80px;"><b>NOV</b></td>
+								<td class="ui-state-default" align="center" style="width:80px;"><b>DEZ</b></td>
+								<td class="ui-state-default" align="center" style="width:80px;"><b>ANO</b></td>
+							</tr>
+							<p:repeat var="consOrcamentoMetaItens" value="#{consultaOrcamentoMetaBean.listaItens}" >
+							<tr>
+								<td rowspan="3">#{consOrcamentoMetaItens.descOrcamentoGrupo}</td>
+								<td align="center">
+									<h:outputLabel value="Previsto" />
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.prevJan}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.prevJan>0}" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>									
+									
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.prevFev}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.prevFev>0}" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.prevMar}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.prevMar>0}" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.prevAbr}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.prevAbr>0}" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.prevMai}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.prevMai>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+									
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.prevJun}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.prevJun>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.prevJul}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.prevJul>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.prevAgo}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.prevAgo>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.prevSet}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.prevSet>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.prevOut}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.prevOut>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.prevNov}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.prevNov>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.prevDez}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.prevDez>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.prevTotal}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.prevTotal>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+							</tr>
+							<tr>
+								<td  align="center">
+									<h:outputLabel value="Realizado" />
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.fatJan}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.fatJan>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.fatFev}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.fatFev>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.fatMar}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.fatMar>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.fatAbr}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.fatAbr>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.fatMai}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.fatMai>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.fatJun}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.fatJun>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.fatJul}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.fatJul>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.fatAgo}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.fatAgo>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.fatSet}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.fatSet>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.fatOut}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.fatOut>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.fatNov}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.fatNov>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.fatDez}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.fatDez>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>	
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.fatTotal}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.fatTotal>0}" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>	
+								</td>
+							</tr>
+							<tr>
+								<td class="ui-state-" align="center">
+									<h:outputLabel value="(%)" />
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consOrcamentoMetaItens.percJan)}" align="right" >
+									<h:outputLabel value="#{consOrcamentoMetaItens.percJan}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.percJan>0}" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consOrcamentoMetaItens.percFev)}" align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.percFev}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.percFev>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consOrcamentoMetaItens.percMar)}" align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.percMar}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.percMar>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consOrcamentoMetaItens.percAbr)}" align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.percAbr}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.percAbr>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consOrcamentoMetaItens.percMai)}" align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.percMai}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.percMai>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consOrcamentoMetaItens.percJun)}" align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.percJun}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.percJun>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consOrcamentoMetaItens.percJul)}" align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.percJul}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.percJul>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consOrcamentoMetaItens.percAgo)}" align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.percAgo}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.percAgo>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consOrcamentoMetaItens.percSet)}" align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.percSet}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.percSet>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consOrcamentoMetaItens.percOut)}" align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.percOut}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.percOut>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consOrcamentoMetaItens.percNov)}" align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.percNov}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.percNov>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consOrcamentoMetaItens.percDez)}" align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.percDez}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.percDez>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consOrcamentoMetaItens.prevTotal)}" align="right">
+									<h:outputLabel value="#{consOrcamentoMetaItens.prevTotal}" converter="currencyFormat" rendered="#{consOrcamentoMetaItens.prevTotal>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+							</tr> 
+							</p:repeat>
+							<ui:fragment rendered="#{not empty consultaOrcamentoMetaBean.listaItens}" >
+							<tr style="font-weight: bold;">
+								<td rowspan="3"><b>TOTAL GERAL</b></td>
+								<td align="center">
+									<h:outputLabel value="Previsto" />
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.prevTotJan}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.prevTotJan>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>									
+									
+								</td> 
+								<td  align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.prevTotFev}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.prevTotFev>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.prevTotMar}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.prevTotMar>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.prevTotAbr}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.prevTotMai>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.prevTotMai}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.prevTotJun>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+									
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.prevTotJun}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.prevTotJun>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.prevTotJul}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.prevTotJul>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.prevTotAgo}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.prevTotAgo>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.prevTotSet}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.prevTotSet>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.prevTotOut}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.prevTotOut>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.prevTotNov}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.prevTotNov>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.prevTotDez}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.prevTotDez>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.prevTotAno}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.prevTotAno>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+							</tr>
+							<tr style="font-weight: bold;">
+								<td  align="center">
+									<h:outputLabel value="Realizado" />
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.fatTotJan}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.fatTotJan>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.fatTotFev}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.fatTotFev>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.fatTotMar}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.fatTotMar>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.fatTotAbr}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.fatTotAbr>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.fatTotMai}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.fatTotMai>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.fatTotJun}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.fatTotJun>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.fatTotJul}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.fatTotJul>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.fatTotAgo}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.fatTotAgo>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.fatTotSet}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.fatTotSet>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.fatTotOut}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.fatTotOut>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.fatTotNov}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.fatTotNov>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.fatTotDez}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.fatTotDez>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>	
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.fatTotAno}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.fatTotAno>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>	
+								</td>
+							</tr>
+							<tr style="font-weight: bold;">
+								<td class="ui-state-" align="center">
+									<h:outputLabel value="(%)" />
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consultaOrcamentoMetaBean.percTotJan)}" align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.percTotJan}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.percTotJan>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consultaOrcamentoMetaBean.percTotFev)}" align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.percTotFev}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.percTotFev>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consultaOrcamentoMetaBean.percTotMar)}" align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.percTotMar}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.percTotMar>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consultaOrcamentoMetaBean.percTotAbr)}" align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.percTotAbr}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.percTotAbr>0}" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consultaOrcamentoMetaBean.percTotMai)}" align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.percTotMai}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.percTotMai>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consultaOrcamentoMetaBean.percTotJun)}" align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.percTotJun}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.percTotJun>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consultaOrcamentoMetaBean.percTotJul)}" align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.percTotJul}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.percTotJul>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consultaOrcamentoMetaBean.percTotAgo)}" align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.percTotAgo}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.percTotAgo>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consultaOrcamentoMetaBean.percTotSet)}" align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.percTotSet}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.percTotSet>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consultaOrcamentoMetaBean.percTotOut)}" align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.percTotOut}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.percTotOut>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consultaOrcamentoMetaBean.percTotNov)}" align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.percTotNov}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.percTotNov>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consultaOrcamentoMetaBean.percTotDez)}" align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.percTotDez}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.percTotDez>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+								<td class="#{consultaOrcamentoMetaBean.styloTotais(consultaOrcamentoMetaBean.percTotAno)}" align="right">
+									<h:outputLabel value="#{consultaOrcamentoMetaBean.percTotAno}" converter="currencyFormat" rendered="#{consultaOrcamentoMetaBean.percTotAno>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>	
+								</td>
+							</tr> 
+							</ui:fragment>
+					</table>
+				</div>
+		</h:form>
+		
+		<script>
+			//$('#edicaoOrcamentoMeta\\:panelOrcamentoMeta').hide();
+			//$('#formOrcamentoMetaBuscar\\:panelFilterOrcamentoMetaBean').hide();
+		</script>
+		
+</ui:composition> 

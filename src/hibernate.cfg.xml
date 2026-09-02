@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC 
+    "-//Hibernate/Hibernate Configuration DTD//EN"
+    "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+	<hibernate-configuration> 
+	    <session-factory>
+	    
+	    
+	    	<!--  Descomnetar para poder fazer deploy --> 
+		  	<property name="hibernate.dialect">org.hibernate.dialect.FirebirdDialect</property> 
+			<property name="connection.datasource">java:/comp/env/jdbc/TriviaFLoja</property>  
+				
+			
+		    <!--  bd localhost   
+	  		<property name="dialect">org.hibernate.dialect.FirebirdDialect</property>
+	        <property name="connection.driver_class">org.firebirdsql.jdbc.FBDriver</property>
+	        <property name="connection.url">jdbc:firebirdsql:localhost/3050:C:\Program Files\Trivia\Data\TRIVIA.FDB?lc_ctype=UNICODE_FSS</property>
+	        <property name="connection.username">SYSDBA</property>
+	        <property name="connection.password">masterkey</property>
+		  	 -->
+		    
+	        <property name="current_session_context_class">thread</property>        
+	        <property name="cache.provider_class">org.hibernate.cache.NoCacheProvider</property>
+			<property name="hibernate.hbm2ddl.auto">none</property> <!-- create | validate | update | none -->
+			<property name="show_sql">true</property>
+			
+			<!-- <mapping class="br.com.webapp.model.fb.usuario.UsuarioFB" /> --> <!-- Concluído -->
+			<!-- <mapping class="br.com.webapp.model.fb.empresa.EmpresaFB" /> --> <!-- Concluído -->
+			<!-- <mapping class="br.com.webapp.model.fb.vendedor.VendedorFB" /> --> <!-- Concluído -->
+			<mapping class="br.com.webapp.model.fb.cliente.ClienteFB" />
+			<mapping class="br.com.webapp.model.fb.produto.Produto" />
+			<mapping class="br.com.webapp.model.fb.produtolinha.ProdutoLinhaFB" />
+			<mapping class="br.com.webapp.model.fb.produtocb.ProdutoCBFB" />
+			
+			
+			<!-- <mapping class="br.com.webapp.model.fb.fretetipo.FreteTipoFB" /> --> <!-- Concluído, precisa ver essa entidade -->
+			<!-- <mapping class="br.com.webapp.model.fb.movfisctipo.MovFiscTipoFB" /> --> <!-- Concluído, entidade nao aparece na tela -->
+			<!-- <mapping class="br.com.webapp.model.fb.condpagto.CondPagtoFB" /> --> <!-- Concluído -->
+			<!-- <mapping class="br.com.webapp.model.fb.formapagto.FormaPagtoFB" /> --> <!-- Concluído -->
+			<!-- <mapping class="br.com.webapp.model.fb.pedvenda.PedVendaFB"/> -->  <!-- Concluído -->
+			<!-- <mapping class="br.com.webapp.model.fb.pedvenda.PedVendaItemFB"/> -->  <!-- Concluído -->
+			<mapping class="br.com.webapp.model.fb.pedvenda.diverg.PedVendaDivergFB"/>
+			<!-- <mapping class="br.com.webapp.model.fb.pedvendaitem.dto.PedVendaItemFBDTO"/> -->
+			<mapping class="br.com.webapp.model.fb.reserva.ReservaFB"/>
+			<mapping class="br.com.webapp.model.fb.reservalote.ReservaLoteFB"/>
+			<mapping class="br.com.webapp.model.fb.reservafila.ReservaFilaFB"/>
+			<!-- <mapping class="br.com.webapp.model.fb.cobrtipo.CobrTipoFB"/> --> <!-- Concluído -->
+			<!-- <mapping class="br.com.webapp.model.fb.tabpreco.TabPrecoFB"/> --> <!-- Concluído -->
+			<!-- <mapping class="br.com.webapp.model.fb.produto.ProdutoFB"/> -->  <!-- Concluído -->
+			<!-- <mapping class="br.com.webapp.model.fb.produto.ProdutoEstoqueFB"/> -->  <!-- Concluído -->
+			<mapping class="br.com.webapp.model.fb.tabpreco.TabPrecoFB"/>
+			<mapping class="br.com.webapp.model.fb.pedvendastatus.PedVendaStatusFB"/>
+			<mapping class="br.com.webapp.model.fb.pedvenda.dto.PedVendaFBDTO"/>
+			<!-- <mapping class="br.com.webapp.model.fb.enderecotipo.EnderecoTipoFB"/> --> <!-- Concluído -->
+			<!-- <mapping class="br.com.webapp.model.fb.pais.PaisFB"/> --> <!-- Concluído -->
+			<!-- <mapping class="br.com.webapp.model.fb.estado.EstadoFB"/> --> <!-- Concluído -->
+			<!-- <mapping class="br.com.webapp.model.fb.municipio.MunicipioFB"/> -->	<!-- Concluído -->
+			<!-- <mapping class="br.com.webapp.model.fb.alcadacondpagto.AlcadaCondPagtoFB"/> --> <!-- Concluído -->
+			<!-- <mapping class="br.com.webapp.model.fb.telefonetipo.TelefoneTipoFB"/> --><!-- Concluído -->
+			<!-- <mapping class="br.com.webapp.model.fb.gestaovenda.GestaoVendaFB"/> -->	<!-- Concluído -->
+			<!-- <mapping class="br.com.webapp.model.fb.alcadacondpagto.dto.AlcadaCondPagtoFBDTO"/> -->		<!-- Concluído -->
+			
+			<!-- No modelo nao addscalar os @Transient -->
+			
+			<mapping class="br.com.coletor.model.UsuarioColetor"/>
+	        <mapping class="br.com.coletor.model.EmpresaColetor"/>
+	        <mapping class="br.com.coletor.model.ProdutoColetor"/>
+	        <mapping class="br.com.coletor.model.ColetorInv"/>
+	        <mapping class="br.com.coletor.model.ColetorInvContagem"/>
+	        <mapping class="br.com.coletor.model.ColetorPlanilhaCega"/>
+	        <mapping class="br.com.coletor.model.ColetorPlanilhaCegaItem"/>
+	        <mapping class="br.com.coletor.model.ColetorPlanilhaCegaContagem"/>
+	        <mapping class="br.com.coletor.model.ColetorOrdSep"/>
+	        <mapping class="br.com.coletor.model.ColetorOrdSepItem"/>
+	        <mapping class="br.com.coletor.model.ColetorOrdSepItemContagem"/>
+	        <mapping class="br.com.coletor.model.ColetorOrdSepLote"/>
+	        
+	        <mapping class="br.com.coletor.model.ColetorRomaneio"/>
+	        <mapping class="br.com.coletor.model.ColetorRomaneioItem"/>
+	        <mapping class="br.com.coletor.model.ColetorRomaneioContagem"/>
+	        <mapping class="br.com.coletor.model.dto.ColetorRomaneioResumoDTO"/>
+	        <mapping class="br.com.coletor.model.dto.ColetorRomaneioCorteDTO"/>
+	        
+	        <mapping class="br.com.coletor.model.ColetorSeparacao"/>
+	        <mapping class="br.com.coletor.model.ColetorSeparador"/>
+			
+	    </session-factory>
+	</hibernate-configuration> 

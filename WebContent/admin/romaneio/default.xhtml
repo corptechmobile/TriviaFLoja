@@ -1,0 +1,219 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+	<div class="tab-content-space">
+		<div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+		<f:metadata>
+			<f:viewAction action="#{romaneioBean.clearSession}" />
+		</f:metadata>
+
+		<!-- Filtro -->
+		<h:form id="consultaRomaneio">
+
+			<p:growl id="msg" showDetail="true" life="3000" />
+			<p:focus context="panelFiltroRomaneio" />
+			<p:defaultCommand target="btnBuscar" />
+
+			<p:toolbar id="tb">
+
+				<f:facet name="right">
+					<p:commandButton id="menuHome" icon="ui-icon-home"
+						action="#{romaneioBean.addHome}" update="@form:msg"
+						process="@this" title="Home" />
+					<p:commandButton icon="ui-icon-star"
+						actionListener="#{romaneioBean.addFavoritos}"
+						update="@form:msg" process="@this" title="Favoritos"
+						oncomplete="updateMenuHome();" />
+				</f:facet>
+			</p:toolbar>
+
+			<p:panel id="panelFiltroRomaneio"
+				widgetVar="panelFiltroRomaneio" closable="true">
+				<div class="ui-fluid">
+					<p:panelGrid columns="9"
+						columnClasses="ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-1, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0"
+						layout="grid" styleClass="ui-panelgrid-blank">
+
+						<p:inputText id="numProcTranspFilter"
+							value="#{romaneioBean.numProcTranspFilter}" placeholder="Proc. Transp"
+							size="10" decimalPlaces="0" decimalSeparator=""
+							thousandSeparator="" />
+
+						<p:inputText id="numRomaneioFilter"
+							value="#{romaneioBean.numRomaneioFilter}" placeholder="ID"
+							size="10" decimalPlaces="0" decimalSeparator=""
+							thousandSeparator="" />
+
+						<p:inputText id="produtoFilter"
+							value="#{romaneioBean.produtoFilter}"
+							placeholder="Produto / Descrição / Código Interno" />
+
+							<p:calendar id="data1Filter"
+								value="#{romaneioBean.data1Filter}" pattern="dd/MM/yyyy"
+								size="10" mask="99/99/9999" label="Data"
+								converterMessage="Data inválida" />
+				        
+					        <p:calendar id="data2Filter" 
+									value="#{romaneioBean.data2Filter}" pattern="dd/MM/yyyy"
+									size="10" mask="99/99/9999" label="Data"
+									converterMessage="Data inválida" />
+
+						<p:selectCheckboxMenu multiple="true" label="Status"  id="status" value="#{romaneioBean.situacaoFilter}" filter="false" autoWidth="true">
+							<f:selectItem itemValue="0" itemLabel="Em Aberto"/>
+							<f:selectItem itemValue="1" itemLabel="Em Conferência"/>
+							<f:selectItem itemValue="2" itemLabel="Conferido"/>
+							<f:selectItem itemValue="3" itemLabel="Conferido com Corte"/>
+							<f:selectItem itemValue="4" itemLabel="Finalizado"/>
+							<f:selectItem itemValue="5" itemLabel="Cancelado"/>
+						</p:selectCheckboxMenu>
+												
+						<p:commandButton id="btnBuscar" value="Buscar"
+							actionListener="#{romaneioBean.buscar}"
+							update="@form :listagemRomaneio" icon="icon-search" />
+
+						 <p:commandButton 
+									 id="btnLimpar" 
+									 value="Limpar"
+									 action="#{romaneioBean.limpar}"
+									 update="@form :listagemRomaneio"
+									 icon="ui-icon-close" 
+									 />
+
+						<h:commandLink rendered="#{not empty romaneioBean.lista}">
+							<p:graphicImage library="images" name="excel16x16.png" />
+							<p:dataExporter type="xls"
+								target=":listagemRomaneio:dtRomaneio"
+								fileName="Romaneio" />
+						</h:commandLink>
+
+					</p:panelGrid>
+				</div>
+			</p:panel>
+
+			<p:sticky target="tb" margin="50" />
+
+		</h:form>
+        
+       
+				<!-- Listagem -->
+		<h:form id="listagemRomaneio">
+
+			<p:blockUI block="dtRomaneio"
+				widgetVar="bUIDataTableRomaneio">
+			LOADING<br />
+				<p:graphicImage library="images" name="progress_bar.gif" />
+			</p:blockUI>
+
+			<p:dataTable id="dtRomaneio" var="romaneio"
+				value="#{romaneioBean.lista}"
+				emptyMessage="Nenhum registro encontrado" rows="20" paginator="true"
+				paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+				rowsPerPageTemplate="10,20,40" reflow="true">
+
+				<p:column sortBy="#{romaneio.romaneioId}" styleClass="customCollumnId">
+					<f:facet name="header">Romaneio</f:facet>
+					<h:outputText value="#{romaneio.romaneioId}" />
+				</p:column>
+				
+				<p:column sortBy="#{romaneio.procTranspId}" styleClass="customCollumnId">
+					<f:facet name="header">Proc. Transp</f:facet>
+					<h:outputText value="#{romaneio.procTranspId}" />
+				</p:column>
+
+				<p:column sortBy="#{romaneio.momentoGer}"
+					styleClass="customCollumnDataHora">
+					<f:facet name="header">Geração</f:facet>
+					<h:outputText value="#{romaneio.momentoGer}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</h:outputText>
+				</p:column>
+
+				<p:column sortBy="#{romaneio.momentoConf}"
+					styleClass="customCollumnDataHora">
+					<f:facet name="header">Conferência</f:facet>
+					<h:outputText value="#{romaneio.momentoConf}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</h:outputText>
+				</p:column>
+
+				<p:column sortBy="#{romaneio.momentoFinalizado}"
+					styleClass="customCollumnDataHora">
+					<f:facet name="header">Finalização</f:facet>
+					<h:outputText value="#{romaneio.momentoFinalizado}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</h:outputText>
+				</p:column>
+				
+				<p:column sortBy="#{romaneio.momentoCanc}"
+					styleClass="customCollumnDataHora">
+					<f:facet name="header">Cancelado</f:facet>
+					<h:outputText value="#{romaneio.momentoCanc}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</h:outputText>
+				</p:column>
+ 				
+				
+				<p:column sortBy="#{romaneio.status}"
+					styleClass="customCollumnId">
+					<f:facet name="header">Situação</f:facet>
+					
+					<h:outputText rendered="#{romaneio.status=='0'}" value="Em Aberto" styleClass="tx_bold"/>
+						<h:outputText rendered="#{romaneio.status=='1'}" value="Em conferência" styleClass="tx_bold"/>
+						<h:outputText rendered="#{romaneio.status=='2'}" value="Conferido" styleClass="tx_bold"/>
+						<h:outputText rendered="#{romaneio.status=='3'}" value="Conferido com Corte" styleClass="tx_bold"/>
+						<h:outputText rendered="#{romaneio.status=='4'}" value="Finalizado" styleClass="tx_bold"/>
+						<h:outputText rendered="#{romaneio.status=='5'}" value="Cancelado" styleClass="tx_bold"/>
+				</p:column>
+
+
+
+				<p:column styleClass="customCollumn2Icon" exportable="false">
+					<f:facet name="header"></f:facet>
+					<p:commandButton action="#{romaneioGerenciarBean.gerenciar}"
+						update="@none" process="@this" icon="ui-icon-gear"
+						title="Gerenciar"
+						onstart="closeTab('romaneioBean');"
+						oncomplete="openTab('romaneioBean', 'Romaneio - #{romaneio.romaneioId}', 'Romaneio - #{romaneio.romaneioId}', 'romaneio/gerenciar.jsf')"
+						rendered="true">				
+						<f:setPropertyActionListener
+							target="#{romaneioGerenciarBean.selecionada}" value="#{null}" />
+						<f:setPropertyActionListener
+							target="#{romaneioGerenciarBean.selecionadaId}"
+							value="#{romaneio.romaneioId}" />
+					</p:commandButton>
+
+					<p:commandButton action="#{romaneioBean.excluir}"
+						update=":consultaRomaneio:msg @form" icon="ui-icon-trash"
+						oncomplete="closeEdicaoRomaneio()"
+						rendered="#{romaneio.status!='2'}"
+						title="Excluir">
+						<f:setPropertyActionListener
+							target="#{romaneioBean.selecionadaId}" value="#{romaneio.romaneioId}" />
+						<p:confirm header="Excluir"
+							message="Confirma a Exclusão de TODAS as leituras?"
+							icon="ui-icon-alert" />
+					</p:commandButton>
+				</p:column>
+				
+			
+			</p:dataTable>
+			<p:toolbar>
+				<f:facet name="right">
+		        	Total: #{romaneioBean.lista.size()}
+		        </f:facet>
+			</p:toolbar>
+
+		</h:form>
+		
+	</div>
+    <script>
+			function closeEdicaoRomaneio() {
+				$('#edicaoRomaneio\\:panelRomaneio').hide();
+			}	
+			closeEdicaoRomaneio();
+	</script>
+	
+</ui:composition>

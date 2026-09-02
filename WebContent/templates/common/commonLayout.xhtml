@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      >
+
+	<h:head>
+	
+	<title>TRIVIA MOBILE</title>
+	
+
+		<h:outputStylesheet library="css" name="common-style.css" />
+		<h:outputStylesheet library="css" name="table-style.css"  />
+		<h:outputStylesheet library="css" name="tabs.css"  />
+		
+		<!--  
+    	<h:outputStylesheet library="jquery/development-bundle/themes/base/" name="jquery.ui.core.css" />
+    	<h:outputStylesheet library="jquery/development-bundle/themes/base/" name="jquery.ui.resizable.css" />
+    	<h:outputStylesheet library="jquery/development-bundle/themes/base/" name="jquery.ui.accordion.css" />
+    	<h:outputStylesheet library="jquery/development-bundle/themes/base/" name="jquery.ui.autocomplete.css" />
+    	<h:outputStylesheet library="jquery/development-bundle/themes/base/" name="jquery.ui.button.css" />
+    	<h:outputStylesheet library="jquery/development-bundle/themes/base/" name="jquery.ui.dialog.css" />
+    	<h:outputStylesheet library="jquery/development-bundle/themes/base/" name="jquery.ui.slider.css" />
+    	<h:outputStylesheet library="jquery/development-bundle/themes/base/" name="jquery.ui.tabs.css" /> 	
+    	<h:outputStylesheet library="jquery/development-bundle/themes/base/" name="jquery.ui.theme.css" />
+		
+		<h:outputScript library="jquery/development-bundle/" name="jquery-1.4.2.js" target="head" />
+		<h:outputScript library="jquery/development-bundle/ui/" name="jquery.ui.core.js" target="head" />
+		<h:outputScript library="jquery/development-bundle/ui/" name="jquery.ui.widget.js" target="head" />
+		<h:outputScript library="jquery/development-bundle/ui/" name="jquery.ui.mouse.js" target="head" />
+		<h:outputScript library="jquery/development-bundle/ui/" name="jquery.ui.slider.js" target="head" />
+		<h:outputScript library="jquery/development-bundle/ui/" name="jquery.ui.accordion.js" target="head" />
+		<h:outputScript library="jquery/development-bundle/ui/" name="jquery.ui.button.js" target="head" />
+		<h:outputScript library="jquery/development-bundle/ui/" name="jquery.ui.tabs.js" target="head" />
+		<h:outputScript library="jquery/development-bundle/ui/" name="jquery.ui.position.js" target="head" />
+		<h:outputScript library="jquery/development-bundle/ui/" name="jquery.ui.dialog.js" target="head" />
+		<h:outputScript library="jquery/development-bundle/ui/" name="jquery.ui.datepicker.js" target="head" />
+		<h:outputScript library="jquery/development-bundle/ui/" name="jquery.ui.autocomplete.js" target="head" />
+		<h:outputScript library="jquery" name="principal.js" target="head" />
+		-->
+
+	</h:head>
+    
+    <h:body>
+ 
+	<div id="page">
+		
+		<div id="header">
+			<ui:insert name="header" >
+				 <ui:include src="/templates/common/commonHeader.xhtml" />
+			</ui:insert>
+	    </div>
+	    
+	    <div id="menu">
+			<ui:insert name="menu" >
+				 <ui:include src="/templates/common/menuContent.xhtml" />
+			</ui:insert>
+	    </div>
+	    	    
+	    <div id="content">
+	    	<div style="padding: 0px;">
+		    	
+		    		<!-- <ui:insert name="titulo" ></ui:insert> -->
+		    		
+			       	<ui:insert name="content" >
+				   		<ui:include src="/templates/common/commonContent.xhtml" />
+				   	</ui:insert>
+			   	
+		   	</div>
+	    </div>
+		    
+	    <div id="footer">
+	    	<ui:insert name="footer" >
+	    		<!-- <ui:include src="/templates/common/commonFooter.xhtml" /> -->
+	    	</ui:insert>
+    	</div>
+    	
+    </div>
+    
+    </h:body>
+
+</html>

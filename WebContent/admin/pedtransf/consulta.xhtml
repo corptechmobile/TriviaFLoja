@@ -1,0 +1,287 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+   	 
+   	<div class="tab-content-space">
+    
+    	<div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+    	<f:metadata>
+	      <f:viewAction action="#{pedTransfConsultaBean.clearSession}"/>
+	    </f:metadata>
+    
+	    <!-- Filtro -->
+	     <h:form id="formPedTransfConsulta">
+	     
+	     	<p:growl id="msg" showDetail="true" life="3000"/>
+	     	<p:focus context="panelFiltroPedTransfConsulta"/>
+	    	<p:defaultCommand target="btnBuscar" />
+	    	
+	    	<p:toolbar id="tb">
+	    		<f:facet name="left"> 
+	    			
+	    			<!-- <p:menuButton value="Novo" rendered="false">
+				        <p:menuitem value="Pedido" actionListener="#{pedTransfNovoBean.novoPedVendaNormal}" update="@none" icon="icon-new" onstart="closeTab('pedTransfNovoBean')" oncomplete="openTab('pedTransfNovoBean', 'Pedido / Novo', 'Pedido / Novo', 'pedtransf/novo.jsf?id=1')"/>
+				        <p:menuitem value="Encomenda" actionListener="#{pedTransfNovoBean.novoPedVendaEncomenda}" update="@none" icon="icon-new" onstart="closeTab('pedTransfNovoBean')" oncomplete="openTab('pedTransfNovoBean', 'Encomenda / Novo', 'Encomenda / Novo', 'pedtransf/novo.jsf?id=1')"/>
+				        <p:menuitem value="Composto" actionListener="#{pedTransfNovoBean.novoPedVendaProdComposto}" ajax="@none" icon="icon-new" onstart="closeTab('pedTransfNovoBean')" oncomplete="openTab('pedTransfNovoBean', 'Composto / Novo', 'Composto / Novo', 'pedtransf/novo.jsf?id=1')"/>
+				    </p:menuButton> -->
+				    
+		            <p:commandButton value="Novo" 
+									 actionListener="#{pedTransfNovoBean.novoPedTransf}"
+									 update="@none"
+									 process="@this"
+									 icon="icon-new"
+									 onstart="closeTab('pedTransfNovoBean')" 
+									 oncomplete="openTab('pedTransfNovoBean', 'Pedido / Novo', 'Pedido / Novo', 'pedtransf/novo.jsf?id=1')"
+									 />
+									 
+	       		</f:facet>
+		        <f:facet name="right">
+			        <p:commandButton id="menuHome" icon="ui-icon-home" actionListener="#{pedTransfConsultaBean.addHome}" update="@form:msg" process="@this" title="Home" />
+			        <p:commandButton icon="ui-icon-star" actionListener="#{pedTransfConsultaBean.addFavoritos}" update="@form:msg" process="@this" title="Favoritos" oncomplete="updateMenuHome();" />
+	        	</f:facet>
+		    </p:toolbar>
+		    
+		    <p:sticky target="tb" margin="50"/>
+		    
+		    <p:panel id="panelFiltroPedTransfConsulta" widgetVar="panelFiltroPedTransfConsulta" >
+		    	<div class="ui-fluid">
+		    	<div class="ui-g">
+		    	
+		    		<div class="ui-g-6 ui-md-2 ui-lg-0">
+		    			<h:outputLabel for="numPedidoFilter" value="N.Pedido:"/> <br/>
+						<p:inputNumber id="numPedidoFilter" value="#{pedTransfConsultaBean.numPedidoFilter}" placeholder="" style="width:100%;" decimalSeparator="" thousandSeparator="" decimalPlaces="0" >
+							<f:convertNumber maxFractionDigits="0" minFractionDigits="0"  />
+						</p:inputNumber>
+					</div>
+					
+        			<ui:fragment rendered="#{contextoBean.empresaFilter}">
+        			<div class="ui-g-6 ui-md-2 ui-lg-0">
+						<h:outputLabel for="empresa" value="Empresa: "/> <br/>
+				        <p:selectOneMenu  id="empresa" value="#{pedTransfConsultaBean.empresaFilter}" filter="false" autoWidth="true">
+							<f:selectItem itemValue="" itemLabel="Todos"/>
+							<f:selectItems value="#{pedTransfConsultaBean.empresasSelect}" /> 
+						</p:selectOneMenu>
+					</div>
+					</ui:fragment>
+					<ui:fragment rendered="#{contextoBean.vendedorFilter}">
+					<div class="ui-g-6 ui-md-3 ui-lg-0">
+						<h:outputLabel for="vendedorCreateSelect" value="Vendedor:"/> <br />
+						<p:autoComplete id="vendedorCreateSelect" dropdown="true" scrollHeight="200"
+										queryDelay="1000"
+										minQueryLength="3" 
+										completeMethod="#{pedTransfConsultaBean.completeVendedor}" 
+										value="#{pedTransfConsultaBean.vendedorFilter}" 
+										var="ven" 
+										itemLabel="#{ven.nomeFantasia}" 
+										itemValue="#{ven}" 
+										converter="vendedorFBConverter" 
+										forceSelection="true"
+										emptyMessage="Nenhum Vendedor encontrado"
+										placeholder="Vendedor">
+										
+							<p:ajax event="itemSelect" listener="#{pedTransfConsultaBean.closeFilterVendedor}" update="@this"/> 
+							
+							<p:column>
+								<h:outputText value="#{ven.id}"/> <br/>
+								<h:outputText value="#{ven.nomeFantasia}"/>
+							</p:column>
+							
+						</p:autoComplete>
+					</div>
+					</ui:fragment>
+					<div class="ui-g-6 ui-md-3 ui-lg-0">
+						<h:outputLabel for="clienteCreateSelect" value="Cliente:"/> <br />
+						<p:autoComplete id="clienteCreateSelect" dropdown="true" scrollHeight="200"
+										queryDelay="1000"
+										minQueryLength="3" 
+										completeMethod="#{pedTransfConsultaBean.completeCliente}"  
+										value="#{pedTransfConsultaBean.clienteFilter}" 
+										var="cli" 
+										itemLabel="#{cli.razaoSocial}" 
+										itemValue="#{cli}" 
+										converter="clienteFBConverter" 
+										forceSelection="true"
+										emptyMessage="Nenhum Cliente encontrado"
+										placeholder="Cliente">
+										
+							<p:ajax event="itemSelect" listener="#{pedTransfConsultaBean.closeFilterCliente}" update="@this"/> 
+							
+							<p:column>
+								<h:outputText value="#{cli.cnpjCpf}" rendered="#{cli.tipoPessoa == 'J' or cli.tipoPessoa == 'O'}" converter="converter.CNPJConverter" styleClass="tx_bold" />
+								<h:outputText value="#{cli.cnpjCpf}" rendered="#{cli.tipoPessoa == 'F'}" converter="converter.CPFConverter" styleClass="tx_bold"/><br/>
+								<h:outputText value="#{cli.razaoSocial}" />
+							</p:column>
+							
+						</p:autoComplete>
+					</div>
+					<div class="ui-g-6 ui-md-2 ui-lg-0">
+					<h:panelGroup>
+						<h:outputLabel for="status" value="Status"/> <br />
+						<p:selectOneMenu  id="status" value="#{pedTransfConsultaBean.statusFilter}" filter="false" autoWidth="true">
+							<f:selectItem itemValue="" itemLabel="Todos"/>
+							<f:selectItems value="#{pedTransfConsultaBean.statusSelect}" /> 
+						</p:selectOneMenu>
+					</h:panelGroup>
+					</div>
+				</div>
+				
+        		<div class="ui-g">
+        			
+        			<div class="ui-g-0 ui-md-0 ui-lg-0">
+        				<p:outputLabel for="carteira" value="Pedidos em carteira: " />
+	        			<p:selectBooleanCheckbox id="carteira" value="#{pedTransfConsultaBean.carteiraFilter}"/>
+        			</div>
+	     			<div class="ui-g-0 ui-md-0 ui-lg-0">
+	        			<h:outputLabel for="desPeriodo" value="Desconsiderar período: " />
+		        		<p:selectBooleanCheckbox id="desPeriodo" value="#{pedTransfConsultaBean.desconsPeriodoFilter}">
+		        			<p:ajax update="@form"/>
+		        		</p:selectBooleanCheckbox>
+	        		</div>
+	        		<div class="ui-g-0 ui-md-0 ui-lg-0">
+						<p:panelGrid columns="4" styleClass="ui-panelgrid-blank" rendered="#{pedTransfConsultaBean.desconsPeriodoFilter == false}">
+							<p:selectOneMenu id="tipoData" value="#{pedTransfConsultaBean.tipoDataFilter}" rendered="#{pedTransfConsultaBean.desconsPeriodoFilter == false}" autoWidth="true">
+								<f:selectItem itemValue="entrada" itemLabel="Entrada"/>
+								<f:selectItem itemValue="efetivacao" itemLabel="Efetivação"/>
+								<f:selectItem itemValue="conclusao" itemLabel="Conclusão"/>
+							</p:selectOneMenu>
+					        <p:calendar id="dataFilter1" value="#{pedTransfConsultaBean.dataFilter1}" pattern="dd/MM/yyyy" size="10" mask="99/99/9999" label="Data" converterMessage="Data inválida" />
+					        <h:outputLabel value=" à " />
+					        <p:calendar id="dataFilter2" value="#{pedTransfConsultaBean.dataFilter2}" pattern="dd/MM/yyyy" size="10" mask="99/99/9999" label="Data" converterMessage="Data inválida" />
+				        </p:panelGrid>
+			        </div>
+        		</div>
+		        
+		    	<div class="ui-g">
+	     			<div class="ui-g-0 ui-md-0 ui-lg-0">
+			    		<p:commandButton 
+							 id="btnBuscar"
+							 value="Buscar"
+							 actionListener="#{pedTransfConsultaBean.buscar}"
+							 update=":listagemPedTransfConsulta exportExcel"
+							 icon="icon-search"
+							 onclick="PF('bUIDataTablePedTransfConsulta').show()"
+							 />
+					</div>
+					<div class="ui-g-0 ui-md-0 ui-lg-0">	 
+						 <p:commandButton 
+							 id="btnLimpar" 
+							 value="Limpar"
+							 action="#{pedTransfConsultaBean.limpar}"
+							 update=" @form :listagemPedTransfConsulta "
+							 icon="ui-icon-close" 
+							 onclick="PF('bUIDataTablePedTransfConsulta').show()"
+							 />
+					</div>
+					<div class="ui-g-0 ui-md-0 ui-lg-0">	 
+						<h:panelGroup id="exportExcel"> 
+							<p:commandButton icon="icon-excel" disabled="#{empty pedTransfConsultaBean.lista}" title="Exportar para excel" ajax="false">
+					            <p:dataExporter type="xls" target=":listagemPedTransfConsulta:dtPedTransfConsulta" fileName="pedVendas"  />
+					        </p:commandButton>
+				    	</h:panelGroup>
+			    	</div>
+		    	</div>
+		    	</div>
+		    </p:panel>
+	     	
+	     </h:form>
+	   	
+	<!-- Listagem -->
+     <h:form id="listagemPedTransfConsulta">
+     
+     	<p:remoteCommand name="updatePedTransfExcluidaBean" update="@form :formPedTransfConsulta" actionListener="#{pedTransfConsultaBean.pedVendaExcluido}" />
+     	<p:remoteCommand name="updatePedTransfConsultaBean" update="@form" actionListener="#{pedTransfConsultaBean.buscar}" /> 
+     	
+     	<p:blockUI block="dtPedTransfConsulta" widgetVar="bUIDataTablePedTransfConsulta" trigger="dtPedTransfConsulta">
+			LOADING<br />
+        	<p:graphicImage library="images" name="progress_bar.gif"/>
+		</p:blockUI>
+		
+		<p:dataTable id="dtPedTransfConsulta" var="pedTransf" reflow="true" value="#{pedTransfConsultaBean.lista}" emptyMessage="Nenhum registro encontrado.">
+
+			<p:column sortBy="#{pedTransf.pedVendaId}" styleClass="customCollumnId" priority="1">
+				<f:facet name="header">Pedido</f:facet>
+				<h:outputText value="#{pedTransf.pedVendaId}" styleClass="tx_bold" />
+        	</p:column>
+        	
+        	<p:column sortBy="#{pedTransf.empresaDesc}" rendered="#{pedTransfConsultaBean.empresaFilter == null}" priority="3">
+        		<f:facet name="header">Empresa</f:facet>
+				<h:outputText value="#{pedTransf.empresaDesc}"/>
+        	</p:column>
+        	
+			<p:column sortBy="#{pedTransf.clienteDesc}" rendered="#{pedTransfConsultaBean.clienteFilter == null}" priority="1">
+				<f:facet name="header">Cliente</f:facet>
+				<h:outputText value="#{pedTransf.clienteDesc}" />
+        	</p:column>
+        	
+        	<p:column sortBy="#{pedTransf.condPagtoDesc}" styleClass="customCollumnDataHora" priority="5">
+				<f:facet name="header">Cond.Pagto</f:facet>
+				<h:outputText value="#{pedTransf.condPagtoDesc}" />
+        	</p:column>
+        	
+        	<p:column sortBy="#{pedTransf.vendedorDesc}" rendered="#{pedTransfConsultaBean.vendedorFilter == null}" priority="1">
+				<f:facet name="header">Vendedor</f:facet>
+				<h:outputText value="#{pedTransf.vendedorDesc}" />
+        	</p:column>
+        	
+        	<p:column sortBy="#{pedTransf.dtEntrada}" styleClass="customCollumnDataHora" priority="1">
+        		<f:facet name="header">Entrada</f:facet>
+   				<h:outputText value="#{pedTransf.dtEntrada}" >
+   					<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+   				</h:outputText>
+   			</p:column>
+   			
+   			<p:column sortBy="#{pedTransf.dtEfetivacao}" styleClass="customCollumnDataHora" priority="5">
+   				<f:facet name="header">Efetivação</f:facet>
+   				<h:outputText value="#{pedTransf.dtEfetivacao}" >
+   					<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+   				</h:outputText>
+   			</p:column>
+   			
+   			<p:column sortBy="#{pedTransf.dtConclusao}" styleClass="customCollumnDataHora" priority="5">
+   				<f:facet name="header">Conclusão</f:facet>
+   				<h:outputText value="#{pedTransf.dtConclusao}" >
+   					<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+   				</h:outputText>
+   			</p:column>
+   			
+   			<!-- <p:column headerText="Forma Pagamento" sortBy="#{pedTransf.formaPagtoDesc}">
+   				<h:outputText value="#{pedTransf.formaPagtoDesc}"/>
+   			</p:column> -->
+				
+			<p:column sortBy="#{pedTransf.pedVendaStatusDesc}" rendered="#{pedTransfConsultaBean.statusFilter == null}" priority="1" styleClass="customCollumnDataHora">
+				<f:facet name="header">Status</f:facet>
+				<h:outputText value="#{pedTransf.pedVendaStatusDesc}" />
+        	</p:column>	
+        	
+        	<p:column styleClass="customCollumnValor" sortBy="#{pedTransf.valor}" priority="1">
+        		<f:facet name="header">Valor</f:facet>
+	            <h:outputText value="#{pedTransf.valor}" styleClass="tx_bold" converter="currencyFormat"/>
+	        </p:column>
+	        
+	        <p:column styleClass="customCollumn1Icon" exportable="false" priority="1">
+				<f:facet name="header"></f:facet>
+				<p:commandButton action="#{pedTransfNovoBean.editar}"
+					update="@none" process="@this" icon="ui-icon-pencil" title="Editar"
+					onstart="closeTab('pedTransfNovoBean')" 
+					oncomplete="openTab('pedTransfNovoBean', '#{pedTransf.encomendaToString} / #{pedTransf.pedVendaId}', '#{pedTransf.encomendaToString} / #{pedTransf.pedVendaId}', 'pedtransf/novo.jsf?id=1')"
+					>
+					<f:setPropertyActionListener target="#{pedTransfNovoBean.selecionadaId}" value="#{pedTransf.pedVendaId}" />
+				</p:commandButton>
+				
+			</p:column>	
+	        
+		</p:dataTable>
+		<p:toolbar id="tbTotal">
+	        <f:facet name="right">
+	        	<h:outputText value="Total: "/>
+	        	<h:outputText value="#{pedTransfConsultaBean.valorTotal}" converter="currencyFormat" styleClass="tx_bold" />
+	        </f:facet>
+        </p:toolbar>
+		
+	</h:form>
+	
+	</div>
+	
+</ui:composition>

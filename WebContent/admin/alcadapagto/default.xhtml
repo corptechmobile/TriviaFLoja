@@ -1,0 +1,249 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+    
+    <div class="tab-content-space">
+    <div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+    <f:metadata>
+      <f:viewAction action="#{alcadaPagtoBean.clearSession}"/>
+    </f:metadata>
+     
+     
+     <!-- Filtro -->
+     <h:form id="consultaAlcadaPagto">
+     
+     	<p:growl id="msg" showDetail="true" life="3000"/>
+     	<p:focus context="panelFiltroAlcadaPagto"/>
+    	<p:defaultCommand target="btnBuscar" />
+    	
+    	<p:toolbar id="tb">
+	        <f:facet name="left">
+	            <p:commandButton id="btnGerarMulti" 
+									value="Gerar Alçadas" 
+										actionListener="#{alcadaPagtoBean.novoMulti}" 
+											update=":formMultiAlcada :edicaoAlcadaPagto"
+											icon="ui-icon-check"/>				 
+	        </f:facet>
+	        <f:facet name="right">
+		        <p:commandButton id="menuHome" icon="ui-icon-home" actionListener="#{alcadaPagtoBean.addHome}" update="@form:msg" process="@this" title="Home" />
+		        <p:commandButton icon="ui-icon-star" actionListener="#{alcadaPagtoBean.addFavoritos}" update="@form:msg" process="@this" title="Favoritos" oncomplete="updateMenuHome();" />
+        	</f:facet>
+	    </p:toolbar>
+	    
+	    <p:sticky target="tb" margin="50"/>
+	    
+	    <p:panel id="panelFiltroAlcadaPagto" widgetVar="panelFiltroAlcadaPagto" >
+	    	<div class="ui-fluid">
+	    		<div class="ui-g">
+	       			<div class="ui-g-6 ui-md-0 ui-lg-0">
+						<h:outputLabel for="gestao" value="Gestão:"/>
+				        <p:selectOneMenu  id="gestao" value="#{alcadaPagtoBean.gestaoFilter}" autoWidth="false" style="width:100%;">
+				        	<f:selectItem itemValue="" itemLabel="Todos"/>	
+							<f:selectItems value="#{alcadaPagtoBean.gestoesSelected}" /> 
+						</p:selectOneMenu>
+						
+					</div>
+					<div class="ui-g-0 ui-md-0 ui-lg-0">
+						<h:outputLabel for="conds" value="Condição de pagamento:"/>
+				        <p:selectOneMenu  id="conds" value="#{alcadaPagtoBean.condPagtoFilter}" filter="true" autoWidth="false">
+				        	<f:selectItem itemValue="" itemLabel="Todos"/>
+							<f:selectItems value="#{alcadaPagtoBean.condsSelected}" /> 
+						</p:selectOneMenu>
+					</div>
+	    		</div>
+	    	</div>
+	    	
+	    	<p:commandButton 
+					 id="btnBuscar" 
+					 value="Buscar"
+					 actionListener="#{alcadaPagtoBean.buscar}"
+					 update="exportExcel :listagemAlcadaPagto"
+					 icon="icon-search"  
+					 onclick="PF('bUIDataTableAlcadaPagto').show()"
+					 />
+					 
+			 <p:commandButton 
+				 id="btnLimpar" 
+				 value="Limpar"
+				 action="#{alcadaPagtoBean.limpar}"
+				 update=" @form :listagemAlcadaPagto "
+				 icon="ui-icon-close" 
+				 onclick="PF('bUIDataTableAlcadaPagto').show()"
+				 />
+				 
+			<h:panelGroup id="exportExcel"> 
+				<p:commandButton icon="icon-excel" disabled="#{empty alcadaPagtoBean.lista}" title="Exportar para excel" ajax="false">
+		            <p:dataExporter type="xls" target=":listagemAlcadaPagto:dtAlcadaPagto" fileName="alcadaPagtos"  />
+		        </p:commandButton>
+	    	</h:panelGroup>
+	    	
+	    </p:panel>
+     	
+     </h:form>
+     
+     <h:form id="formMultiAlcada">
+		
+		<p:blockUI block="panelMultiAlcadaPagto" trigger="btnFiltrar" widgetVar="bUIMultiAlcadaPagto">
+			LOADING<br />
+        	<p:graphicImage library="images" name="progress_bar.gif"/>
+		</p:blockUI>
+		
+		<p:focus context="panelMultiAlcadaPagto"/>
+		
+		
+		<p:panel id="panelMultiAlcadaPagto" widgetVar="panelMultiAlcadaPagto" header="#{alcadaPagtoBean.tituloAdd}" closable="true" rendered="#{alcadaPagtoBean.renderedMultiAlcadas}">
+			<p:messages showDetail="true" showSummary="false" closable="true"/>
+			<div class="ui-fluid">
+			
+				<p:panelGrid columns="13" columnClasses="ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank">
+				
+					<p:outputLabel for="gestaoRef" value="Gestão"/>
+					<p:selectOneMenu  id="gestaoRef" value="#{alcadaPagtoBean.gestaoFilter}" autoWidth="true">
+						<f:selectItems value="#{alcadaPagtoBean.gestoesSelected}"/> 
+					</p:selectOneMenu>
+					
+					<p:outputLabel for="alcada" value="Alcada"/>
+					<p:inputNumber id="alcada" value="#{alcadaPagtoBean.alcadaMulti}" symbol="%" symbolPosition="s" decimalSeparator="," thousandSeparator="." emptyValue="zero" size="7" inputStyleClass="customCollumnPerc" />
+					
+					<p:commandButton id="btnFiltrar" 
+									value="Gerar Multi Alçadas" 
+										actionListener="#{alcadaPagtoBean.gerarMulti}" 
+											update=":formMultiAlcada :edicaoAlcadaPagto"
+											icon="ui-icon-check"  />
+				
+				</p:panelGrid>
+				
+			</div>
+			
+			
+			<p:dataTable id="dtMultiAlcadaPagto" 
+						var="alcadaPagtoMulti" 
+						value="#{alcadaPagtoBean.listaMultiAlcadas}" 
+						emptyMessage="Nenhum registro encontrado." 
+						rendered="#{not empty alcadaPagtoBean.listaMultiAlcadas}">
+			
+	        	
+		        <p:column headerText="Cond. Pagamento">
+		        	<p:outputLabel value="#{alcadaPagtoMulti.condPagtoDesc}"/>
+				</p:column>
+				
+				<p:column headerText="Alçada">
+					<p:inputNumber value="#{alcadaPagtoMulti.alcada}" size="12" decimalSeparator="," thousandSeparator="." emptyValue="zero" decimalPlaces="2" inputStyleClass="tx_right"/>
+				</p:column>
+	        	
+			</p:dataTable>
+			
+			<br />
+			
+			<p:commandButton id="btnGerar" 
+							value="Salvar" 
+							actionListener="#{alcadaPagtoBean.salvarMulti}" 
+							update=":listagemAlcadaPagto @form :consultaAlcadaPagto:msg"
+							icon="icon-save"  
+							rendered="#{not empty alcadaPagtoBean.listaMultiAlcadas}"/>
+		</p:panel>
+		
+	</h:form>
+     
+     <!-- cadastro -->
+    	<h:form id="edicaoAlcadaPagto">
+    		<p:blockUI block="edicaoAlcadaPagto" trigger="btnSalvar" widgetVar="bUIAlcadaPagto">
+			LOADING<br />
+        		<p:graphicImage library="images" name="progress_bar.gif"/>
+			</p:blockUI>
+			
+			<p:focus context="edicaoAlcadaPagto"/>
+			<p:panel id="panelAlcadaPagto" widgetVar="panelAlcadaPagto" header="#{alcadaPagto.tituloAdd}" closable="true" rendered="#{alcadaPagtoBean.renderedEdicao}"> 
+			
+			<p:messages showDetail="true" showSummary="false" closable="true"/>
+			
+			<div class="ui-fluid">
+				<p:panelGrid columns="2" columnClasses="ui-grid-col-0, ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank">
+				 
+			     	<p:outputLabel value="Gestão: "/>
+			     	<h:outputText value="#{alcadaPagtoBean.selecionada.gestaoVendaDesc}" /> 
+			     	
+			     	<p:outputLabel value="Cond. Pagto: "/>
+			     	<h:outputText value="#{alcadaPagtoBean.selecionada.condPagtoDesc}" />
+			     	
+			     	<p:outputLabel value="Alçada: "/>
+					<p:inputNumber value="#{alcadaPagtoBean.selecionada.alcada}" size="12" decimalSeparator="," thousandSeparator="." emptyValue="zero" decimalPlaces="2" inputStyleClass="tx_right"/>
+					
+					<p:commandButton id="btnSalvar" 
+					value="Salvar" 
+						actionListener="#{alcadaPagtoBean.salvar}" 
+							update=":listagemAlcadaPagto:dtAlcadaPagto :edicaoAlcadaPagto :consultaAlcadaPagto:msg"
+							icon="ui-icon-disk"  /> 
+					
+				</p:panelGrid>
+				
+			</div>
+		</p:panel>
+    	</h:form>
+     
+      
+     <!-- Listagem -->
+     <h:form id="listagemAlcadaPagto">
+     	
+     	<p:remoteCommand name="updateListAlcadaPagtoProjetoBean" update="@form" />
+     	
+     	<p:blockUI block="dtAlcadaPagto" widgetVar="bUIDataTableAlcadaPagto">
+			LOADING<br />
+        	<p:graphicImage library="images" name="progress_bar.gif"/>
+		</p:blockUI>
+		
+		<p:dataTable id="dtAlcadaPagto" var="alcadaPagto"
+			value="#{alcadaPagtoBean.lista}" emptyMessage="Nenhum registro encontrado."
+			rows="20" paginator="true"
+			paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+			rowsPerPageTemplate="10,20,40"
+			sortBy="#{alcadaPagto.gestaoVendaDesc}">
+
+				<p:column sortBy="#{alcadaPagto.gestaoVendaDesc}" priority="1">
+					<f:facet name="header">Gestão</f:facet>
+					<h:outputText value="#{alcadaPagto.gestaoVendaDesc} " />
+	        	</p:column>
+	        	
+	        	<p:column sortBy="#{alcadaPagto.id}" priority="1">
+					<f:facet name="header">Cond.Pagto.</f:facet>
+					<h:outputText value="#{alcadaPagto.condPagtoDesc} " />
+	        	</p:column>
+	        	
+	        	<p:column sortBy="#{alcadaPagto.alcada}" styleClass="customCollumnValor" priority="1">
+					<f:facet name="header">Alçada</f:facet>
+					<h:outputText value="#{alcadaPagto.alcada}" converter="currencyFormat"/>
+	        	</p:column>
+
+
+				<p:column styleClass="customCollumn2Icon" exportable="false" priority="1">
+					<f:facet name="header"></f:facet>
+					<p:commandButton action="#{alcadaPagtoBean.editar}"
+									 update=":edicaoAlcadaPagto :formMultiAlcada" 
+									 process="@this" 
+									 icon="ui-icon-pencil" 
+									 title="Editar"
+						onclick="PF('bUIAlcadaPagto').show();" 
+						>
+						<f:setPropertyActionListener target="#{alcadaPagtoBean.selecionada}" value="#{alcadaPagto}" />
+					</p:commandButton>
+					
+					<p:commandButton action="#{alcadaPagtoBean.excluir}" update="@form :edicaoAlcadaPagto :formMultiAlcada :consultaAlcadaPagto:msg" icon="ui-icon-trash" title="Excluir">
+						<p:confirm header="Confirme" message="Deseja Excluir: #{alcadaPagto.gestaoVendaDesc}/#{alcadaPagto.condPagtoDesc}/#{alcadaPagto.alcada}?" icon="ui-icon-alert"/>
+						<f:setPropertyActionListener target="#{alcadaPagtoBean.selecionada}" value="#{alcadaPagto}" />
+					</p:commandButton>
+				</p:column>
+
+			</p:dataTable>
+			<p:toolbar id="tbTotal">
+		        <f:facet name="right">
+		        	Total: #{alcadaPagtoBean.lista.size()}
+		        </f:facet>
+	        </p:toolbar>
+			
+		</h:form>
+     
+    </div>
+    
+</ui:composition>

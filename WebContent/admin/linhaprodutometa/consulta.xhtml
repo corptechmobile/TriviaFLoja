@@ -1,0 +1,324 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"> 
+<style>
+tr:nth-child(even) {
+  background-color: #f2f2f2
+}
+ .animated .ui-progressbar-value { 
+     background-image: url("#{resource['demo/images/pbar-ani.gif']}"); 
+ }
+
+</style>
+
+   	<div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+    <f:metadata>
+      <f:viewAction action="#{consultaLinhaProdutoMetaBean.clearSession}"/>
+    </f:metadata>
+
+		<h:form id="formConsLinhaProdutoMetaBuscar">
+
+			<p:growl id="msg" showDetail="true" life="3000" />
+			<p:focus context="panelFilterConsultaLinhaProdutoMetaBean" />
+			<p:defaultCommand target="btnBuscarConsulta" />
+
+		    <p:toolbar id="tb">
+		        <f:facet name="right">
+					<p:commandButton id="menuHome" icon="ui-icon-home"
+						actionListener="#{consultaLinhaProdutoMetaBean.addHome}" update="@form:msg"
+						process="@this" title="Home" />
+					<p:commandButton icon="ui-icon-star"
+						actionListener="#{consultaLinhaProdutoMetaBean.addFavoritos}"
+						update="@form:msg" process="@this" title="Favoritos"
+						oncomplete="updateMenuHome();" />
+	        	</f:facet>
+		    </p:toolbar>
+
+			<p:sticky target="tb" margin="50" />
+
+			<p:panel id="panelFilterConsultaLinhaProdutoMetaBean" widgetVar="panelFilterConsultaLinhaProdutoMetaBean" >
+				<div class="ui-fluid">
+				<p:panelGrid columns="6" columnClasses="ui-grid-col-0,ui-grid-col-0, ui-grid-col-0,ui-grid-col-0, ui-grid-col-0,ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+				<h:panelGroup>
+					<h:outputLabel value="Ano/Mês:" for="anoMes"/><br/>
+			        <p:inputMask id="anoMes" value="#{consultaLinhaProdutoMetaBean.anoMes}" mask="9999/99" placeholder="Ano/Mês" size="7"  required="true" requiredMessage="Informe o Ano/Mês" converter="anoMesConverter"  />
+				</h:panelGroup>
+				<h:panelGroup>
+					<h:outputLabel value="Empresa:" for="empresaIdFilter"/><br/>
+			        <p:selectOneMenu  id="empresaIdFilter" value="#{consultaLinhaProdutoMetaBean.empresaFilter}" filter="true" autoWidth="true" required="true" requiredMessage="Selecione uma Empresa">
+						<f:selectItem itemLabel="Todas" itemValue="#{null}" />  
+						<f:selectItems value="#{consultaLinhaProdutoMetaBean.empresaSelect}" /> 
+					</p:selectOneMenu>
+				</h:panelGroup>
+				<h:panelGroup>
+					<h:outputLabel value="Vendedor:" for="vendedorIdFilter"/><br/>
+			        <p:selectOneMenu  id="vendedorIdFilter" value="#{consultaLinhaProdutoMetaBean.vendedorFilter}" converter="vendedorFBConverter" filter="true" autoWidth="true" >
+						<f:selectItem itemLabel="Todos" itemValue="#{null}" />  
+						<f:selectItems value="#{consultaLinhaProdutoMetaBean.vendedorSelect}" /> 
+					</p:selectOneMenu>
+				</h:panelGroup>	
+				<h:panelGroup>			
+					<h:outputLabel value="Gestão:" for="gestaoMobIdFilter"/><br/>
+			        <p:selectOneMenu  id="gestaoMobIdFilter" value="#{consultaLinhaProdutoMetaBean.gestaoVendaMobFilter}" filter="true" autoWidth="true" required="true" requiredMessage="Selecione uma Empresa">
+						<f:selectItems value="#{consultaLinhaProdutoMetaBean.gestaoVendaMobFilterSelect}" />  
+					</p:selectOneMenu>
+				</h:panelGroup>
+				<h:panelGroup>
+					<h:outputLabel value="Visualizar por:" for="visualizarFilter"/><br/>
+			        <p:selectOneMenu  id="visualizarFilter" value="#{consultaLinhaProdutoMetaBean.visualizarFilter}" filter="true" autoWidth="true" required="true" requiredMessage="Selecione a forma de visualização">
+						<f:selectItem itemLabel="Vendedor" itemValue="vendedor" />   
+						<f:selectItem itemLabel="Linha de Produto" itemValue="linhaproduto" />  
+					</p:selectOneMenu>
+				</h:panelGroup>
+				<h:panelGroup>			
+					<h:outputLabel value=" " /><br/>
+					<p:selectBooleanCheckbox id="semEstoqueFilter" value="#{consultaLinhaProdutoMetaBean.incluirDevolucao}" />
+					<p:outputLabel value=" Incluir Devolução " />
+				</h:panelGroup>
+				<h:panelGroup>	
+					<h:outputLabel value=" " /><br/>
+					<p:commandButton id="btnBuscarConsulta" value="Buscar"
+									actionListener="#{consultaLinhaProdutoMetaBean.buscar}"
+									update="@form :listaConsLinhaProdutoMeta" icon="icon-search" 
+									onclick="PF('bUIDataConsLinhaProd').show()"								
+									 />
+				</h:panelGroup>
+				<h:panelGroup>	
+					<h:outputLabel value=" " /><br/>
+					<p:commandButton 
+									 id="btnLimpar" 
+									 value="Limpar"
+									 action="#{consultaLinhaProdutoMetaBean.limpar}"
+									 update="@form :listaConsLinhaProdutoMeta "
+									 icon="ui-icon-close" 
+								 />	
+				</h:panelGroup>
+				</p:panelGrid>
+				</div>
+			</p:panel>
+
+		</h:form>
+
+		<h:form id="listaConsLinhaProdutoMeta">
+				<p:blockUI block="tabview" widgetVar="bUIDataConsLinhaProd">
+					Carregando<br />
+					<p:graphicImage library="images" name="progress_bar.gif" />
+			    </p:blockUI>
+				
+								
+				<div class="ui-datatable ui-widget">
+					<ui:fragment rendered="#{not empty consultaLinhaProdutoMetaBean.listaItens}" >
+					<table role="grid" style="overflow-x: auto">
+						<tr class="table-striped">
+							<td class="ui-state-default" style="width:40px;"><b><h:outputLabel value="Prazo Decorrido / Dias Uteis:" /></b>
+							<b><h:outputLabel value="#{consultaLinhaProdutoMetaBean.prazoDecorrido}" /> / <h:outputLabel value="#{consultaLinhaProdutoMetaBean.dUteis}" /></b>
+							</td>
+						</tr>
+					</table>	
+					</ui:fragment>							
+					<table role="grid" style="overflow-x: auto"  >
+							<tr class="table-striped">
+								<td class="ui-state-default" style="width:200px;" rowspan="2" align="center"><b>Vendedor</b></td>
+								<td class="ui-state-default" colspan="5" align="center"><b>Faturamento($)</b></td>
+								<td class="ui-state-default" colspan="2" align="center"><b>Meta(%)</b></td>
+								<td class="ui-state-default" colspan="3" align="center"><b>Média Diária</b></td>
+								<td class="ui-state-default" colspan="3" align="center"><b>Cobertura</b></td>
+								<td class="ui-state-default" colspan="3" align="center"><b>Mix</b></td>
+							</tr>
+							<tr class="table-striped">
+								<td class="ui-state-default" title="Meta Mensal" style="width:80px;" align="right">M. Mês</td>
+								<td class="ui-state-default" title="Meta Proporcional" style="width:80px;" align="right">M. Prop.</td>
+								<td class="ui-state-default" title="Realizado" style="width:80px;" align="right">R.</td>
+								<td class="ui-state-default" title="Diferença Meta Mensal x Realizado" style="width:80px;" align="right">Dif.</td>
+								<td class="ui-state-default" title="Tendência de Faturamento" style="width:80px;" align="right">T.</td>
+								<td class="ui-state-default" title="Percentual Realizado sobre a Meta" style="width:80px;" align="right">R.</td>
+								<td class="ui-state-default" title="Percentual Tendência sobre a Meta" style="width:80px;" align="right">T.</td>
+								<td class="ui-state-default" title="Média Diária da Meta" style="width:80px;" align="right">M.</td>
+								<td class="ui-state-default" title="Média Diária do Realizado" style="width:80px;" align="right">R.</td>
+								<td class="ui-state-default" title="Nova Meta" style="width:80px;" align="right">Nova M.</td>
+								<td class="ui-state-default" title="Cobertura Clientes Realizados" style="width:80px;" align="right">R.</td>
+								<td class="ui-state-default" title="Cobertura Clientes em Carteira " style="width:80px;" align="right">C.</td>
+								<td class="ui-state-default" title="Percentual Realizado x Carteira" style="width:80px;" align="right">%</td>
+								<td class="ui-state-default" title="Mix de Produtos Realizados" style="width:80px;" align="right">R.</td>
+								<td class="ui-state-default" title="Mix de Produtos Atual" style="width:80px;" align="right">A.</td>
+								<td class="ui-state-default" title="Percentual Mix Realizado x Atual" style="width:80px;" align="right">%</td>
+							</tr>
+							<p:repeat var="consLinhaProdutoMeta" id="tabview" value="#{consultaLinhaProdutoMetaBean.listaItens}" >
+							<tr>
+								<td>#{consLinhaProdutoMeta.descricao}</td>
+								<td  align="right">
+									<h:outputLabel value="#{consLinhaProdutoMeta.metaMensal}" converter="currencyFormat" rendered="#{consLinhaProdutoMeta.metaMensal>0}" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>									
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consLinhaProdutoMeta.metaProp}" converter="currencyFormat" rendered="#{consLinhaProdutoMeta.metaProp>0}" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consLinhaProdutoMeta.fatMensal}" converter="currencyFormat" rendered="#{consLinhaProdutoMeta.fatMensal>0}" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td class="#{consultaLinhaProdutoMetaBean.styloTotais(consLinhaProdutoMeta.difMetaFat)}" align="right">
+									<h:outputLabel value="#{consLinhaProdutoMeta.difMetaFat}" converter="currencyFormat"  >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td class="#{consultaLinhaProdutoMetaBean.styloTotais(consLinhaProdutoMeta.tendencia)}" align="right">
+									<h:outputLabel value="#{consLinhaProdutoMeta.tendencia}" converter="currencyFormat" rendered="#{consLinhaProdutoMeta.tendencia>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+									
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consLinhaProdutoMeta.percMeta}" converter="currencyFormat" rendered="#{consLinhaProdutoMeta.percMeta>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>
+								</td>
+								<td class="#{consultaLinhaProdutoMetaBean.styloTotais(consLinhaProdutoMeta.percTendencia)}" align="right">
+									<h:outputLabel value="#{consLinhaProdutoMeta.percTendencia}" converter="currencyFormat" rendered="#{consLinhaProdutoMeta.percTendencia>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consLinhaProdutoMeta.metaDiaria}" converter="currencyFormat" rendered="#{consLinhaProdutoMeta.metaDiaria>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consLinhaProdutoMeta.fatDiaria}" converter="currencyFormat" rendered="#{consLinhaProdutoMeta.fatDiaria>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td class="#{consultaLinhaProdutoMetaBean.styloTotais(consLinhaProdutoMeta.novaMetaDiaria)}" align="right">
+									<h:outputLabel value="#{consLinhaProdutoMeta.novaMetaDiaria}" converter="currencyFormat" rendered="#{consLinhaProdutoMeta.novaMetaDiaria>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consLinhaProdutoMeta.coberturaReal}" converter="currencyFormat" rendered="#{consLinhaProdutoMeta.coberturaReal>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consLinhaProdutoMeta.coberturaCarteira}" converter="currencyFormat" rendered="#{consLinhaProdutoMeta.coberturaCarteira>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td class="#{consultaLinhaProdutoMetaBean.styloTotaisMeta(consLinhaProdutoMeta.percCobertura,consLinhaProdutoMeta.percMetaCobertura)}" align="right">
+									<h:outputLabel value="#{consLinhaProdutoMeta.percCobertura}" converter="currencyFormat" rendered="#{consLinhaProdutoMeta.percCobertura>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consLinhaProdutoMeta.mixReal}" converter="currencyFormat" rendered="#{consLinhaProdutoMeta.mixReal>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consLinhaProdutoMeta.mixAtual}" converter="currencyFormat" rendered="#{consLinhaProdutoMeta.mixAtual>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td class="#{consultaLinhaProdutoMetaBean.styloTotaisMeta(consLinhaProdutoMeta.percMix,consLinhaProdutoMeta.percMetaMix)}" align="right">
+									<h:outputLabel value="#{consLinhaProdutoMeta.percMix}" converter="currencyFormat" rendered="#{consLinhaProdutoMeta.percMix>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>
+								</td>
+							</tr>
+							</p:repeat>
+							<ui:fragment rendered="#{not empty consultaLinhaProdutoMetaBean.listaItens}" >
+							<tr style="font-weight: bold;" class="customBgGreenMeta">
+								<td align="right">TOTAL GERAL</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaLinhaProdutoMetaBean.totalMetaMensal}" converter="currencyFormat" rendered="#{consultaLinhaProdutoMetaBean.totalMetaMensal>0}" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaLinhaProdutoMetaBean.totalMetaProp}" converter="currencyFormat" rendered="#{consultaLinhaProdutoMetaBean.totalMetaProp>0}" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaLinhaProdutoMetaBean.totalFatMensal}" converter="currencyFormat" rendered="#{consultaLinhaProdutoMetaBean.totalFatMensal>0}" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td class="#{consultaLinhaProdutoMetaBean.styloTotais(consultaLinhaProdutoMetaBean.totalDifMetaFat)}" align="right">
+									<h:outputLabel value="#{consultaLinhaProdutoMetaBean.totalDifMetaFat}" converter="currencyFormat"  >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td class="#{consultaLinhaProdutoMetaBean.styloTotais(consultaLinhaProdutoMetaBean.totalTendencia)}" align="right">
+									<h:outputLabel value="#{consultaLinhaProdutoMetaBean.totalTendencia}" converter="currencyFormat" rendered="#{consultaLinhaProdutoMetaBean.totalTendencia>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaLinhaProdutoMetaBean.totalPercMeta}" converter="currencyFormat" rendered="#{consultaLinhaProdutoMetaBean.totalPercMeta>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>
+								</td>
+								<td class="#{consultaLinhaProdutoMetaBean.styloTotais(consultaLinhaProdutoMetaBean.totalPercTendencia)}" align="right">
+ 									<h:outputLabel value="#{consultaLinhaProdutoMetaBean.totalPercTendencia}" converter="currencyFormat" rendered="#{consultaLinhaProdutoMetaBean.totalPercTendencia>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>
+ 								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaLinhaProdutoMetaBean.totalMetaDiaria}" converter="currencyFormat" rendered="#{consultaLinhaProdutoMetaBean.totalMetaDiaria>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaLinhaProdutoMetaBean.totalFatDiaria}" converter="currencyFormat" rendered="#{consultaLinhaProdutoMetaBean.totalFatDiaria>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td class="#{consultaLinhaProdutoMetaBean.styloTotais(consultaLinhaProdutoMetaBean.totalNovaMetaDiaria)}" align="right">
+									<h:outputLabel value="#{consultaLinhaProdutoMetaBean.totalNovaMetaDiaria}" converter="currencyFormat" rendered="#{consultaLinhaProdutoMetaBean.totalNovaMetaDiaria>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaLinhaProdutoMetaBean.totalCoberturaReal}" converter="currencyFormat" rendered="#{consultaLinhaProdutoMetaBean.totalCoberturaReal>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td  align="right">
+									<h:outputLabel value="#{consultaLinhaProdutoMetaBean.totalCoberturaCarteira}" converter="currencyFormat" rendered="#{consultaLinhaProdutoMetaBean.totalCoberturaCarteira>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td class="#{consultaLinhaProdutoMetaBean.styloTotais(consultaLinhaProdutoMetaBean.totalPercCobertura)}" align="right">
+									<h:outputLabel value="#{consultaLinhaProdutoMetaBean.totalPercCobertura}" converter="currencyFormat" rendered="#{consultaLinhaProdutoMetaBean.totalPercCobertura>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consultaLinhaProdutoMetaBean.totalMixReal}" converter="currencyFormat" rendered="#{consultaLinhaProdutoMetaBean.totalMixReal>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td align="right">
+									<h:outputLabel value="#{consultaLinhaProdutoMetaBean.totalMixAtual}" converter="currencyFormat" rendered="#{consultaLinhaProdutoMetaBean.totalMixAtual>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>
+								</td>
+								<td class="#{consultaLinhaProdutoMetaBean.styloTotais(consultaLinhaProdutoMetaBean.totalPercMix)}" align="right">
+									<h:outputLabel value="#{consultaLinhaProdutoMetaBean.totalPercMix}" converter="currencyFormat" rendered="#{consultaLinhaProdutoMetaBean.totalPercMix>0}">
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />%
+									</h:outputLabel>
+								</td>
+							</tr>
+							</ui:fragment>
+					</table>
+				</div>
+		</h:form>
+		
+		
+</ui:composition> 

@@ -1,0 +1,231 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+   	
+   	<div class="tab-content-space">
+    
+	   	<h:form id="edicaoCliente">
+	   	
+	   		<p:focus context="#{clienteNovoBean.focus}" /> 
+			<p:defaultCommand target="btnSalvar" />
+			<p:messages id="msgEdicaoCliente" showDetail="true" showSummary="false" closable="true" />
+	   	
+			<p:blockUI block="edicaoCliente" trigger="btnSalvar" widgetVar="bUICliente">
+				LOADING<br />
+	        	<p:graphicImage library="images" name="progress_bar.gif"/>
+			</p:blockUI>
+			
+			<p:fieldset id="fieldDados" legend="Dados" styleClass="painelFieldset">
+				
+				<div class="ui-fluid">
+				
+					<div style="float:right;">
+						<p:outputLabel value="Ativo" styleClass="tx_azul" rendered="#{clienteNovoBean.clienteAtivo}"/>
+						<p:outputLabel value="Inativo" styleClass="tx_red" rendered="#{clienteNovoBean.clienteAtivo==false}"/>
+					</div>
+					
+					<h:outputText rendered="#{clienteNovoBean.editando}" value="#{clienteNovoBean.selecionada.tipoPessoa == 'F' ? 'Pessoa Física' : ''}#{clienteNovoBean.selecionada.tipoPessoa == 'J' ? 'Pessoa Jurídica' : ''}#{clienteNovoBean.selecionada.tipoPessoa == 'O' ? 'Outro' : ''}" styleClass="tx_bold" style="margin-right:10px;" />
+					
+					<p:panelGrid columns="7" columnClasses="ui-grid-col-0,ui-grid-col-0,ui-grid-col-0,ui-grid-col-0,ui-grid-col-0,ui-grid-col-0,ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+					 
+					 	<p:selectOneMenu id="tipoPessoa" value="#{clienteNovoBean.selecionada.tipoPessoa}" style="width:125px" rendered="#{!clienteNovoBean.editando}" >
+			            	<f:selectItem itemLabel="Física" itemValue="F" />
+			            	<f:selectItem itemLabel="Jurídica" itemValue="J" />
+			            	<!-- <f:selectItem itemLabel="Outro" itemValue="O" /> -->
+			            	<p:ajax update="@form" listener="#{clienteNovoBean.verificarTipoPessoa}"/> 
+			        	</p:selectOneMenu>
+			        	
+						<p:outputLabel id="labelCnpj" value="CNPJ:" for="cnpj" rendered="#{clienteNovoBean.selecionada.tipoPessoa == 'J' or clienteNovoBean.selecionada.tipoPessoa == 'O'}" />
+						<h:panelGroup>
+							<p:inputMask id="cnpj" value="#{clienteNovoBean.selecionada.cnpjCpf}" mask="HH.HHH.HHH/HHHH-HH" required="true" requiredMessage="Preencha o CNPJ" size="19" maxlength="19" rendered="#{(clienteNovoBean.selecionada.tipoPessoa == 'J' or clienteNovoBean.selecionada.tipoPessoa == 'O') and !clienteNovoBean.editando}">
+								<f:validator validatorId="validator.CNPJValidator" disabled="#{clienteNovoBean.selecionada.tipoPessoa == 'O'}" />
+								<f:converter converterId="converter.CNPJConverter" />
+								<p:ajax event="blur" update="@form" listener="#{clienteNovoBean.verificarCpfCnpj}" onstart="PF('bUICliente').show()" onerror="PF('bUICliente').hide()" oncomplete="PF('bUICliente').hide()" />
+							</p:inputMask>
+							<h:outputText rendered="#{(clienteNovoBean.selecionada.tipoPessoa == 'J' or clienteNovoBean.selecionada.tipoPessoa == 'O') and clienteNovoBean.editando}" value="#{clienteNovoBean.selecionada.cnpjCpf}" styleClass="tx_bold">
+								<f:converter converterId="converter.CNPJConverter" />
+							</h:outputText>
+						</h:panelGroup>
+					
+						<p:outputLabel id="labelInscEst" value="Insc. Estadual:" for="panelInscEst" rendered="#{clienteNovoBean.selecionada.tipoPessoa == 'J'}"/>
+						<h:panelGroup id="panelInscEst">
+							<p:inputText id="inscEst" value="#{clienteNovoBean.selecionada.inscEst}"  size="14" maxlength="14" rendered="#{clienteNovoBean.selecionada.tipoPessoa == 'J'}" disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}" />
+						</h:panelGroup>
+						
+						<p:outputLabel id="labelInscMun" value="Insc. Municipal:" for="inscMun" rendered="#{clienteNovoBean.selecionada.tipoPessoa == 'J'}" disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}"/>
+						<p:inputText id="inscMun" value="#{clienteNovoBean.selecionada.inscMun}" size="14" maxlength="14" rendered="#{clienteNovoBean.selecionada.tipoPessoa == 'J'}" disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}" />
+						
+						<p:outputLabel id="labelCpf" value="CPF:" for="cpf" rendered="#{clienteNovoBean.selecionada.tipoPessoa == 'F'}"/>
+						<h:panelGroup>
+							<p:inputMask id="cpf" value="#{clienteNovoBean.selecionada.cnpjCpf}" mask="999.999.999-99" required="true" requiredMessage="Preencha o CPF" size="15" maxlength="15" rendered="#{clienteNovoBean.selecionada.tipoPessoa == 'F' and !clienteNovoBean.editando}" >
+								<f:validator validatorId="validator.CPFValidator" /> 
+								<f:converter converterId="converter.CPFConverter" />
+								<p:ajax event="blur" update="@form" listener="#{clienteNovoBean.verificarCpfCnpj}" onstart="PF('bUICliente').show()" onerror="PF('bUICliente').hide()" oncomplete="PF('bUICliente').hide()" />
+							</p:inputMask>
+							<h:outputText rendered="#{clienteNovoBean.selecionada.tipoPessoa == 'F' and clienteNovoBean.editando}" value="#{clienteNovoBean.selecionada.cnpjCpf}" styleClass="tx_bold">
+								<f:converter converterId="converter.CPFConverter" />
+							</h:outputText>
+						</h:panelGroup>
+						
+						<p:outputLabel id="labelNumRg" value="RG:" for="panelNumRg" rendered="#{clienteNovoBean.selecionada.tipoPessoa == 'F'}" />
+						<h:panelGroup id="panelNumRg">
+							<p:inputText id="numRg" value="#{clienteNovoBean.selecionada.numRg}" size="20" maxlength="15" rendered="#{clienteNovoBean.selecionada.tipoPessoa == 'F'}" disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}" />
+						</h:panelGroup>
+						
+					</p:panelGrid>
+					<p:panelGrid columns="6" columnClasses="ui-grid-col-1,ui-grid-col-3,ui-grid-col-1,ui-grid-col-3,ui-grid-col-1,ui-grid-col-3" layout="grid" styleClass="ui-panelgrid-blank" >
+							
+							<ui:param name="razaoSocial" value="#{clienteNovoBean.selecionada.tipoPessoa eq 'J' ? 'Razão Social' : 'Nome' }" />
+							<ui:param name="nomeFantasia" value="#{clienteNovoBean.selecionada.tipoPessoa eq 'J' ? 'Nome fantasia' : 'Apelido' }" />
+							
+							<p:outputLabel value="#{clienteNovoBean.selecionada.tipoPessoa eq 'J' ? 'Razão Social' : 'Nome' }: " for="razaoSocial"/>
+							<p:inputText id="razaoSocial" value="#{clienteNovoBean.selecionada.razaoSocial}" required="true" requiredMessage="Preencha a #{razaoSocial}" size="40" maxlength="60" disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}" />
+							
+							<p:outputLabel value="#{clienteNovoBean.selecionada.tipoPessoa eq 'J' ? 'Nome fantasia' : 'Apelido' }: " for="nomeFantasia" />
+							<p:inputText id="nomeFantasia" value="#{clienteNovoBean.selecionada.nomeFantasia}" required="true" requiredMessage="Preencha o #{nomeFantasia}" size="40" maxlength="30" disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}" />
+		
+							<p:outputLabel value="E-mail:" for="email" />
+							<p:inputText id="email" value="#{clienteNovoBean.selecionada.email}" size="15" maxlength="100" validatorMessage="E-mail inválido" disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}">
+								<f:validateRegex pattern="^[_A-Za-z0-9-\+]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$" />
+							</p:inputText>
+							
+					</p:panelGrid>
+					
+				</div>
+				
+				<p:fieldset id="fieldEndereco" legend="Endereço" styleClass="painelFieldset">
+					
+					<div class="ui-g">
+						
+						<div class="ui-g-1 ui-md-0 ui-lg-0">
+							<p:outputLabel value="CEP:"  />
+						</div>
+						
+						<div class="ui-g-0 ui-md-0 ui-lg-0">
+							<p:inputMask id="cep" value="#{clienteNovoBean.selecionada.cep}"  size="12" required="true" requiredMessage="Preencha o CEP" mask="99999-999" converter="cepConverter" disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}" />
+						</div>
+						
+						<div class="ui-g-0 ui-md-0 ui-lg-0">
+							<p:commandButton id="btnBuscarCep"
+								value="Pesquisar CEP"
+								actionListener="#{clienteNovoBean.buscarCep}" 
+								update="pais estado municipio bairro logradouro"
+								process="@this cep" 
+								onstart="PF('bUICliente').show()" 
+								onerror="PF('bUICliente').hide()" 
+								oncomplete="PF('bUICliente').hide()" 
+								disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}"	
+							/>
+						</div>
+
+						<div class="ui-g-0 ui-md-0 ui-lg-0">
+							<a href="http://www.buscacep.correios.com.br/sistemas/buscacep/buscaCep.cfm" target="_blank">
+								<p:graphicImage library="images" name="i_correios.jpg" />
+							</a>
+						</div>
+					</div>
+										
+					<div class="ui-fluid">
+					<p:panelGrid columns="6" columnClasses="ui-grid-col-1,ui-grid-col-3,ui-grid-col-1,ui-grid-col-3,ui-grid-col-1,ui-grid-col-3" layout="grid" styleClass="ui-panelgrid-blank" >
+						
+						<p:outputLabel value="Tipo:" for="enderecoTipo" />
+						<p:selectOneMenu id="enderecoTipo" value="#{clienteNovoBean.enderecoTipo}" disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}" >
+							<f:selectItems value="#{clienteNovoBean.enderecoTiposSelect}" />
+						</p:selectOneMenu>
+						
+						<p:outputLabel value="País:" for="pais" />
+						<p:selectOneMenu  id="pais"
+											value="#{clienteNovoBean.pais}" 
+												required="true" 
+													requiredMessage="Selecione um País" filter="true" filterMatchMode="contains" autoWidth="false" disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}" >
+							<f:selectItem itemLabel="" itemValue="" />  
+							<f:selectItems value="#{clienteNovoBean.paisesSelect}" />
+							<p:ajax update="estado municipio" listener="#{clienteNovoBean.verificarPais}"/>
+						</p:selectOneMenu>
+						
+						<p:outputLabel value="Estado:" for="estado" />
+						<p:selectOneMenu  id="estado"
+											value="#{clienteNovoBean.estado}" 
+												required="true" 
+													requiredMessage="Selecione um Estado" filter="true" filterMatchMode="contains" autoWidth="false" disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}" >
+							<f:selectItem itemLabel="" itemValue="" />  
+							<f:selectItems value="#{clienteNovoBean.estadosSelect}" />
+							<p:ajax update="estado municipio" listener="#{clienteNovoBean.verificarEstado}"/>
+						</p:selectOneMenu>
+			        	
+			        	<p:outputLabel value="Município:" for="municipio" />
+			        	<p:selectOneMenu id="municipio"
+											value="#{clienteNovoBean.municipio}" 
+												required="true" 
+													requiredMessage="Selecione um Município" filter="true" filterMatchMode="contains" autoWidth="false" disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}" >
+							<f:selectItem itemLabel="" itemValue="" />  
+							<f:selectItems value="#{clienteNovoBean.municipiosSelect}" />
+						</p:selectOneMenu>
+						
+						<p:outputLabel value="Logradouro:" for="logradouro" />
+						<p:inputText id="logradouro" value="#{clienteNovoBean.selecionada.logradouro}" required="true" requiredMessage="Preencha o logradouro" maxlength="60" disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}" />
+						
+						<p:outputLabel value="Complemento:" for="complemento" />
+						<p:inputText id="complemento" value="#{clienteNovoBean.selecionada.complemento}" maxlength="15" disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}" />
+						
+						<p:outputLabel value="Bairro:" for="bairro" />
+						<p:inputText id="bairro" value="#{clienteNovoBean.selecionada.bairro}" required="true" requiredMessage="Preencha o bairro" maxlength="30" disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}" />
+						
+						<p:outputLabel value="Ponto de Referência:" for="pontoReferencia" />
+						<h:panelGroup>
+							<p:inputTextarea id="pontoReferencia" value="#{clienteNovoBean.selecionada.pontoReferencia}" maxlength="300" counter="displayRef" counterTemplate="{0} caracteres restante." autoResize="false" disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}"  />
+							<h:outputText id="displayRef" />
+						</h:panelGroup>
+						
+					</p:panelGrid>
+					</div>
+				</p:fieldset>
+				
+				<p:fieldset id="fieldTelefone" legend="Telefone" styleClass="painelFieldset">
+				
+					<div class="ui-g">
+	     				<div class="ui-g-0 ui-md-0 ui-lg-0">
+							<div class="ui-fluid">
+				        	<p:selectOneMenu  id="telefoneTipo"
+												value="#{clienteNovoBean.telefoneTipo}" 
+													required="true" 
+														requiredMessage="Selecione um Tipo Telefone" autoWidth="false" disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}" >
+								<f:selectItems value="#{clienteNovoBean.telefoneTiposSelect}" />
+							</p:selectOneMenu>
+							</div>
+						</div>
+			     		<div class="ui-g-0 ui-md-0 ui-lg-0">
+							<p:inputNumber id="codArea" value="#{clienteNovoBean.selecionada.codArea}" size="5" maxlength="2" decimalPlaces="0" placeholder="DDD" required="true" requiredMessage="Preencha o DDD" disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}" />
+							<p:inputText id="numero" value="#{clienteNovoBean.selecionada.numero}" size="14" maxlength="9" placeholder="Telefone" required="true" requiredMessage="Preencha o Telefone" disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}" >
+								<f:converter converterId="converter.NumberPhoneConverter" />
+							</p:inputText>
+						</div>
+			     		<div class="ui-g-0 ui-md-0 ui-lg-0">
+							<p:inputText rendered="false" id="ramal" value="#{clienteNovoBean.selecionada.ramal}" maxlength="10" placeholder="Ramal" disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}" />
+						</div>
+					</div>
+				
+				</p:fieldset>
+				
+				<p:commandButton id="btnSalvar" 
+								value="Salvar" 
+								actionListener="#{clienteNovoBean.salvar}" 
+								update="@form"
+								process="@form"
+								icon="ui-icon-disk" 
+								disabled="#{empty clienteNovoBean.selecionada.cnpjCpf}"  
+								/> 
+			</p:fieldset>
+			
+		
+		</h:form>
+		
+	</div>
+	
+	<script>
+		$.mask.definitions['H'] = "[A-Za-z0-9]";
+	</script>
+	
+</ui:composition>

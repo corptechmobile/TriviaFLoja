@@ -1,0 +1,738 @@
+/* 
+#3BB34A
+#0F9347 
+
+A4DEAC
+*/
+
+.painelFieldset{
+	margin-bottom:10px
+}
+
+.tabHomeContent .ui-tabs-panel{
+	padding-left: 5px !important;
+	padding-right: 5px !important;
+}
+
+.tabContent .ui-tabs-panel{
+	padding-left: 2px !important;
+	padding-right: 2px !important;
+}
+
+/* Corrigir problema do dialog que ficava atras do modal do menu */
+.ui-confirm-dialog, .ui-dialog {
+	z-index: 1000000000 !important;
+}
+
+/* Corrigir problema do contextmenu que ficava atras do menu */
+.ui-contextmenu {
+	z-index: 4001 !important; 
+}
+
+/* Corrigir problema da tabView */
+.ui-tabs-nav{
+	width: auto !important;
+}
+
+/* Melhorar o espaco entre os campos do form */
+.ui-panelgrid .ui-panelgrid-cell {
+    padding: 2px 2px !important;
+    
+}
+
+/* remover &nsbs spance */
+.ui-selectonemenu-panel .ui-selectonemenu-list-item {
+    white-space: pre !important;
+}
+
+/* corrigir posicao acima do topo */
+.ui-growl {
+	z-index: 99999999 !important;
+}
+/*  */
+.ui-datepicker{
+	z-index: 1000000001 !important;
+}
+
+/*  */
+.customPanelGridBlank .ui-panelgrid-blank{
+	border: none!important
+}
+
+/*  */
+.customPanelToggleIconLeft .ui-panel-titlebar-icon.ui-corner-all {
+   float: left !important;
+   margin-right: 10px !important;
+}
+
+.customDataGridBorderNone tr, .customDataGridBorderNone td{border: none!important}
+
+/* steps */
+.ui-steps .ui-steps-item {
+    width: 33%;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+ 
+.ui-state-highlight {
+    text-shadow: none !important;
+}
+ 
+.ui-steps.custom {
+    margin-bottom: 30px;
+}
+ 
+.ui-steps.custom .ui-steps-item .ui-menuitem-link {
+    height: 10px;
+    padding: 0 1em;
+}
+ 
+.ui-steps.custom .ui-steps-item .ui-steps-number {
+    background-color: #0081c2;
+    color: #FFFFFF;
+    display: inline-block;
+    width: 30px;
+    border-radius: 10px;
+    margin-top: -10px;
+    margin-bottom: 10px;
+}
+ 
+.ui-steps.custom .ui-steps-item.ui-state-highlight .ui-steps-title {
+    color: #555;
+}
+/* steps */
+
+.customRowColorAvaria{
+	background-color: #FDEDEC !important;
+}
+
+.customCollumnId{
+	width:90px;
+	text-align: center;
+}
+
+.customCollumnCodEdt{
+	width:120px;
+	text-align: left;
+}
+
+.customCollumnLogoEmpresa{
+	width:75px;
+	text-align: center;
+}
+
+.customCollumn1Icon{
+	width:60px;
+	text-align: center;
+}
+
+.customCollumn2Icon{
+	width:94px;
+	text-align: center;
+}
+
+.customCollumn3Icon{
+	width:130px;
+	text-align: center;
+}
+
+.customCollumn3Situacao{
+	width:82px;
+	text-align: center;
+}
+
+.customCollumn4Situacao{
+	width:100px;
+	text-align: center;
+}
+
+.customCollumn3Urgencia{
+	width:83px;
+	text-align: center;
+}
+
+.customCollumn3Tipo{
+	width:60px;
+	text-align: center;
+}
+
+.customCollumnCpfCnpj{
+	width:150px;
+	text-align: center;
+}
+
+.customCollumnPermissoes{
+	width:100px;
+	text-align: center;
+}
+
+.customCollumnData{
+	width:90px;
+	text-align: center;
+}
+
+.customCollumnTelefone{
+	width:120px;
+	text-align: center;
+}
+
+.customCollumnDataHora{
+	width:150px;
+	text-align: center;
+}
+
+.customCollumnQtd{
+	width:60px;
+	text-align: right;
+}
+
+.customCollumnQtdEstoque{
+	width:110px;
+	text-align: right;
+}
+
+.customCollumnRight{
+	text-align: right;
+}
+
+.customCollumnStatusPedido{
+	width:100px;
+	text-align: center;
+}
+
+.customCollumnFrete{
+	width:30px;
+	text-align: center;
+}
+
+.customCollumnDescricao{
+	text-align: center;
+	width: 50px;
+}
+
+.customCollumnTipoDocumento{
+	width:60px;
+	text-align: center;
+}
+
+.customCollumnCondPagto{
+	width:110px;
+	text-align: center;
+}
+
+.customCollumnFormaPagamento{
+	width:60px;
+	text-align: center;
+}
+
+.customCollumnValor{
+	width:90px;
+	text-align: right;
+}
+
+.customCollumnPerc{
+	width:65px;
+	text-align: right;
+}
+
+
+.customCollumnValorGrande{
+	width:120px;
+	text-align: right;
+}
+
+.customCollumnValorMuitoGrande{
+	width:180px;
+	text-align: right;
+}
+
+.customCollumnValorGigante{
+	width:210px;
+	text-align: right;
+}
+
+.customCollumnTotal{
+	width:120px;
+	text-align: right;
+}
+
+.customCollumn2SubTotal{
+	width:160px;
+}
+			
+.customCollumnRowToggler{
+	width:36px;
+}
+
+.customCollumnUserVerApp{
+	width:50px;
+	text-align: center;
+}
+
+.customCollumnUserStatus{
+	width:70px;
+	text-align: center;
+}
+
+.customCollumnUserTipo{
+	width:75px;
+	text-align: center;
+}
+
+.customCollumnColor{
+	width:50px;
+	text-align: center;
+}
+
+.customCollumnCriticidade{
+	width:90px;
+	text-align: center;
+}
+
+.customCollumnProcesso{
+	width:90px;
+	text-align: center;
+}
+
+.customCollumnAtraso{
+	width:90px;
+	text-align: center;
+}
+
+.customCollumnEstado{
+	width:70px;
+	text-align: center;
+}
+
+.customCollumnBairro{
+	width:160px;
+}
+
+.customCollumnProjStatusProjeto{
+	width:120px;
+	text-align: center;
+}
+
+.customCollumnDeadline{
+	width:90px;
+	text-align: center;
+}
+
+.customCollumnFormaEnvio{
+	width:100px;
+	text-align: center;
+}
+
+.customCollumnCodigoBarra{
+	width:180px;
+	text-align: center;
+}
+
+.customCollumnInvContagem{
+	width:310px;
+}
+
+.customCollumnInvContagemValue{
+	text-align: right;
+}
+
+.customCollumnDataUsuario{
+	width: 310px;
+	text-align: center;
+}
+
+.customCollumn3M{
+	width: 120px;
+	text-align: right;
+}
+
+.customCollumnProdutoLinha{
+	width:130px;
+}
+
+.customBgRedLight{
+	background-color: #ffe6e7 !important;
+	font-size: 16px !important;
+	color:#000 ;
+}
+
+.customBgYellowLight{
+	background-color: #ffffd7 !important;
+	font-size: 16px;
+	color:#000;
+}
+
+/*
+.customBgRed{
+	background-color: red !important;
+	font-size: 16px !important;
+	color:#fff ;
+}
+
+.customBgYellow{
+	background-color: #ffff0a !important;
+	font-size: 16px;
+	color:#000;
+}
+*/
+.customBgRedMeta {
+	background-color: #FF4E40 !important;
+	background-image: none !important;
+	background-repeat: no-repeat !important; 
+	font-size: 14px !important;
+	color:#fff !important;
+}
+.customBgYellowMeta {
+	background-color: #FFF26E !important;
+	background-repeat: no-repeat !important; 
+	background-image: none !important;
+	font-size: 14px !important;
+	color:#000 !important;
+}
+.customBgGreenMeta {
+	background-color: #95FFA0 !important;
+	background-repeat: no-repeat !important; 
+	background-image: none !important;
+	font-size: 14px !important;
+	color:#000 !important;
+}
+
+.customBgBlueMeta {
+	background-color: #4691E8 !important;
+	background-repeat: no-repeat !important; 
+	background-image: none !important;
+	font-size: 14px !important;
+	color:#fff !important;
+}
+
+
+
+.customBgRed {
+	background-color: red !important;
+	background-image: none !important;
+	background-repeat: no-repeat !important; 
+	font-size: 16px !important;
+	color:#fff !important;
+}
+
+.customBgYellow {
+	background-color: #ffff0a !important;
+	background-repeat: no-repeat !important; 
+	background-image: none !important;
+	font-size: 16px !important;
+	color:#000 !important;
+}
+.customBgGreen {
+	background-color: #95FFA0 !important;
+	background-repeat: no-repeat !important; 
+	background-image: none !important;
+	font-size: 14px !important;
+	color:#000 !important;
+}
+
+
+.ui-g{
+  	/* display: table !important; */  
+}
+
+/* primeface  */
+.ui-lg-0, .ui-md-0, .ui-g-0 {
+	margin: 0 !important; 
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
+	padding-left: 0 !important;
+	padding-right: 0.5em !important; 
+	
+	/* display: table-cell !important; 
+	vertical-align: middle !important;  */
+}
+.ui-lg-1, .ui-lg-2, .ui-lg-3, .ui-lg-4, .ui-lg-5, .ui-lg-6, .ui-lg-7, .ui-lg-8, .ui-lg-9, .ui-lg-10, .ui-lg-11, .ui-lg-12{
+	margin: 0 !important; 
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
+	padding-left: 0 !important;
+	padding-right: 0.5em !important; 
+	
+	/* display: table-cell !important; 
+	vertical-align: middle !important;  */
+}
+
+.ui-md-1, .ui-md-2, .ui-md-3, .ui-md-4, .ui-md-5, .ui-md-6, .ui-md-7, .ui-md-8, .ui-md-9, .ui-md-10, .ui-md-11, .ui-md-12{
+	margin: 0 !important; 
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
+	padding-left: 0 !important;
+	padding-right: 0.5em !important; 
+	
+/* 	display: table-cell !important; 
+	vertical-align: middle !important;  */
+}
+
+.ui-g-1, .ui-g-2, .ui-g-3, .ui-g-4, .ui-g-5, .ui-g-6, .ui-g-7, .ui-g-8, .ui-g-9, .ui-g-10, .ui-g-11, .ui-g-12{
+	margin: 0 !important; 
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
+	padding-left: 0 !important;
+	padding-right: 0.5em !important; 
+	
+	/* display: table-cell !important; 
+	vertical-align: middle !important;  */
+}
+
+.ui-dialog-title{
+	font-size: 14px !important;
+}
+
+/* .customTitleBar.ui-panelmenu { } */
+
+.customBackgroundMenu {
+	background-color: #5db370 !important;
+	background-image: url("#{resource['icons/star24x24.png']}") !important; 
+	background-position: right 15px center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* Favoritos */
+.uiMenuFavoritos h3 {
+	padding: 6px !important; 
+	background-color: #000 !important;
+	background-image: url("#{resource['icons/star24x24.png']}") !important; 
+	background-position: right 15px center !important;
+    background-repeat: no-repeat !important;
+    font-size: 1em !important;
+}
+
+.uiMenuFavoritos h3 a {
+	color: white !important;
+	background-color:transparent !important;
+	
+}
+
+.uiMenuFavoritos h3 a:hover {
+	color: white !important;
+	background-color:transparent !important;
+}
+
+/* cor do icone ADDBBC -> http://www.flaticon.com/free-icon/full-items-inside-a-shopping-bag_31351 */
+/* Default */
+.uiMenu h3 {
+	padding: 6px !important; 
+	background-color: #000 !important;
+	background-image: none !important; 
+	font-size: 1em !important;
+}
+
+.uiMenu h3 a {
+	color: white !important;
+	background-color:transparent !important;
+	
+}
+
+.uiMenu h3 a:hover {
+	color: white !important;
+	background-color:transparent !important;
+}
+
+/* Configuracao 
+.uiSubMenu1 h3 {
+	padding: 6px !important; 
+	background-color: #000 !important;
+	background-image: url("#{resource['icons/settings_24x24.png']}") !important; 
+	background-position: right 15px center !important;
+    background-repeat: no-repeat !important;
+}
+
+.uiSubMenu1 h3 a {
+	color: white !important;
+	background-color:transparent !important;
+	
+}
+
+.uiSubMenu1 h3 a:hover {
+	color: white !important;
+	background-color:transparent !important;
+}
+*/
+
+/* Pedidos */
+.uiSubMenu2 h3 {
+	padding: 6px !important; 
+	background-color: #000 !important;
+	background-image: url("#{resource['icons/full-shoping-cart_24x24.png']}") !important; 
+	background-position: right 15px center !important;
+    background-repeat: no-repeat !important;
+}
+
+.uiSubMenu2 h3 a {
+	color: white !important;
+	background-color:transparent !important;
+	
+}
+
+.uiSubMenu2 h3 a:hover {
+	color: white !important;
+	background-color:transparent !important;
+}
+
+/* Acesso 
+.uiSubMenu5 h3 {
+	padding: 6px !important; 
+	background-color: #000 !important;
+	background-image: url("#{resource['icons/group24x24.png']}") !important; 
+	background-position: right 15px center !important;
+    background-repeat: no-repeat !important;
+}
+
+.uiSubMenu5 h3 a {
+	color: white !important;
+	background-color:transparent !important;
+	
+}
+
+.uiSubMenu5 h3 a:hover {
+	color: white !important;
+	background-color:transparent !important;
+}
+*/
+
+/* Pessoa*/
+.uiSubMenu1 h3 {
+	padding: 6px !important; 
+	background-color: #000 !important;
+	background-image: url("#{resource['icons/community_24x24.png']}") !important; 
+	background-position: right 15px center !important;
+    background-repeat: no-repeat !important;
+}
+
+.uiSubMenu1 h3 a {
+	color: white !important;
+	background-color:transparent !important;
+	
+}
+
+.uiSubMenu1 h3 a:hover {
+	color: white !important;
+	background-color:transparent !important;
+}
+
+/* Rota
+.uiSubMenu6 h3 {
+	padding: 6px !important; 
+	background-color: #000 !important;
+	background-image: url("#{resource['icons/gps_24x24.png']}") !important; 
+	background-position: right 15px center !important;
+    background-repeat: no-repeat !important;
+}
+
+.uiSubMenu6 h3 a {
+	color: white !important;
+	background-color:transparent !important;
+	
+}
+
+.uiSubMenu6 h3 a:hover {
+	color: white !important;
+	background-color:transparent !important;
+}
+ */
+/* Dashboard  */
+.uiSubMenu20 h3 {
+	padding: 6px !important; 
+	background-color: #000 !important;
+	background-image: url("#{resource['icons/bar-graph-with-dollar-sign_24x24.png']}") !important; 
+	background-position: right 15px center !important;
+    background-repeat: no-repeat !important;
+}
+
+.uiSubMenu20 h3 a {
+	color: white !important;
+	background-color:transparent !important;
+	
+}
+
+.uiSubMenu20 h3 a:hover {
+	color: white !important;
+	background-color:transparent !important;
+}
+
+/* Monitoramento 
+.uiSubMenu7 h3 {
+	padding: 6px !important; 
+	background-color: #000 !important;
+	background-image: url("#{resource['icons/statistics-on-a-screen-and-a-smartphone_24x24.png']}") !important; 
+	background-position: right 15px center !important;
+    background-repeat: no-repeat !important;
+}
+
+.uiSubMenu7 h3 a {
+	color: white !important;
+	background-color:transparent !important;
+	
+}
+
+.uiSubMenu7 h3 a:hover {
+	color: white !important;
+	background-color:transparent !important;
+}
+Mapa Entrega
+*/
+  
+.uiSubMenu3 h3 {
+	padding: 6px !important; 
+	background-color: #000 !important;
+	background-image: url("#{resource['icons/delivery-truck-with-circular-clock_24x24.png']}") !important; 
+	background-position: right 15px center !important;
+    background-repeat: no-repeat !important;
+}
+
+.uiSubMenu3 h3 a {
+	color: white !important;
+	background-color:transparent !important;
+	
+}
+
+.uiSubMenu3 h3 a:hover {
+	color: white !important;
+	background-color:transparent !important;
+}
+
+/* Cadastro 
+.uiSubMenu25 h3 {
+	padding: 6px !important; 
+	background-color: #000 !important;
+	background-image: url("#{resource['icons/shared-folder_24x24.png']}") !important; 
+	background-position: right 15px center !important;
+    background-repeat: no-repeat !important;
+}
+
+.uiSubMenu25 h3 a {
+	color: white !important;
+	background-color:transparent !important;
+	
+}
+
+.uiSubMenu25 h3 a:hover {
+	color: white !important;
+	background-color:transparent !important;
+}
+*/
+/* Projetos 
+.uiSubMenu19 h3 {
+	padding: 6px !important; 
+	background-color: #000 !important;
+	background-image: url("#{resource['icons/statistics-on-a-screen-and-a-smartphone_24x24.png']}") !important; 
+	background-position: right 15px center !important;
+    background-repeat: no-repeat !important;
+}
+
+.uiSubMenu19 h3 a {
+	color: white !important;
+	background-color:transparent !important;
+	
+}
+
+.uiSubMenu19 h3 a:hover {
+	color: white !important;
+	background-color:transparent !important;
+}
+*/

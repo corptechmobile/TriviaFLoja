@@ -1,0 +1,179 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"> 
+   	
+   	<div class="tab-content-space">
+    <div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+    <f:metadata>
+      <f:viewAction action="#{orcamentoGrupoBean.clearSession}"/>
+    </f:metadata>
+
+		<h:form id="formProdutoBuscar">
+
+			<p:growl id="msg" showDetail="true" life="3000" />
+			<p:focus context="panelFilterOrcamentoGrupoBean" />
+			<p:defaultCommand target="btnBuscar" />
+
+		    <p:toolbar id="tb">
+		        <f:facet name="left">
+		            <p:commandButton id="btnNovo"  value="Novo" icon="icon-new" update=":edicaoOrcamentoGrupo" 
+		            	actionListener="#{orcamentoGrupoBean.novo}"
+		            	 />
+		            <p:commandButton id="btnFilter"  value="Filtrar" icon="icon-filter" update="@none" 
+		            	onclick="openFilter('formProdutoBuscar\\:panelFilterOrcamentoGrupoBean','formProdutoBuscar\\:descLinhaProd')" />
+		        </f:facet>
+		        <f:facet name="right">
+					<p:commandButton id="menuHome" icon="ui-icon-home"
+						actionListener="#{orcamentoGrupoBean.addHome}" update="@form:msg"
+						process="@this" title="Home" />
+					<p:commandButton icon="ui-icon-star"
+						actionListener="#{orcamentoGrupoBean.addFavoritos}"
+						update="@form:msg" process="@this" title="Favoritos"
+						oncomplete="updateMenuHome();" />
+	        	</f:facet>
+		    </p:toolbar>
+
+			<p:sticky target="tb" margin="50" />
+
+			<p:panel id="panelFilterOrcamentoGrupoBean" widgetVar="panelFilterOrcamentoGrupoBean" >
+				<div class="ui-fluid">
+				<p:panelGrid columns="5" columnClasses="ui-grid-col-2,ui-grid-col-1,ui-grid-col-1,ui-grid-col-0,ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+				 <p:inputText id="descricaoFilter" value="#{orcamentoGrupoBean.descricaoFilter}" placeholder="Descrição" style="width:100%;" />
+				<p:commandButton id="btnBuscar" value="Buscar"
+								actionListener="#{orcamentoGrupoBean.buscar}"
+								update="@form :formResultFilterOrcamentoGrupoBean" icon="icon-search"
+								 />	
+				<p:commandButton 
+								 id="btnLimpar" 
+								 value="Limpar"
+								 action="#{orcamentoGrupoBean.limpar}"
+								 update="@form :formResultFilterOrcamentoGrupoBean "
+								 icon="ui-icon-close" 
+							 />	
+				
+				</p:panelGrid>
+				</div>
+			</p:panel>
+
+		</h:form>
+
+		<h:form id="edicaoOrcamentoGrupo">
+	
+		<p:blockUI block="panelOrcamentoGrupo" trigger="btnSalvar" widgetVar="bUIOrcamentoGrupo" >
+			LOADING<br />
+        	<p:graphicImage library="images" name="progress_bar.gif"/>
+		</p:blockUI> 
+		
+		<p:panel id="panelOrcamentoGrupo" widgetVar="panelOrcamentoGrupo" header="#{orcamentoGrupoBean.tituloAdd}" closable="true" >
+			
+			<p:focus context="panelOrcamentoGrupo"/>
+			<p:messages id="msgAdd"  showDetail="true" showSummary="false" closable="true" />
+			
+			<div class="ui-fluid">
+			<p:panelGrid columns="9" columnClasses="ui-grid-col-0,ui-grid-col-4,ui-grid-col-0,ui-grid-col-1,ui-grid-col-0,ui-grid-col-1,ui-grid-col-0,ui-grid-col-1,ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+				<h:outputLabel value="Descrição:" for="descricao"/>
+				<p:inputText id="descricao" value="#{orcamentoGrupoBean.selecionada.descricao}"  required="true" requiredMessage="Descrição é obrigatório" />
+
+				<h:outputLabel value="Perc. Faturamento:" for="percFaturamento"/>
+				<p:inputNumber id="percFaturamento" value="#{orcamentoGrupoBean.selecionada.percFaturamento}" decimalPlaces="2" decimalSeparator="," thousandSeparator="." />
+
+				<h:outputLabel value="Ordem:" for="ordem"/>
+				<p:spinner id="ordem" value="#{orcamentoGrupoBean.selecionada.ordem}" required="true" size="5" requiredMessage="Ordem é obrigatório"  min="0" max="1000"  />
+
+				<h:outputLabel value="Status:" for="status"/>
+				<p:selectOneMenu id="status" value="#{orcamentoGrupoBean.selecionada.ativo}">
+                    <f:selectItem itemLabel="Ativo" itemValue="1" />
+                    <f:selectItem itemLabel="Inativo" itemValue="0" />
+                </p:selectOneMenu>
+
+				<p:commandButton id="btnSalvar" 
+									value="Salvar" 
+										actionListener="#{orcamentoGrupoBean.salvar}" 
+											update=":formResultFilterOrcamentoGrupoBean, :edicaoOrcamentoGrupo"
+											icon="icon-save"  /> 
+			</p:panelGrid>
+			
+			</div>
+		</p:panel>
+		
+		</h:form>
+		
+		<h:form id="formResultFilterOrcamentoGrupoBean">
+		
+				<p:dataTable value="#{orcamentoGrupoBean.lista}"
+				             widgetVar="UIdtItensOrcamentoGrupoBean" 
+						     var="orcamentogrupo" 
+						     paginator="true" rows="15"
+							 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							 rowsPerPageTemplate="5,10,15,20,30" 
+							 emptyMessage="Nenhum registro encontrado." 
+							 reflow="true" >
+				
+				    <p:column sortBy="#{orcamentogrupo.id}" styleClass="customCollumnId" priority="1" >
+				    	<f:facet name="header">Código</f:facet>
+				    	<h:outputText value="#{orcamentogrupo.id}" />
+				  	</p:column>
+				
+				  	<p:column sortBy="#{orcamentogrupo.descricao}" priority="1"  >
+					   <f:facet name="header">Descrição</f:facet>
+					   <h:outputText value="#{orcamentogrupo.descricao}" />
+				  	</p:column>
+				
+				  	<p:column sortBy="#{orcamentogrupo.percFaturamento}" priority="1" style="width:180px;" styleClass="customCollumnValor">
+					   <f:facet name="header">Perc. Faturamento</f:facet>
+					   <h:outputText value="#{orcamentogrupo.percFaturamento}" converter="currencyFormat" />
+				  	</p:column>
+
+				  	<p:column sortBy="#{orcamentogrupo.ordem}" priority="1"  styleClass="customCollumnValor" >
+					   <f:facet name="header">Ordem</f:facet>
+					   <h:outputText value="#{orcamentogrupo.ordem}"  />
+				  	</p:column>
+				
+					<p:column style="width:180px;" priority="4">
+						<f:facet name="header">Status</f:facet>
+						<center>
+							<h:outputText value="#{orcamentogrupo.ativo==0 ? 'Inativo': 'Ativo'}" />
+						</center>
+					</p:column>
+
+				  	<p:column styleClass="customCollumn3Icon">
+					<f:facet name="header"></f:facet>
+					<p:commandButton action="#{orcamentoGrupoBean.editar}" 
+									update=":edicaoOrcamentoGrupo"  
+									icon="ui-icon-pencil" 
+									title="Editar" 
+									onclick="PF('panelOrcamentoGrupo').show()">
+						<f:setPropertyActionListener target="#{orcamentoGrupoBean.selecionada}" value="#{orcamentogrupo}" />
+					</p:commandButton>
+					<p:commandButton action="#{orcamentoGrupoBean.eventos}"
+						update="@none" icon="icon-clientes" title="Associar Eventos Financeiros"
+						onstart="closeTab('orcamentoGrupoBean')" 
+						oncomplete="openTab('orcamentoGrupoBean', 'Grupo orçamento / #{orcamentogrupo.id} - #{orcamentogrupo.descricao}', 'Grupo orçamento / #{orcamentogrupo.id} - #{orcamentogrupo.descricao}', 'orcamentogrupo/eventos.jsf?id=1')">
+						<f:setPropertyActionListener target="#{grupoOrcEventoFinanFBBean.selecionadaId}" value="#{orcamentogrupo.id}" />
+					</p:commandButton>
+					<p:commandButton action="#{orcamentoGrupoBean.excluir}" update="@form, :edicaoOrcamentoGrupo :formResultFilterOrcamentoGrupoBean" icon="ui-icon-trash" title="Excluir" >
+						<f:setPropertyActionListener target="#{orcamentoGrupoBean.selecionadaId}" value="#{orcamentogrupo.id}" />
+					<p:confirm header="Confirme" message="Deseja Excluir o grupo #{orcamentogrupo.id} - #{orcamentogrupo.descricao} ?" icon="ui-icon-alert" />	
+					</p:commandButton>
+			</p:column>
+				
+			  </p:dataTable>
+			  
+			  	<p:toolbar id="tbTotal">
+			        <f:facet name="right">
+			        	Total: #{orcamentoGrupoBean.lista.size()}
+			        </f:facet>
+		        </p:toolbar>
+		</h:form>
+		
+		<script>
+			$('#edicaoOrcamentoGrupo\\:panelOrcamentoGrupo').hide();
+			$('#formProdutoBuscar\\:panelFilterOrcamentoGrupoBean').hide();
+		</script>
+		
+   		
+	</div>
+
+</ui:composition> 

@@ -1,0 +1,172 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"> 
+   	
+   	<div class="tab-content-space">
+    <div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+    <f:metadata>
+      <f:viewAction action="#{comissaoFaixaDescBean.clearSession}"/>
+    </f:metadata>
+
+		<h:form id="formProdutoBuscar">
+
+			<p:growl id="msg" showDetail="true" life="3000" />
+			<p:focus context="panelFilterComissaoFaixaDescBean" />
+			<p:defaultCommand target="btnBuscar" />
+
+		    <p:toolbar id="tb">
+		        <f:facet name="left">
+		            <p:commandButton id="btnNovo"  value="Novo" icon="icon-new" update=":edicaoComissaoFaixa" 
+		            	actionListener="#{comissaoFaixaDescBean.novo}"
+		            	 />
+		            <p:commandButton id="btnFilter"  value="Filtrar" icon="icon-filter" update="@none" 
+		            	onclick="openFilter('formProdutoBuscar\\:panelFilterComissaoFaixaDescBean','formProdutoBuscar\\:descLinhaProd')" />
+		        </f:facet>
+		        <f:facet name="right">
+					<p:commandButton id="menuHome" icon="ui-icon-home"
+						actionListener="#{comissaoFaixaDescBean.addHome}" update="@form:msg"
+						process="@this" title="Home" />
+					<p:commandButton icon="ui-icon-star"
+						actionListener="#{comissaoFaixaDescBean.addFavoritos}"
+						update="@form:msg" process="@this" title="Favoritos"
+						oncomplete="updateMenuHome();" />
+	        	</f:facet>
+		    </p:toolbar>
+
+			<p:sticky target="tb" margin="50" />
+
+			<p:panel id="panelFilterComissaoFaixaDescBean" widgetVar="panelFilterComissaoFaixaDescBean" >
+				<div class="ui-fluid">
+				<p:panelGrid columns="5" columnClasses="ui-grid-col-2,ui-grid-col-1,ui-grid-col-1,ui-grid-col-0,ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+				 <p:inputText id="descLinhaProd" value="#{comissaoFaixaDescBean.descLinhaProd}" placeholder="Linha de Produto" style="width:100%;" />
+				 <p:inputNumber id="descfaixa1" value="#{comissaoFaixaDescBean.descfaixa1}" decimalSeparator="," thousandSeparator="." decimalPlaces="2" onfocus="this.select()" placeholder="Faixa Inicial"  />
+				 <p:inputNumber id="descfaixa2" value="#{comissaoFaixaDescBean.descfaixa2}" decimalSeparator="," thousandSeparator="." decimalPlaces="2" onfocus="this.select()" placeholder="Faixa Final"  />
+				<p:commandButton id="btnBuscar" value="Buscar"
+								actionListener="#{comissaoFaixaDescBean.buscar}"
+								update="@form :formResultFilterComissaoFaixaDescBean" icon="icon-search"
+								 />	
+				<p:commandButton 
+								 id="btnLimpar" 
+								 value="Limpar"
+								 action="#{comissaoFaixaDescBean.limpar}"
+								 update="@form :formResultFilterComissaoFaixaDescBean "
+								 icon="ui-icon-close" 
+							 />	
+				
+				</p:panelGrid>
+				</div>
+			</p:panel>
+
+		</h:form>
+
+		<h:form id="edicaoComissaoFaixa">
+	
+		<p:blockUI block="panelComissaoFaixa" trigger="btnSalvar" widgetVar="bUIComissaoFaixa" >
+			LOADING<br />
+        	<p:graphicImage library="images" name="progress_bar.gif"/>
+		</p:blockUI> 
+		
+		<p:panel id="panelComissaoFaixa" widgetVar="panelComissaoFaixa" header="#{comissaoFaixaDescBean.tituloAdd}" closable="true" >
+			
+			<p:focus context="panelComissaoFaixa"/>
+			<p:messages id="msgAdd"  showDetail="true" showSummary="false" closable="true" />
+			
+			<div class="ui-fluid">
+			<p:panelGrid columns="9" columnClasses="ui-grid-col-0,ui-grid-col-4,ui-grid-col-0,ui-grid-col-1,ui-grid-col-0,ui-grid-col-1,ui-grid-col-0,ui-grid-col-1,ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+				<h:outputLabel value="Linha de Produto:" for="produtoLinhaId"/>
+		        <p:selectOneMenu  id="produtoLinhaId" value="#{comissaoFaixaDescBean.produtoLinhaFilter}" converter="produtoLinhaFBConverter" filter="true" autoWidth="true" required="true" requiredMessage="Selecione uma Linha de Produto">
+					<f:selectItem itemLabel="Todos" itemValue="#{null}" />  
+					<f:selectItems value="#{comissaoFaixaDescBean.linhaProdutoSelect}" /> 
+				</p:selectOneMenu>
+				
+				<h:outputLabel value="Faixa desconto Inicial:" for="faixaDesconto1"/>
+				<p:inputNumber id="faixaDesconto1" value="#{comissaoFaixaDescBean.selecionada.faixaDesc1}" decimalPlaces="2" decimalSeparator="," thousandSeparator="." required="true" maxValue="100" requiredMessage="Faixa de desconto inicial é obrigatório" />
+
+				<h:outputLabel value="Faixa desconto final:" for="faixaDesconto2"/>
+				<p:inputNumber id="faixaDesconto2" value="#{comissaoFaixaDescBean.selecionada.faixaDesc2}" decimalPlaces="2" decimalSeparator="," thousandSeparator="." required="true" maxValue="100" requiredMessage="Faixa de desconto final é obrigatório" />
+				
+				<h:outputLabel value="Perc. Comissão:" for="percComissao"/>
+				<p:inputNumber id="percComissao" value="#{comissaoFaixaDescBean.selecionada.percComissao}" decimalPlaces="2" decimalSeparator="," thousandSeparator="." required="true" maxValue="100" requiredMessage="Percentual de Comissão é obrigatório" />
+				<p:commandButton id="btnSalvar" 
+									value="Salvar" 
+										actionListener="#{comissaoFaixaDescBean.salvar}" 
+											update=":formResultFilterComissaoFaixaDescBean, :edicaoComissaoFaixa"
+											icon="icon-save"  /> 
+			</p:panelGrid>
+			
+			</div>
+		</p:panel>
+		
+		</h:form>
+		
+		<h:form id="formResultFilterComissaoFaixaDescBean">
+		
+				<p:dataTable value="#{comissaoFaixaDescBean.lista}"
+				             widgetVar="UIdtItensComissaoFaixaDescBean" 
+						     var="comissaofaixa" 
+						     paginator="true" rows="15"
+							 paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+							 rowsPerPageTemplate="5,10,15,20,30" 
+							 emptyMessage="Nenhum registro encontrado." 
+							 reflow="true" >
+				
+				    <p:column sortBy="#{comissaofaixa.id}" styleClass="customCollumnId" priority="1" >
+				    	<f:facet name="header">Código</f:facet>
+				    	<h:outputText value="#{comissaofaixa.id}" />
+				  	</p:column>
+				
+				  	<p:column sortBy="#{comissaofaixa.produtoLinhaDesc}" priority="1"  >
+					   <f:facet name="header">Linha</f:facet>
+					   <h:outputText value="#{comissaofaixa.codEdt} - #{comissaofaixa.produtoLinhaDesc}" />
+				  	</p:column>
+				
+				  	<p:column sortBy="#{comissaofaixa.faixaDesc1}" priority="1"  style="width:130px;" styleClass="customCollumnValor" >
+					   <f:facet name="header">Faixa Inicial</f:facet>
+					   <h:outputText value="#{comissaofaixa.faixaDesc1}" converter="currencyFormat" />
+				  	</p:column>
+				
+				  	<p:column sortBy="#{comissaofaixa.faixaDesc2}" priority="1"  style="width:130px;" styleClass="customCollumnValor">
+					   <f:facet name="header">Faixa Final</f:facet>
+					   <h:outputText value="#{comissaofaixa.faixaDesc2}" converter="currencyFormat" />
+				  	</p:column>
+
+				  	<p:column sortBy="#{comissaofaixa.percComissao}" priority="1"  style="width:170px;" styleClass="customCollumnValor">
+					   <f:facet name="header">Perc. Comissão</f:facet>
+					   <h:outputText value="#{comissaofaixa.percComissao}" converter="currencyFormat" />
+				  	</p:column>
+				  	
+				  	<p:column styleClass="customCollumn2Icon">
+					<f:facet name="header"></f:facet>
+					<p:commandButton action="#{comissaoFaixaDescBean.editar}" 
+									update=":edicaoComissaoFaixa"  
+									icon="ui-icon-pencil" 
+									title="Editar" 
+									onclick="PF('panelComissaoFaixa').show()">
+						<f:setPropertyActionListener target="#{comissaoFaixaDescBean.selecionada}" value="#{comissaofaixa}" />
+					</p:commandButton>
+					<p:commandButton action="#{comissaoFaixaDescBean.excluir}" update="@form, :edicaoComissaoFaixa :formResultFilterComissaoFaixaDescBean" icon="ui-icon-trash" title="Excluir" >
+						<f:setPropertyActionListener target="#{comissaoFaixaDescBean.selecionadaId}" value="#{comissaofaixa.id}" />
+					<p:confirm header="Confirme" message="Deseja Excluir a linha #{comissaofaixa.produtoLinhaDesc} entre as faixas #{comissaofaixa.faixaDesc1} e #{comissaofaixa.faixaDesc2}?" icon="ui-icon-alert" />	
+					</p:commandButton>
+			</p:column>
+				
+			  </p:dataTable>
+			  
+			  	<p:toolbar id="tbTotal">
+			        <f:facet name="right">
+			        	Total: #{comissaoFaixaDescBean.lista.size()}
+			        </f:facet>
+		        </p:toolbar>
+		</h:form>
+		
+		<script>
+			$('#edicaoComissaoFaixa\\:panelComissaoFaixa').hide();
+			$('#formProdutoBuscar\\:panelFilterComissaoFaixaDescBean').hide();
+		</script>
+		
+   		
+	</div>
+
+</ui:composition> 

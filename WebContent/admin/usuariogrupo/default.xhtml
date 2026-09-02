@@ -1,0 +1,174 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+    
+    <div class="tab-content-space">
+    <div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+    <f:metadata>
+	      <f:viewAction action="#{usuarioGrupoBean.clearSession}"/>
+     </f:metadata>
+    
+    <h:form id="consultaUsuarioGrupo">
+    
+    	<p:growl id="msg" showDetail="true" life="3000"/>
+    	<p:focus context="panelFiltroUsuarioGrupo"/>
+    	<p:defaultCommand target="btnBuscar" />
+    	
+	    <p:toolbar id="tb">
+	        <f:facet name="left">
+	            <p:commandButton value="Novo" 
+								 actionListener="#{usuarioGrupoBean.novo}"
+								 update=":edicaoUsuarioGrupo"
+								 icon="icon-new"
+								 onclick="PF('bUIUsuarioGrupo').show()"
+								 />
+								 
+	            <p:commandButton value="Filtrar" icon="icon-filter" update="@none" 
+	            	onclick="openFilter('consultaUsuarioGrupo\\:panelFiltroUsuarioGrupo','consultaUsuarioGrupo\\:descricaoFilter')" />
+	        </f:facet>
+	        <f:facet name="right">
+		        <p:commandButton icon="ui-icon-home" action="#{usuarioGrupoBean.addHome}" update="msg" title="Home" />
+		        <p:commandButton icon="ui-icon-star" actionListener="#{usuarioGrupoBean.addFavoritos}" update="msg" title="Favoritos" oncomplete="updateMenuHome()"/>
+        	</f:facet>
+	        
+	    </p:toolbar>
+	    
+	    <p:panel id="panelFiltroUsuarioGrupo" widgetVar="panelFiltroUsuarioGrupo" closable="true" >
+	    	<div class="ui-fluid">
+	    	<p:panelGrid columns="3" columnClasses="ui-grid-col-2,ui-grid-col-1,ui-grid-col-1" layout="grid" styleClass="ui-panelgrid-blank" >
+				
+				<p:inputText id="descricaoFilter" value="#{usuarioGrupoBean.descricaoFilter}" placeholder="Descrição" />
+
+				<p:commandButton 
+					 id="btnBuscar" 
+					 value="Buscar"
+					 actionListener="#{usuarioGrupoBean.buscar}"
+					 update=":listagemUsuarioGrupo"
+					 icon="icon-search" 
+					 />
+				 <p:commandButton 
+					 id="btnLimpar" 
+					 value="Limpar"
+					 action="#{usuarioGrupoBean.limpar}"
+					 update="descricaoFilter :listagemUsuarioGrupo "
+					 icon="ui-icon-close" 
+					 />
+	    	</p:panelGrid>
+	    	</div>
+	    </p:panel>
+	    
+	    <p:sticky target="tb" margin="50"/>
+	    
+    </h:form>
+    
+	<h:form id="edicaoUsuarioGrupo">
+	
+		<p:blockUI block="panelUsuarioGrupo" trigger="btnSalvar" widgetVar="bUIUsuarioGrupo">
+			LOADING<br />
+        	<p:graphicImage library="images" name="progress_bar.gif"/>
+		</p:blockUI>
+		
+		<p:panel id="panelUsuarioGrupo" widgetVar="panelUsuarioGrupo" header="#{usuarioGrupoBean.tituloAdd}" closable="true" >
+			
+			<p:focus context="panelUsuarioGrupo"/>
+			<p:messages id="msgAdd" showDetail="true" closable="true"/>
+			
+			<div class="ui-fluid">
+			<p:panelGrid columns="6" columnClasses="ui-grid-col-0,ui-grid-col-3,ui-grid-col-0,ui-grid-col-3,ui-grid-col-0,ui-grid-col-1" layout="grid" styleClass="ui-panelgrid-blank" >
+				<h:outputLabel value="Descrição:" for="descricao"/>
+				<p:inputText id="descricao" value="#{usuarioGrupoBean.selecionada.descricao}" required="true" requiredMessage="Descrição é obrigatório" />
+				
+				<h:outputLabel value="E-mail:" for="email"/>
+				<p:inputText id="email" value="#{usuarioGrupoBean.selecionada.email}" required="true" requiredMessage="E-mail é obrigatório" />
+				
+				<h:outputLabel value="Desconto Máximo:" for="descontoMaximo"/>
+				<p:inputNumber id="descontoMaximo" value="#{usuarioGrupoBean.selecionada.descontoMaximo}" decimalPlaces="2" decimalSeparator="," thousandSeparator="." required="true" requiredMessage="Desconto Máximo é obrigatório" />
+			</p:panelGrid>
+			
+			<p:panel id="panelUsuarioGrupoMenuAcesso" widgetVar="panelUsuarioGrupoMenuAcesso" header="CONFIGURAÇÕES DE ACESSO DO GRUPO" > 
+				<p:treeTable widgetVar="dataTableUsuarioGrupoMenuAcesso" var="menuAcesso" value="#{usuarioGrupoBean.treeTable}" selectionMode="checkbox" selection="#{usuarioGrupoBean.treeTableSelected}">
+						
+						<p:ajax event="select" listener="#{usuarioGrupoBean.onNodeSelect}" update="@none" />
+				        <p:ajax event="unselect" listener="#{usuarioGrupoBean.onNodeUnselect}" update="@none" />
+          
+						<p:column headerText="Descrição">
+							#{menuAcesso.descricao}
+				        </p:column>
+				        
+				        <p:column headerText="Alt" priority="3">
+							#{menuAcesso.alt} 
+				        </p:column>
+				</p:treeTable>
+			</p:panel>
+			
+			</div>
+			
+			<br/>
+			<p:commandButton id="btnSalvar" 
+					value="Salvar" 
+						actionListener="#{usuarioGrupoBean.salvar}" 
+							update=":listagemUsuarioGrupo, :edicaoUsuarioGrupo"
+							icon="icon-save"  /> 
+			
+						
+		</p:panel>
+		
+	</h:form>
+
+	<h:form id="listagemUsuarioGrupo">
+	
+		<p:dataTable widgetVar="dataTableUsuarioGrupo" var="usuarioGrupo" value="#{usuarioGrupoBean.lista}" emptyMessage="Nenhum resultado encontrado.">
+
+			<p:column sortBy="#{usuarioGrupo.id}" styleClass="customCollumnId">
+				<f:facet name="header">ID</f:facet>
+				#{usuarioGrupo.id} 
+	        </p:column>
+
+			<p:column sortBy="#{usuarioGrupo.descricao}">
+				<f:facet name="header">Descrição</f:facet>
+				#{usuarioGrupo.descricao}
+	        </p:column>
+	        
+	        <p:column sortBy="#{usuarioGrupo.email}" priority="2">
+				<f:facet name="header">E-mail</f:facet>
+				#{usuarioGrupo.email}
+	        </p:column>
+	        
+	        <p:column sortBy="#{usuarioGrupo.descricao}" styleClass="customCollumnValor">
+				<f:facet name="header">Desconto</f:facet>
+				<h:outputText value="#{usuarioGrupo.descontoMaximo}" converter="currencyFormat" />
+	        </p:column>
+	        
+	        <p:column priority="2" styleClass="customCollumnPermissoes">
+				<f:facet name="header">Permissões</f:facet>
+				#{usuarioGrupo.menus.size()}
+	        </p:column>
+
+			<p:column styleClass="customCollumn2Icon">
+				<f:facet name="header"></f:facet>
+				<p:commandButton action="#{usuarioGrupoBean.editar}" 
+								update=":edicaoUsuarioGrupo" 
+								icon="ui-icon-pencil" 
+								title="Editar" 
+								onclick="PF('bUIUsuarioGrupo').show()">
+					<f:setPropertyActionListener target="#{usuarioGrupoBean.selecionada}" value="#{usuarioGrupo}" />
+				</p:commandButton>
+				<p:commandButton action="#{usuarioGrupoBean.excluir}" update="@form, :edicaoUsuarioGrupo" icon="ui-icon-trash" title="Excluir" >
+					<f:setPropertyActionListener target="#{usuarioGrupoBean.selecionada}" value="#{usuarioGrupo}" />
+					<p:confirm header="Confirme" message="Deseja Excluir #{usuarioGrupo.descricao}?" icon="ui-icon-alert" />	
+				</p:commandButton>
+			</p:column>
+
+		</p:dataTable>
+	</h:form>
+	
+	<script>
+		$('#edicaoUsuarioGrupo\\:panelUsuarioGrupo').hide();
+		$('#consultaUsuarioGrupo\\:panelFiltroUsuarioGrupo').hide();
+	</script>
+	
+	</div>
+	
+</ui:composition>

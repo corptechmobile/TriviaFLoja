@@ -1,0 +1,220 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+    
+    <div class="tab-content-space">
+    <div class="panelUrlDescricao">Orçamento Grupo / Associação de Eventos Financeiros / #{grupoOrcEventoFinanFBBean.selecionadaId} - #{grupoOrcEventoFinanFBBean.selecionada.descricao}</div>
+	<f:metadata>
+	      <f:viewAction action="#{grupoOrcEventoFinanFBBean.init}"/>
+    </f:metadata>     
+     <h:form id="panelGrupoEvento">
+     
+     	<p:growl id="msgPainelGrupoEvento" life="3000" showDetail="true" showSummary="false" escape="true"/>
+     	
+	     <p:toolbar id="tb">
+	        <f:facet name="left">
+	            <p:commandButton value="Filtrar" 
+								 icon="icon-filter" 
+								 update="@none" 
+	            				 onclick="openFilter('consultaGrupoEvento\\:panelFiltroGrupoEvento','consultaGrupoEvento\\:descricaoFilter')" 
+								 />
+								 
+				<p:commandButton 
+					 id="addCliNaoAssoc" 
+					 value="Incluir (#{grupoOrcEventoFinanFBBean.eveNaoAssocSelected.size()})"
+					 actionListener="#{grupoOrcEventoFinanFBBean.addEventos}"
+					 update="@form  :consultaGrupoEvento :listagemGrupoEvento"
+					 icon="icon-clientes"  
+					 disabled="#{grupoOrcEventoFinanFBBean.eveNaoAssocSelected.size() == 0}" 
+					 oncomplete="closePanelFiltroGrupoEvento()"
+					 />
+				
+				<p:commandButton 
+					 id="removeCliAssoc" 
+					 value="Remover (#{grupoOrcEventoFinanFBBean.eveAssocSelected.size()})"
+					 actionListener="#{grupoOrcEventoFinanFBBean.removeEventos}"
+					 update="@form :consultaGrupoEvento :listagemGrupoEvento"
+					 icon="icon-clientes"  
+					 disabled="#{grupoOrcEventoFinanFBBean.eveAssocSelected.size() == 0}" 
+					 oncomplete="closePanelFiltroGrupoEvento()"
+					 />
+	        </f:facet>
+	    </p:toolbar>
+	    
+	    <p:sticky target="tb" margin="50"/>
+	    
+    </h:form>
+	    
+    <h:form id="consultaGrupoEvento">
+    	
+    	<p:focus context="panelFiltroGrupoEvento"/>
+    	
+	    <p:panel id="panelFiltroGrupoEvento" widgetVar="panelFiltroGrupoEvento" header="Buscar Eventos Financeiros Não Associados">
+	    	<f:facet name="actions">
+				<p:commandLink styleClass="ui-panel-titlebar-icon ui-corner-all ui-state-default" title="Fechar" update="@none" process="@none" onclick="openFilter('consultaGrupoEvento\\:panelFiltroGrupoEvento','consultaGrupoEvento\\:descricaoFilter')">
+					<h:outputText styleClass="ui-icon ui-icon-closethick" />
+				</p:commandLink>
+			</f:facet>
+					
+	    	<div class="ui-fluid">
+	    	<p:panelGrid columns="4" columnClasses="ui-grid-col-3, ui-grid-col-2, ui-grid-col-0, ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+				
+		        <p:selectOneMenu  id="grupoFinanceiroIdFilter" value="#{grupoOrcEventoFinanFBBean.grupoFinanceiroFilter}" converter="grupoFinanceiroFBConverter" filter="true" autoWidth="true">
+					<f:selectItem itemLabel="Grupo Financeiro" itemValue="#{null}" />  
+					<f:selectItems value="#{grupoOrcEventoFinanFBBean.grupoFinanceiroSelect}" />  
+				</p:selectOneMenu>
+				
+				<p:inputText id="descricaoFilter" value="#{grupoOrcEventoFinanFBBean.descricaoFilter}" placeholder="Evento Financeiro" />
+					
+				<p:commandButton 
+						 id="btnBuscar" 
+						 value="Buscar"
+						 actionListener="#{grupoOrcEventoFinanFBBean.buscar}"
+						 update="@form :panelGrupoEvento "
+						 icon="icon-search"
+						 onclick="PF('bUIDTGrupoEventoFilter').show()" 
+						 />
+						 
+				 <p:commandButton 
+						 id="btnLimpar" 
+						 value="Limpar"
+						 action="#{grupoOrcEventoFinanFBBean.limpar}"
+						 update="@form :panelGrupoEvento "
+						 icon="ui-icon-close" 
+						 onclick="PF('bUIDTGrupoEventoFilter').show()" 
+						 />
+						 
+	    	</p:panelGrid>
+	    	</div>
+	    	
+	    	<p:blockUI block="dtGrupoEventoFilter" widgetVar="bUIDTGrupoEventoFilter">
+				LOADING<br />
+	        	<p:graphicImage library="images" name="progress_bar.gif"/>
+			</p:blockUI>
+			<p:panel header="(#{grupoOrcEventoFinanFBBean.listaFilter.size()}) Lista de Eventos Financeiros Não Associados">
+	    	<p:dataTable id="dtGrupoEventoFilter" var="eventofinanceiro"
+						value="#{grupoOrcEventoFinanFBBean.listaFilter}" emptyMessage="Nenhuma registro encontrado."
+						selection="#{grupoOrcEventoFinanFBBean.eveNaoAssocSelected}" 
+						rowKey="#{eventofinanceiro.id}"
+						scrollable="true"
+						scrollHeight="400" 
+						reflow="true">
+			
+					<p:ajax event="rowSelect" listener="#{grupoOrcEventoFinanFBBean.onRowFilterSelect}" update=":panelGrupoEvento" process="dtGrupoEventoFilter" />
+					<p:ajax event="rowUnselect" listener="#{grupoOrcEventoFinanFBBean.unRowFilterSelect}" update=":panelGrupoEvento" process="dtGrupoEventoFilter" />
+					<p:ajax event="rowSelectCheckbox" listener="#{grupoOrcEventoFinanFBBean.onRowFilterSelect}" update=":panelGrupoEvento" process="dtGrupoEventoFilter" />
+					<p:ajax event="rowUnselectCheckbox" listener="#{grupoOrcEventoFinanFBBean.unRowFilterSelect}" update=":panelGrupoEvento" process="dtGrupoEventoFilter" />
+					<p:ajax event="toggleSelect" listener="#{grupoOrcEventoFinanFBBean.onRowFilterSelectAll}" update=":panelGrupoEvento" process="dtGrupoEventoFilter" />
+					
+					<f:facet name="header"></f:facet>
+		        	<p:column selectionMode="multiple" style="width:50px;text-align:center"/>
+			
+					<p:column sortBy="#{eventofinanceiro.id}" styleClass="customCollumnId" >
+						<f:facet name="header">CÓDIGO</f:facet>
+						<h:outputText value="#{eventofinanceiro.id} " />
+		        	</p:column>
+		        	
+					<p:column sortBy="#{eventofinanceiro.descEventoFinanceiro}" >
+						<f:facet name="header">Evento Financeiro</f:facet>
+						<h:outputText value="#{eventofinanceiro.descEventoFinanceiro}" />
+		        	</p:column>
+
+					<p:column sortBy="#{eventofinanceiro.descGrupoFinanceiro}" >
+						<f:facet name="header">Grupo Financeiro</f:facet>
+						<h:outputText value="#{eventofinanceiro.descGrupoFinanceiro}" />
+		        	</p:column>
+
+
+			</p:dataTable>
+			</p:panel>
+	    </p:panel>
+	    
+    </h:form>
+    
+	<h:form id="listagemGrupoEvento">
+		<p:panel header="(#{grupoOrcEventoFinanFBBean.lista.size()}) Lista de Eventos Financeiros Associados">
+	    	<div class="ui-fluid">
+	    	<p:panelGrid columns="4" columnClasses="ui-grid-col-3, ui-grid-col-2, ui-grid-col-0, ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+				
+		        <p:selectOneMenu  id="grupoFinanceiroIdFilter2" value="#{grupoOrcEventoFinanFBBean.grupoFinanceiroAssocFilter}" converter="grupoFinanceiroFBConverter" filter="true" autoWidth="true">
+					<f:selectItem itemLabel="Grupo Financeiro" itemValue="#{null}" />  
+					<f:selectItems value="#{grupoOrcEventoFinanFBBean.grupoFinanceiroAssocSelect}" />  
+				</p:selectOneMenu>
+				
+				<p:inputText id="descricaoFilter2" value="#{grupoOrcEventoFinanFBBean.descricaoAssocFilter}" placeholder="Evento Financeiro" />
+					 
+				<p:commandButton 
+						 id="btnBuscar2" 
+						 value="Buscar"
+						 actionListener="#{grupoOrcEventoFinanFBBean.buscarAssoc}"
+						 update="@form :listagemGrupoEvento"
+						 icon="icon-search"
+						 onclick="PF('bUIDTGrupoEventoFilter2').show()" 
+						 />
+						 
+				 <p:commandButton 
+						 id="btnLimpar2" 
+						 value="Limpar"
+						 action="#{grupoOrcEventoFinanFBBean.limparAssoc}"
+						 update="@form :listagemGrupoEvento"
+						 icon="ui-icon-close" 
+						 onclick="PF('bUIDTGrupoEventoFilter2').show()" 
+						 />
+						 
+	    	</p:panelGrid>
+	    	</div>	
+	    	<p:blockUI block="dtGrupoEvento" widgetVar="bUIDTGrupoEventoFilter2">
+				LOADING<br />
+	        	<p:graphicImage library="images" name="progress_bar.gif"/>
+			</p:blockUI>		
+		<p:dataTable id="dtGrupoEvento" var="eventofinanceiroAssoc"
+				value="#{grupoOrcEventoFinanFBBean.lista}" emptyMessage="Nenhuma registro encontrado."
+				selection="#{grupoOrcEventoFinanFBBean.eveAssocSelected}" 
+				rowKey="#{eventofinanceiroAssoc.id}"
+				scrollable="true"
+				scrollHeight="400" 
+				reflow="true">
+				
+			<p:ajax event="rowSelect" listener="#{grupoOrcEventoFinanFBBean.onRowListaSelect}" update=":panelGrupoEvento" process="dtGrupoEvento" />
+			<p:ajax event="rowUnselect" listener="#{grupoOrcEventoFinanFBBean.unRowListaSelect}" update=":panelGrupoEvento " process="dtGrupoEvento" />
+			<p:ajax event="rowSelectCheckbox" listener="#{grupoOrcEventoFinanFBBean.onRowListaSelect}" update=":panelGrupoEvento" process="dtGrupoEvento" />
+			<p:ajax event="rowUnselectCheckbox" listener="#{grupoOrcEventoFinanFBBean.unRowListaSelect}" update=":panelGrupoEvento" process="dtGrupoEvento" />
+			<p:ajax event="toggleSelect" listener="#{grupoOrcEventoFinanFBBean.onRowListaSelectAll}" update=":panelGrupoEvento" process="dtGrupoEvento" />
+			
+			<f:facet name="header"></f:facet>
+        	<p:column selectionMode="multiple" style="width:50px;text-align:center"/>
+		
+			<p:column sortBy="#{eventofinanceiroAssoc.id}" styleClass="customCollumnId" >
+				<f:facet name="header">CÓDIGO</f:facet>
+				<h:outputText value="#{eventofinanceiroAssoc.id} " />
+        	</p:column> 
+        	
+			<p:column sortBy="#{eventofinanceiroAssoc.descEventoFinanceiro}" >
+				<f:facet name="header">Evento Financeiro</f:facet>
+				<h:outputText value="#{eventofinanceiroAssoc.descEventoFinanceiro}" />
+        	</p:column>
+        	
+			<p:column sortBy="#{eventofinanceiroAssoc.descGrupoFinanceiro}" >
+				<f:facet name="header">Grupo Financeiro</f:facet>
+				<h:outputText value="#{eventofinanceiroAssoc.descGrupoFinanceiro}" />
+        	</p:column>
+        	
+
+
+		</p:dataTable>
+		</p:panel>
+		
+	</h:form>
+	
+	</div>
+	
+	<script>
+		function closePanelFiltroGrupoEvento(){
+			$('#consultaGrupoEvento\\:panelFiltroGrupoEvento').hide();
+		}
+		closePanelFiltroGrupoEvento();
+	</script>
+	
+</ui:composition>

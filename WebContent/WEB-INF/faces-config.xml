@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config
+    xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd"
+    version="2.2">
+    
+    <!-- converter -->
+    <converter>
+		<converter-id>converter.CPFConverter</converter-id>
+		<converter-class>br.com.webapp.web.converter.CPFConverter</converter-class>
+	</converter>
+	<converter>
+		<converter-id>converter.CNPJConverter</converter-id>
+		<converter-class>br.com.webapp.web.converter.CNPJConverter</converter-class>
+	</converter>
+	<converter>
+		<converter-id>converter.NumberPhoneConverter</converter-id>
+		<converter-class>br.com.webapp.web.converter.NumberPhoneConverter</converter-class>
+	</converter>
+	
+	<!-- validator -->
+	<validator>
+		<validator-id>validator.CPFValidator</validator-id>
+		<validator-class>br.com.webapp.web.validator.CPFValidator</validator-class>
+	</validator>
+	<validator>
+		<validator-id>validator.CNPJValidator</validator-id>
+		<validator-class>br.com.webapp.web.validator.CNPJValidator</validator-class>
+	</validator>
+    
+    <!-- -->
+	<application>
+   		<el-resolver>org.primefaces.application.exceptionhandler.PrimeExceptionHandlerELResolver</el-resolver>
+	</application>
+	
+	<application>
+		<message-bundle>br.com.webapp.web.Messages</message-bundle>
+	    <locale-config>
+	        <default-locale>en</default-locale>
+	    </locale-config>
+	</application>
+	
+	<factory>
+	    <exception-handler-factory>org.primefaces.application.exceptionhandler.PrimeExceptionHandlerFactory</exception-handler-factory>
+	</factory>
+
+</faces-config>

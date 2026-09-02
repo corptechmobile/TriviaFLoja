@@ -1,0 +1,159 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+    
+    <div class="tab-content-space">
+    <div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+    <f:metadata>
+      <f:viewAction action="#{pedVendaRecebimentoBean.clearSession}"/>
+    </f:metadata>
+     
+     <!-- Filtro -->
+     <h:form id="consultaPedVendaEmRecebimento">
+     
+     	<p:growl id="msg" showDetail="true" life="3000"/>
+     	<p:focus context="panelFiltroPedVendaEmRecebimento"/>
+    	<p:defaultCommand target="btnBuscar" />
+    	
+    	<p:toolbar id="tb">
+	        <f:facet name="left">
+	        </f:facet>
+	        <f:facet name="right">
+		        <p:commandButton id="menuHome" icon="ui-icon-home" action="#{pedVendaRecebimentoBean.addHome}" update="msg" title="Home" />
+		        <p:commandButton icon="ui-icon-star" actionListener="#{pedVendaRecebimentoBean.addFavoritos}" update="msg" title="Favoritos" oncomplete="updateMenuHome();"/>
+        	</f:facet>
+	    </p:toolbar>
+	    
+	    <p:sticky target="tb" margin="50"/>
+	    
+	    <p:panel id="panelFiltroPedVendaEmRecebimento" widgetVar="panelFiltroPedVendaEmRecebimento" >
+    		<div class="ui-g">
+				<div class="ui-g-0 ui-md-3 ui-lg-0">
+					<p:inputText id="descricaoFilter" value="#{pedVendaRecebimentoBean.descricaoFilter}" placeholder="Código Pedido / Nome Cliente" style="width:100%;" />
+				</div>
+				
+				<ui:fragment rendered="#{contextoBean.empresaFilter}">
+				<div class="ui-g-0 ui-md-2 ui-lg-0">
+					<div class="ui-fluid">
+			        <p:selectOneMenu  id="empresa" value="#{pedVendaRecebimentoBean.empresaFilter}" filter="false" autoWidth="true">
+						<f:selectItem itemValue="" itemLabel="Empresas"/>
+						<f:selectItems value="#{pedVendaRecebimentoBean.empresasSelect}" /> 
+					</p:selectOneMenu>
+					</div>
+				</div>
+				</ui:fragment>
+				
+				<div class="ui-g-0 ui-md-2 ui-lg-0">
+					<div class="ui-fluid">
+						<p:autoComplete id="vendedorCreateSelect" dropdown="true" scrollHeight="200"
+										queryDelay="1000"
+										minQueryLength="3" 
+										completeMethod="#{pedVendaRecebimentoBean.completeVendedor}" 
+										value="#{pedVendaRecebimentoBean.vendedorFilter}" 
+										var="ven" 
+										itemLabel="#{ven.nomeFantasia}" 
+										itemValue="#{ven}" 
+										converter="vendedorFBConverter" 
+										forceSelection="true"
+										emptyMessage="Nenhum Vendedor encontrado"
+										placeholder="Vendedores"
+										>
+										
+							<p:ajax event="itemSelect" listener="#{pedVendaRecebimentoBean.closeFilterVendedor}" update="@this"/> 
+							
+							<p:column>
+								<h:outputText value="#{ven.id}"/> <br/>
+								<h:outputText value="#{ven.nomeFantasia}"/>
+							</p:column>
+							
+						</p:autoComplete>
+					</div>
+				</div>
+      				
+				<div class="ui-g-0 ui-md-0 ui-lg-0">
+					<p:commandButton 
+						 id="btnBuscar" 
+						 value="Buscar"
+						 actionListener="#{pedVendaRecebimentoBean.buscar}"
+						 update=":listagemPedVendaEmRecebimento"
+						 icon="icon-search"  
+						 onclick="PF('bUIDataTablePedVendaEmRecebimento').show()"
+						 />
+				</div>
+				<div class="ui-g-0 ui-md-0 ui-lg-0">		 
+					 <p:commandButton 
+						 id="btnLimpar" 
+						 value="Limpar"
+						 action="#{pedVendaRecebimentoBean.limpar}"
+						 update="@form :listagemPedVendaEmRecebimento"
+						 icon="ui-icon-close" 
+						 onclick="PF('bUIDataTablePedVendaEmRecebimento').show()"
+						 />
+				</div>
+    		</div>
+	    </p:panel>
+     	
+     </h:form>
+     
+     <!-- Listagem -->
+     <h:form id="listagemPedVendaEmRecebimento">
+     
+     	<p:remoteCommand name="updateListPedVendaEmRecebimentoBean" update="@form" actionListener="#{pedVendaRecebimentoBean.buscar}" />
+     	
+     	<p:blockUI block="dtPedVendaEmRecebimento" widgetVar="bUIDataTablePedVendaEmRecebimento">
+			LOADING<br />
+        	<p:graphicImage library="images" name="progress_bar.gif"/>
+		</p:blockUI>
+		
+		<p:dataTable id="dtPedVendaEmRecebimento" var="pedVenda" reflow="true"
+			value="#{pedVendaRecebimentoBean.lista}" emptyMessage="Nenhuma registro encontrado.">
+					
+				<p:column sortBy="#{pedVenda.pedVendaId}" styleClass="customCollumnId"> 
+					<f:facet name="header">Pedido</f:facet>
+					<h:outputText value="#{pedVenda.pedVendaId}"/>
+		        </p:column>
+		        
+				<p:column sortBy="#{pedVenda.dtEntrada}" styleClass="customCollumnData">
+					<f:facet name="header">Entrada</f:facet>
+					<h:outputText value="#{pedVenda.dtEntrada}">
+						<f:convertDateTime pattern="dd/MM/yyyy" />
+					</h:outputText>	
+		        </p:column>
+
+		        <p:column sortBy="#{pedVenda.cliente.pessoa.razaoSocialNome}">
+					<f:facet name="header">Cliente</f:facet>
+					#{pedVenda.clienteDesc}
+		        </p:column>
+		        
+		        <p:column sortBy="#{pedVenda.vendedor.pessoa.nomeFantMnem}">
+					<f:facet name="header">Vendedor</f:facet>
+					#{pedVenda.vendedorDesc}
+		        </p:column>
+		        
+				<p:column styleClass="customCollumn1Icon">
+					<f:facet name="header"></f:facet>
+					<p:commandButton action="#{pedVendaRecebimentoBean.alterarStatus}" 
+									update="@form :consultaPedVendaEmRecebimento" 
+									process="@this" 
+									icon="ui-icon-transfer-e-w" 
+									title="Alterar para o Status Aguard. Pagamento">
+						<f:setPropertyActionListener target="#{pedVendaRecebimentoBean.selecionadaId}" value="#{pedVenda.pedVendaId}" />
+						<p:confirm header="Confirme" message="Deseja Alterar para o Status Aguard. Pagamento?" icon="ui-icon-alert" />
+					</p:commandButton>
+				</p:column>
+				
+			</p:dataTable>
+			
+			<p:toolbar id="tbTotal">
+		        <f:facet name="right">
+		        	Total: #{pedVendaRecebimentoBean.lista.size()}
+		        </f:facet>
+	        </p:toolbar>
+			
+		</h:form>
+     
+    </div>
+    
+</ui:composition>

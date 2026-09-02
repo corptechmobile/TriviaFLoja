@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	  xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+<h:head>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+	<title><ui:insert name="titulo">#{contextoBean.titulo}</ui:insert></title>
+	
+	<h:outputStylesheet library="css" name="common-style.css" />
+	<h:outputStylesheet library="css" name="table-style.css"  />
+	<h:outputStylesheet library="css" name="tabs.css"  />
+	
+	<link rel="apple-touch-icon" sizes="57x57" href="#{resource['favicon/apple-icon-57x57.png']}" /> 
+	<link rel="apple-touch-icon" sizes="60x60" href="#{resource['favicon/apple-icon-60x60.png']}" />
+	<link rel="apple-touch-icon" sizes="72x72" href="#{resource['favicon/apple-icon-72x72.png']}" />
+	<link rel="apple-touch-icon" sizes="76x76" href="#{resource['favicon/apple-icon-76x76.png']}" />
+	<link rel="apple-touch-icon" sizes="114x114" href="#{resource['favicon/apple-icon-114x114.png']}" />
+	<link rel="apple-touch-icon" sizes="120x120" href="#{resource['favicon/apple-icon-120x120.png']}" />
+	<link rel="apple-touch-icon" sizes="144x144" href="#{resource['favicon/apple-icon-144x144.png']}" />
+	<link rel="apple-touch-icon" sizes="152x152" href="#{resource['favicon/apple-icon-152x152.png']}" />
+	<link rel="apple-touch-icon" sizes="180x180" href="#{resource['favicon/apple-icon-180x180.png']}" />
+	<link rel="icon" type="image/png" sizes="192x192" href="#{resource['favicon/android-icon-192x192.png']}" />
+	<link rel="icon" type="image/png" sizes="32x32" href="#{resource['favicon/favicon-32x32.png']}" />
+	<link rel="icon" type="image/png" sizes="96x96" href="#{resource['favicon/favicon-96x96.png']}" />
+	<link rel="icon" type="image/png" sizes="16x16" href="#{resource['favicon/favicon-16x16.png']}" />
+	<link rel="manifest" href="#{resource['favicon/manifest.json']}" />
+	<meta name="msapplication-TileColor" content="#ffffff" />
+	<meta name="msapplication-TileImage" content="#{resource['favicon/ms-icon-144x144.png']}" />
+	<meta name="theme-color" content="#ffffff" />
+	
+	<style>
+		/* login */
+		body { 
+		  /* background: url("#{resource['images/bg_login.jpeg']}") no-repeat center center fixed; 
+		  -webkit-background-size: cover;
+		  -moz-background-size: cover;
+		  -o-background-size: cover;
+		  background-size: cover;*/ 
+		}
+		
+		.baseLogin{
+			margin: 0px;
+			padding: 10px;
+		}
+		
+		.baseLogin p{
+			margin: 6px;
+		}
+		
+		.baseLogin img{
+			display: block;
+   			margin: auto auto;
+   			margin-bottom: 20px;
+		}
+		
+		.baseLogin input[type=submit] {
+			width:100%;
+			padding:5px 15px; 
+		    background:#169D25; 
+		    color: white;
+		    border:0 none;
+		    cursor:pointer;
+		    -webkit-border-radius: 5px;
+		    border-radius: 5px; 
+		    margin-bottom: 25px;
+		}
+		
+		.baseLogin a {
+			font-size: 12px;
+		}
+		
+		
+	</style>
+
+</h:head>
+
+<h:body>
+	<div id="container">
+		<div id="corpo">
+			<ui:insert name="corpo"/>    
+		</div>
+	</div>
+</h:body>
+</html>

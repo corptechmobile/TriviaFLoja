@@ -1,0 +1,59 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:composite="http://java.sun.com/jsf/composite">
+	
+	<composite:interface>
+		<composite:attribute name="selecionada" required="true"/>
+		<composite:attribute name="cliente" required="true"/>
+		<composite:attribute name="vendedor" required="true"/>
+	</composite:interface>
+	
+	<composite:implementation>
+		<!-- <p:panelGrid columns="2" columnClasses="ui-grid-col-6,ui-grid-col-6" layout="grid" styleClass="ui-panelgrid-blank"> -->
+		
+		<div class="ui-g">
+			<div class="ui-g-12 ui-md-6 ui-lg-6">
+				<p:fieldset legend="Cliente" styleClass="painelFieldset">
+					<h:outputText value="#{cc.attrs.cliente.cnpjCpf}" rendered="#{cc.attrs.cliente.tipoPessoa == 'J' or cc.attrs.cliente.tipoPessoa == 'O'}" converter="converter.CNPJConverter" styleClass="tx_bold"  />
+					<h:outputText value="#{cc.attrs.cliente.cnpjCpf}" rendered="#{cc.attrs.cliente.tipoPessoa == 'F'}" converter="converter.CPFConverter" styleClass="tx_bold" /><br/>
+					<p:outputLabel value="#{cc.attrs.cliente.id}" styleClass="tx_bold" /> <br/>
+					<p:outputLabel value="#{cc.attrs.cliente.razaoSocial}" />
+				</p:fieldset>
+			</div>
+			<div class="ui-g-12 ui-md-6 ui-lg-6">
+			<p:fieldset legend="Vendedor" styleClass="painelFieldset">
+				<div class="ui-fluid">
+					<p:outputLabel value="#{cc.attrs.vendedor.id}" styleClass="tx_bold" /> <br/>
+					<p:outputLabel value="#{cc.attrs.vendedor.nomeFantasia}" />
+				</div>
+			</p:fieldset>
+			</div>
+		</div>
+		<!-- </p:panelGrid> -->
+			
+		<p:fieldset legend="Detalhes" styleClass="painelFieldset">
+			<div class="ui-fluid">
+		
+				<p:panelGrid columns="11" columnClasses="ui-grid-col-0,ui-grid-col-1,ui-grid-col-0,ui-grid-col-1,ui-grid-col-0,ui-grid-col-1,ui-grid-col-0,ui-grid-col-2,ui-grid-col-0,ui-grid-col-0,ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+				
+					<p:outputLabel value="Frete:" />
+					<h:outputText value="#{cc.attrs.selecionada.freteTipo.descricao}" styleClass="tx_bold" />
+					
+				</p:panelGrid>
+			</div> 
+		</p:fieldset>
+		 
+				
+		<p:fieldset legend="Observação" styleClass="painelFieldset" rendered="#{not empty cc.attrs.selecionada.observacao}">
+			<div class="ui-fluid">
+				<h:outputText escape="false" value="#{cc.attrs.selecionada.observacao}" />
+			</div>
+		</p:fieldset>
+	</composite:implementation>
+	
+</html>

@@ -1,0 +1,108 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      >
+    <body>
+	    <ui:composition>
+		    
+			<p:megaMenu>  
+		        <p:submenu label="MENU" icon="ui-icon-check">  
+		            <p:column>  
+		                <p:submenu label="DADOS" rendered="#{(contextoBean.usuarioLogado.admin or contextoBean.usuarioLogado.gerente) ? true : false}">  
+		                    
+		                    <p:menuitem value="Painel" url="/admin/painel/default.jsf" />
+		                    <p:menuitem value="Empresas" url="/admin/empresa/default.jsf" rendered="#{contextoBean.usuarioLogado.gerente}" />
+		                    <p:menuitem value="Forma Pagamento" url="/admin/formapagamento/default.jsf" />
+		                    <p:menuitem value="Conta Corrente" url="#" />  
+		                    <p:menuitem value="Meta Vendedor" url="#" />  
+		                    <p:menuitem value="Posição Financeira" url="#" />
+		                    <p:menuitem value="Versão Google App" url="/admin/app/default.jsf" rendered="#{contextoBean.usuarioLogado.gerente}" />
+		                      
+		                </p:submenu>
+		                 
+		                <p:submenu label="Pessoas" rendered="#{(contextoBean.usuarioLogado.admin or contextoBean.usuarioLogado.gerente) ? true : false}">  
+		                    <p:menuitem value="Clientes" url="#" />  
+		                    <p:menuitem value="Vendedores" url="/admin/vendedor/default.jsf" rendered="#{contextoBean.usuarioLogado.gerente}" />
+		                    <p:menuitem value="Gestão de Vendas" url="/admin/gestaovenda/default.jsf" rendered="#{contextoBean.usuarioLogado.gerente}" />
+		                </p:submenu>  
+		                
+		                <p:submenu label="Produto" rendered="#{(contextoBean.usuarioLogado.admin or contextoBean.usuarioLogado.gerente) ? true : false}">  
+		                    <p:menuitem value="Produtos" url="#" />  
+		                    <p:menuitem value="Linha de Produtos" url="#" />
+		                    <p:menuitem value="Grades" url="/admin/grade/default.jsf" />
+		                </p:submenu>  
+		                
+		            </p:column>  
+		  
+		            <p:column> 
+		            <!--  
+		                <p:submenu label="Sicronização">  
+		                    <p:menuitem value="Atualizações" url="#" />  
+		                    <p:menuitem value="Usuários" url="/admin/atualizacaousuario/default.jsf" rendered="#{contextoBean.usuarioLogado.gerente}" />
+		                    <p:menuitem value="Última" url="/admin/atualizacaousuario/default2.jsf" rendered="#{contextoBean.usuarioLogado.gerente}" />  
+		                </p:submenu>
+		            -->  
+		            	<p:submenu label="Entrada Pedidos" rendered="#{(contextoBean.usuarioLogado.admin or contextoBean.usuarioLogado.gerente) ? true : false}">  
+		                	<p:menuitem value="Vendedor/Status" url="/admin/entrada_pedido/default.jsf" /> 
+		                	<p:menuitem value="Vendedor/Cliente" url="/admin/entrada_pedido/default2.jsf" /> 
+		                </p:submenu> 
+		                
+		                <p:submenu label="Acesso" rendered="#{(contextoBean.usuarioLogado.admin or contextoBean.usuarioLogado.gerente or contextoBean.usuarioLogado.delivery) ? true : false}">  
+		                    <p:menuitem value="Usuários" url="/admin/usuario/default.jsf" rendered="#{(contextoBean.usuarioLogado.admin or contextoBean.usuarioLogado.gerente) ? true : false}"/>
+		                    <p:menuitem value="Usuário Delivery" url="/admin/transportador/default.jsf" />  
+		                    <p:menuitem value="Mudar Senha" url="/admin/password.jsf" icon="ui-icon-locked" /> 
+		                </p:submenu>  
+		                
+		                <!-- <p:submenu label="MENSAGENS">
+		  					<p:menuitem value="Nova Mensagem" url="/admin/mensagem/nova.jsf"/>
+		  					<p:menuitem value="Consultar" url="/admin/mensagem/lista.jsf"/>
+		  				</p:submenu> -->
+		  				
+		  				<p:submenu label="Rota" rendered="#{(contextoBean.usuarioLogado.admin or contextoBean.usuarioLogado.gerente) ? true : false}">  
+		                    <p:menuitem value="Vendedores" url="/admin/rota/default.jsf" />
+		                    <p:menuitem value="Resultado" url="/admin/rota/resultado.jsf" />  
+		                </p:submenu>
+		                
+		                <p:submenu label="Monitoramento" rendered="#{(contextoBean.usuarioLogado.admin or contextoBean.usuarioLogado.gerente) ? true : false}">  
+		                    <p:menuitem value="Vendedores" url="/admin/checkpoint/default.jsf" />
+		                    <p:menuitem value="Check-In/Out" url="/admin/checkpoint/check-in-out.jsf" />
+		                </p:submenu>
+		                
+		                <p:submenu label="Mapa de Entrega" rendered="#{(contextoBean.usuarioLogado.admin or contextoBean.usuarioLogado.gerente or contextoBean.usuarioLogado.delivery) ? true : false}" >  
+		                    <p:menuitem value="Status" url="/admin/mapaentrega/status.jsf" rendered="#{contextoBean.usuarioLogado.gerente}" />
+		                    <p:menuitem value="Monitoramento" url="/admin/mapaentrega/consulta.jsf" />
+		                    <p:menuitem value="Estatística" url="/admin/mapaentrega/resultado.jsf" />
+		                </p:submenu>  
+		                
+		                
+		               <!--  <p:submenu label="TAB">  
+		                    <p:menuitem value="TAB 1" url="/admin/tab/tab1.jsf" />
+		                    <p:menuitem value="TAB 2" url="/admin/tab/tab2.jsf" />  
+		                </p:submenu>   -->
+		                
+		            </p:column>  
+		            
+		            <p:column> 
+		            
+		            	<p:submenu label="DashBoard Volume/Financeiro" rendered="#{(contextoBean.usuarioLogado.admin or contextoBean.usuarioLogado.gerente) ? true : false}">  
+		                    <p:menuitem value="Forma de Pagamento" url="/admin/grupos/formapagto.jsf" />
+		                    <p:menuitem value="Linha de Produto" url="/admin/grupos/prodlinha.jsf" />
+		                </p:submenu>
+		            
+		            
+		            </p:column>
+		            
+	
+		        </p:submenu> 
+		        
+		        <p:menuitem value="SAIR" url="#" onclick="document.location='#{request.contextPath}/j_spring_security_logout'" icon="ui-icon-close" />  
+		    </p:megaMenu>
+		    			
+	    </ui:composition>
+    </body>
+</html>
+

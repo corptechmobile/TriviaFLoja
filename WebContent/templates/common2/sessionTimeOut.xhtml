@@ -1,0 +1,54 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+
+	<!-- 20 minutos 1200000 -->
+   <h:form id="formIdleMonitorView">
+      <p:growl id="messages" showDetail="true" sticky="true" />
+      <p:idleMonitor id="idleMonitorWs" widgetVar="idleMonitorWs" 
+         timeout="10000" 
+         onidle="startIdleMonitor()">
+        	<p:ajax event="active" listener="#{idleMonitorView.onActive}" update="messages" />
+        	<p:ajax event="idle" listener="#{idleMonitorView.onIdle}" update="messages"></p:ajax>
+       </p:idleMonitor>	
+       <p:remoteCommand name="keepAlive" actionListener="#{idleMonitorView.onkeepSessionAlive}" update="messages" oncomplete="PF('idleMonitorWs').reset()" />
+ 	</h:form>
+ 	
+    <p:dialog id="timeoutSession"
+       header="Aviso"
+       widgetVar="timeoutSession"
+       showEffect="fade" 
+       hideEffect="fade"
+       modal="true"
+       height="110"
+       closable="true"
+       responsive="true"
+       onShow="PF('timeoutSession').hide()">
+         <p>
+            
+            <h:outputText value="Você será conectado em  " />
+            <h:outputText id="dialog-countdown" style="font-weight: bold;"/>
+            <h:outputText value=" segundos" />
+            
+            <br/>
+            
+            <h:outputText value="Deseja ficar conectado?" />
+            
+            <h:form id="formDialogIdleMonitorView">
+                <p:commandButton value="Sim" 
+                                 process="@this" 
+                                 update="@none"
+                                 onclick="hideDialogIdleMonitor()"/>
+                                 	
+                <p:commandButton value="Não" 
+                                 process="@this" 
+                                 update="@none" 
+                                 onclick="logoffIdleMonitor()" />
+            </h:form>
+         </p>
+         
+   </p:dialog>
+   
+</ui:composition>

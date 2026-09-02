@@ -1,0 +1,444 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+   	
+   	<div class="tab-content-space">
+    <div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+    <f:metadata>
+      <f:viewAction action="#{produtoConsultaBean.clearSession}"/>
+    </f:metadata>
+
+		<h:form id="formProdutoBuscar">
+
+			<p:growl id="msg" life="6000" />
+			<p:focus context="panelFilterProdutoBean" />
+			<p:defaultCommand target="btnBuscar" />
+
+			<p:toolbar id="tb">
+				<f:facet name="right">
+					<p:commandButton id="menuHome" icon="ui-icon-home"
+						actionListener="#{produtoConsultaBean.addHome}" update="@form:msg"
+						process="@this" title="Home" />
+					<p:commandButton icon="ui-icon-star"
+						actionListener="#{produtoConsultaBean.addFavoritos}"
+						update="@form:msg" process="@this" title="Favoritos"
+						oncomplete="updateMenuHome();" />
+				</f:facet>
+			</p:toolbar>
+
+			<p:sticky target="tb" margin="50" />
+
+			<p:panel id="panelFilterProdutoBean"
+				widgetVar="panelFilterProdutoBean">
+
+				<div class="ui-fluid">
+
+					<div class="ui-g">
+						<ui:fragment rendered="#{contextoBean.empresaFilter}">
+							<div class="ui-g-6 ui-md-3 ui-lg-0">
+								<h:outputLabel for="empresa" value="Empresa: " />
+								<p:selectOneMenu id="empresa"
+									value="#{produtoConsultaBean.empresaFilter}" filter="false"
+									autoWidth="true">
+									<p:ajax event="change" update="@form:formaPagto @form:condPagto" listener="#{produtoConsultaBean.limparFormaCond}" />
+									<f:selectItems value="#{produtoConsultaBean.empresaSelectItem}" />
+								</p:selectOneMenu>
+							</div>
+						</ui:fragment>
+
+						<div class="ui-g-6 ui-md-3 ui-lg-0">
+							<h:outputLabel for="formaPagto" value="Forma Pagto: " />
+							<p:selectOneMenu id="formaPagto"
+								value="#{produtoConsultaBean.formaFilter}" filter="false"
+								autoWidth="true" required="true" 
+								requiredMessage="Selecione uma forma de pagamento">
+								<p:ajax event="change" update="@form:condPagto" listener="#{produtoConsultaBean.limparCond}"  />
+								<f:selectItems 
+									value="#{produtoConsultaBean.formaPagtoSelectItem}" />
+							</p:selectOneMenu>
+						</div>
+
+						<div class="ui-g-6 ui-md-3 ui-lg-0">
+							<h:outputLabel for="condPagto" value="Cond. Pagto: " />
+							<p:selectOneMenu id="condPagto"
+								value="#{produtoConsultaBean.condicaoFilter}" filter="false"
+								autoWidth="true" required="true"
+								requiredMessage="Selecione uma condição de pagamento">
+								<f:selectItems
+									value="#{produtoConsultaBean.condPagtoSelectItem}" />
+							</p:selectOneMenu>
+						</div>
+
+					</div>
+
+					<div class="ui-g">
+						<div class="ui-g-6 ui-md-4 ui-lg-0">
+							<p:inputText id="descProdFilter"
+								value="#{produtoConsultaBean.descProdFilter}"
+								placeholder="Código ou Descrição"
+								rendered="#{produtoConsultaBean.filterPorCodBarra==false}"
+								style="width:100%;" />
+							<p:inputText id="codBarraFilter"
+								value="#{produtoConsultaBean.codBarraFilter}"
+								placeholder="Código de Barras"
+								rendered="#{produtoConsultaBean.filterPorCodBarra}"
+								required="true" requiredMessage="Informe o Código de Barras" />
+						</div>
+						
+						<ui:fragment rendered="#{produtoConsultaBean.filterPorCodBarra==false}">
+							<div class="ui-g-6 ui-md-3 ui-lg-0">
+								<p:inputText id="linhaFilter"
+									value="#{produtoConsultaBean.linhaProdFilter}"
+									placeholder="Linha de Produto"
+									style="width:100%;" />
+							</div>
+						</ui:fragment>						
+
+						<div class="ui-g-0 ui-md-0 ui-lg-0">
+							<p:selectBooleanButton id="filterPorCodBarra"
+								value="#{produtoConsultaBean.filterPorCodBarra}" offLabel="Off"
+								onLabel="On" onIcon="icon-codebar" offIcon="icon-codebar-off">
+								<p:ajax update="@form" />
+							</p:selectBooleanButton>
+						</div>
+
+						<div class="ui-g-0 ui-md-0 ui-lg-0">
+							<p:selectBooleanCheckbox id="semEstoqueFilter" value="#{produtoConsultaBean.semEstoqueFilter}" />
+							<p:outputLabel for="semEstoqueFilter" value=" Sem estoque " />
+						</div>
+					</div>
+
+				</div>
+				
+				<br />
+
+				<p:commandButton id="btnBuscar" value="Buscar"
+					actionListener="#{produtoConsultaBean.buscar}"
+					update="@form :formResultFilterProdutoBean" icon="icon-search"
+					onclick="PF('bUIDataTableProdutos').show()" /> 
+					
+			</p:panel>
+
+		</h:form>
+
+		<h:form id="formResultFilterProdutoBean">
+		
+		     	<p:blockUI block="tabviewProd" widgetVar="bUIDataTableProdutos">
+					LOADING<br />
+		        	<p:graphicImage library="images" name="progress_bar.gif"/>
+				</p:blockUI>
+				<p:tabView id="tabviewProd" widgetVar="tabPanelWidgetProd" activeIndex="#{produtoConsultaBean.currentTab}" styleClass="tabContent">
+				
+				<p:ajax event="tabChange" listener="#{produtoConsultaBean.onTabChange}" update="@none"/>
+				<p:ajax event="tabClose" listener="#{produtoConsultaBean.onTabClose}" update="@form"/>
+				
+				<p:tab title="Produtos" id="tab0"> 
+				
+				<p:commandButton icon="icon-excel" disabled="#{empty produtoConsultaBean.listaProdutosLDM}" actionListener="${produtoConsultaBean.verificaExportacao}" title="Exportar para excel" ajax="false">
+					            <p:dataExporter type="xls" target="dtItensProdutoBean" fileName="Produtos"  />
+			    </p:commandButton>
+
+		     	<p:blockUI block="dtItensProdutoBean" widgetVar="bUIDataTableProdutos">
+					LOADING<br />
+		        	<p:graphicImage library="images" name="progress_bar.gif"/>
+				</p:blockUI>
+	
+				<p:dataTable id="dtItensProdutoBean" widgetVar="UIdtItensProdutoBean"
+								var="prod" 
+								value="#{produtoConsultaBean.listaProdutosLDM}" 
+								paginator="true" 
+			     				rows="10"
+			     				first="0"
+	                 			paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+	                 			rowsPerPageTemplate="10,20,30" 
+	                 			lazy="true"
+	                 			emptyMessage="Nenhum registro encontrado." 
+	                 			reflow="true">
+			
+				    <p:column sortBy="#{prod.codInterno}" styleClass="customCollumnId" priority="1">
+				    	<f:facet name="header">Código</f:facet>
+				    	<h:outputText value="#{prod.codInterno}" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : ''}"/>
+				  	</p:column>
+				
+				  	<p:column sortBy="#{prod.produtoLinhaDesc}" priority="2" styleClass="customCollumnProdutoLinha">
+					   <f:facet name="header">Linha</f:facet>
+					   <h:outputText value="#{prod.produtoLinhaDesc}" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : ''}" style="text-wrap:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>
+				  	</p:column>
+				
+				  	<p:column sortBy="#{prod.descricao}" priority="1">
+					   <f:facet name="header">Descrição</f:facet>
+					   <h:outputText id="descProd" value="#{prod.descricao}" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : 'tx_bold'}" style="text-wrap:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>
+					   <p:tooltip id="toolDescProd" for="descProd" value="#{prod.descricao}" position="top" rendered="#{produtoConsultaBean.exportar}" />
+				  	</p:column> 
+				
+				  	<p:column styleClass="customCollumnQtdEstoque" priority="1">
+				    	<f:facet name="header">Estoque</f:facet>
+				    	<h:outputText value="#{prod.qtdDisponivelToString}" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : ''}" />
+				    	<h:outputText value=" #{prod.unidadeDesc}" styleClass="#{prod.inPromocao ? 'tx_azul' : ''}"/>
+				  	</p:column>
+				
+				  	<p:column sortBy="#{prod.preco}" styleClass="customCollumnValor" priority="1">
+				    	<f:facet name="header">Preço</f:facet>
+				    	<h:outputText value="#{prod.inPromocao ? prod.precoPromo : prod.preco}" converter="currencyFormat" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : 'tx_bold'}"/>
+				  	</p:column>
+				  	
+					<p:column styleClass="customCollumn1Icon" exportable="false" priority="1">
+						<f:facet name="header"></f:facet>
+						<p:commandButton id="btnOpenLotes"
+									action="#{produtoConsultaBean.openLotesProduto}" 
+									update=":formResultFilterProdutoBean" 
+									process="@this" 
+									icon="ui-icon-plus"
+									title="Mostrar Produtos"
+									onstart="PF('bUIDataTableProdutos').show();"
+									oncomplete="focusInPainel('#formResultFilterProdutoBean\\:tabviewProd', 100);">
+							<f:setPropertyActionListener target="#{produtoConsultaBean.selecionada}" value="#{prod}" />
+						</p:commandButton> 
+					</p:column>				  	
+			
+			  </p:dataTable>
+			  
+			  	<p:toolbar id="tbTotal">
+			        <f:facet name="right">
+			        	Total: #{produtoConsultaBean.listaProdutosLDM.rowCount}
+			        </f:facet>
+		        </p:toolbar>
+		        
+ 				</p:tab>
+				<p:tab id="tabLotesProduto" title="Estoque/Lotes" closable="true" rendered="#{produtoConsultaBean.renderedTabLotesProduto}">
+				
+					<p:blockUI block="dtProdutoEstoque" widgetVar="bUIDataTableVendaProd">
+					      LOADING<br />
+						<p:graphicImage library="images" name="progress_bar.gif" />
+					</p:blockUI>
+					
+					<p:fieldset legend="Produto">
+						<p:panelGrid columns="10" columnClasses="ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-1, ui-grid-col-0, ui-grid-col-2, ui-grid-col-1, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+							<h:outputText value="#{produtoConsultaBean.selecionada.codInterno}" styleClass="tx_bold"  /> - 
+							<h:outputText value="#{produtoConsultaBean.selecionada.descricao}" styleClass="tx_bold" />
+							<h:outputText value="(#{produtoConsultaBean.selecionada.unidadeDesc})" styleClass="tx_bold" />
+							<h:outputLabel for="empresa" value="Empresa: " />
+							<p:selectOneMenu id="empresa"
+								value="#{produtoConsultaBean.empresaProdutoFilter}" filter="false"
+								autoWidth="true">
+								<f:selectItem itemLabel="Todas" itemvalue="#{null}" />
+								<f:selectItems value="#{produtoConsultaBean.empresaSelectItem}" />
+							</p:selectOneMenu>
+							
+							<h:outputText value=" "/>  
+							<p:selectBooleanCheckbox id="soComEstoqueFilter" value="#{produtoConsultaBean.soComEstoqueFilter}" />
+							<p:outputLabel for="soComEstoqueFilter" value="Exibir somente localidades com algum estoque"/>
+							
+							<h:outputText value=" "/>
+							<p:commandButton id="btnBuscarProdutoLote" value="Buscar"
+							actionListener="#{produtoConsultaBean.buscarEstoqueLote}"
+							update="@form" icon="icon-search"
+							 />
+							
+							
+						</p:panelGrid>	
+						
+					</p:fieldset><br/>
+					
+					<p:fieldset legend="Estoque" id="fsEstoque">
+						<p:dataTable id="dtProdutoEstoque" 
+						             var="produtoEstoque" 
+						             value="#{produtoConsultaBean.listarEstoque}"  
+						             emptyMessage="Nenhum registro encontrado." reflow="true">
+						   
+						   <p:columnGroup type="header">
+						   <p:row>
+				                <p:column colspan="3" headerText="Informações" />
+				                <p:column colspan="6" headerText="Quantidades" />
+			              </p:row>
+						   <p:row>
+				                <p:column headerText="Empresa" styleClass="customCollumnDesc" />
+				                <p:column headerText="Depósito" />
+				                <p:column headerText="Localidade" />
+				                <p:column headerText="Total" styleClass="customCollumnQtd" />
+				                <p:column headerText="Vendido" styleClass="customCollumnQtd" />
+				                <p:column headerText="Empresa" styleClass="customCollumnQtd" />
+				                <p:column headerText="Bloqueado" styleClass="customCollumnQtd" />
+				                <p:column headerText="Reservado" styleClass="customCollumnQtd" />
+				                <p:column headerText="Disponível" styleClass="customCollumnQtd" />
+			              </p:row>
+			              </p:columnGroup>
+						   
+						   
+						   <p:column sortBy="#{produtoEstoque.empresaDesc}" priority="1">
+						    	<h:outputText value="#{produtoEstoque.empresaDesc}" />
+						   </p:column>          
+						
+						   <p:column sortBy="#{produtoEstoque.depositoDesc}" priority="1">
+						    	<h:outputText value="#{produtoEstoque.depositoDesc}" />
+						   </p:column>          
+
+						   <p:column sortBy="#{produtoEstoque.localidadeDesc}"  priority="1">
+						    	<h:outputText value="#{produtoEstoque.localidadeDesc}" />
+						   </p:column>          
+
+						  	<p:column priority="1" styleClass="customCollumnQtd">
+						    	<h:outputText value="#{produtoEstoque.qtdTotal}" converter="currencyFormat" />
+						  	</p:column>
+						  	<p:column priority="1" styleClass="customCollumnQtd">
+						    	<h:outputText value="#{produtoEstoque.qtdVendido}" converter="currencyFormat" />
+						  	</p:column>
+						  	<p:column priority="1" styleClass="customCollumnQtd">
+						    	<h:outputText value="#{produtoEstoque.qtdEmpresa}" converter="currencyFormat" />
+						  	</p:column>
+						  	<p:column priority="1" styleClass="customCollumnQtd">
+						    	<h:outputText value="#{produtoEstoque.qtdBloqueado}" converter="currencyFormat" />
+						  	</p:column>
+						  	<p:column priority="1" styleClass="customCollumnQtd">
+						    	<h:outputText value="#{produtoEstoque.qtdReservado}" converter="currencyFormat" />
+						  	</p:column>
+						  	<p:column priority="1" styleClass="customCollumnQtd">
+						    	<h:outputText value="#{produtoEstoque.qtdDisponivel}" converter="currencyFormat" />
+						  	</p:column>
+						  	
+						  	<p:columnGroup type="footer">
+					            <p:row>
+					                <p:column colspan="3" style="text-align:right;" styleClass="tx_bold" footerText="Total:" />
+									<p:column style="text-align:right">
+					                    <f:facet name="footer">
+											<p:outputLabel value="#{produtoConsultaBean.totalQtd}" converter="currencyFormat" styleClass="tx_bold"/>
+										</f:facet>
+				                    </p:column>								  	
+									<p:column style="text-align:right">
+					                    <f:facet name="footer">
+											<p:outputLabel value="#{produtoConsultaBean.totalVendido}" converter="currencyFormat" styleClass="tx_bold"/>
+										</f:facet>
+				                    </p:column>								  	
+									<p:column style="text-align:right">
+					                    <f:facet name="footer">
+											<p:outputLabel value="#{produtoConsultaBean.totalEmpresa}" converter="currencyFormat" styleClass="tx_bold"/>
+										</f:facet>
+				                    </p:column>								  	
+									<p:column style="text-align:right">
+					                    <f:facet name="footer">
+											<p:outputLabel value="#{produtoConsultaBean.totalBloqueado}" converter="currencyFormat" styleClass="tx_bold"/>
+										</f:facet>
+				                    </p:column>								  	
+									<p:column style="text-align:right">
+					                    <f:facet name="footer">
+											<p:outputLabel value="#{produtoConsultaBean.totalReservado}" converter="currencyFormat" styleClass="tx_bold"/>
+										</f:facet>
+				                    </p:column>								  	
+									<p:column style="text-align:right">
+					                    <f:facet name="footer">
+											<p:outputLabel value="#{produtoConsultaBean.totalDisponivel}" converter="currencyFormat" styleClass="tx_bold"/>
+										</f:facet>
+				                    </p:column>								  	
+					            </p:row>
+					        </p:columnGroup>
+						</p:dataTable>
+						
+					</p:fieldset><br/>
+
+					<p:fieldset legend="Lotes" id="fsEstoqueLote">
+						<p:dataTable id="dtProdutoEstoqueLote" 
+						             var="produtoEstoqueLote" 
+						             value="#{produtoConsultaBean.listarEstoqueLote}"  
+						             emptyMessage="Nenhum registro encontrado." reflow="true">
+						   
+						   <p:columnGroup type="header">
+						   <p:row>
+				                <p:column colspan="6" headerText="Informações" />
+				                <p:column colspan="4" headerText="Quantidades" />
+			              </p:row>
+						   <p:row>
+				                <p:column headerText="Empresa"  />
+				                <p:column headerText="Depósito" />
+				                <p:column headerText="Localidade" />
+				                <p:column headerText="Lote" />
+				                <p:column headerText="Produção" />
+				                <p:column headerText="Vencimento" />
+				                <p:column headerText="Total" styleClass="customCollumnQtd" />
+				                <p:column headerText="Reservado" styleClass="customCollumnQtd" />
+				                <p:column headerText="Bloqueado" styleClass="customCollumnQtd" />
+				                <p:column headerText="Disponível" styleClass="customCollumnQtd" />
+			              </p:row>
+			              </p:columnGroup>
+						   
+						   
+						   <p:column sortBy="#{produtoEstoqueLote.empresaDesc}" priority="1">
+						    	<h:outputText value="#{produtoEstoqueLote.empresaDesc}" />
+						   </p:column>          
+						
+						   <p:column sortBy="#{produtoEstoqueLote.depositoDesc}" priority="1">
+						    	<h:outputText value="#{produtoEstoqueLote.depositoDesc}" />
+						   </p:column>          
+
+						   <p:column sortBy="#{produtoEstoqueLote.localidadeDesc}"  priority="1">
+						    	<h:outputText value="#{produtoEstoqueLote.localidadeDesc}" />
+						   </p:column>          
+
+						   <p:column sortBy="#{produtoEstoqueLote.codLote}"  priority="1">
+						    	<h:outputText value="#{produtoEstoqueLote.codLote}" />
+						   </p:column>          
+
+						   <p:column sortBy="#{produtoEstoqueLote.dtProducao}" styleClass="customCollumnData"  priority="1">
+						    	<h:outputText value="#{produtoEstoqueLote.dtProducao}">
+						    		<f:convertDateTime pattern="dd/MM/yyyy" />
+						    	</h:outputText>
+						   </p:column>          
+
+						   <p:column sortBy="#{produtoEstoqueLote.dtVencLote}" styleClass="customCollumnData" priority="1">
+						    	<h:outputText value="#{produtoEstoqueLote.dtVencLote}" >
+						    		<f:convertDateTime pattern="dd/MM/yyyy" />
+						    	</h:outputText>
+						   </p:column>          
+
+						  	<p:column priority="1" styleClass="customCollumnQtd">
+						    	<h:outputText value="#{produtoEstoqueLote.qtdTotal}" converter="currencyFormat" />
+						  	</p:column>
+						  	<p:column priority="1" styleClass="customCollumnQtd">
+						    	<h:outputText value="#{produtoEstoqueLote.qtdReservado}" converter="currencyFormat" />
+						  	</p:column>
+						  	<p:column priority="1" styleClass="customCollumnQtd">
+						    	<h:outputText value="#{produtoEstoqueLote.qtdBloqueado}" converter="currencyFormat" />
+						  	</p:column>
+						  	<p:column priority="1" styleClass="customCollumnQtd">
+						    	<h:outputText value="#{produtoEstoqueLote.qtdDisponivel}" converter="currencyFormat" />
+						  	</p:column>
+						  	
+						  	<p:columnGroup type="footer">
+					            <p:row>
+					                <p:column colspan="6" style="text-align:right;" styleClass="tx_bold" footerText="Total:" />
+									<p:column style="text-align:right">
+					                    <f:facet name="footer">
+											<p:outputLabel value="#{produtoConsultaBean.totalQtd2}" converter="currencyFormat" styleClass="tx_bold"/>
+										</f:facet>
+				                    </p:column>								  	
+									<p:column style="text-align:right">
+					                    <f:facet name="footer">
+											<p:outputLabel value="#{produtoConsultaBean.totalReservado2}" converter="currencyFormat" styleClass="tx_bold"/>
+										</f:facet>
+				                    </p:column>								  	
+									<p:column style="text-align:right">
+					                    <f:facet name="footer">
+											<p:outputLabel value="#{produtoConsultaBean.totalBloqueado2}" converter="currencyFormat" styleClass="tx_bold"/>
+										</f:facet>
+				                    </p:column>								  	
+									<p:column style="text-align:right">
+					                    <f:facet name="footer">
+											<p:outputLabel value="#{produtoConsultaBean.totalDisponivel2}" converter="currencyFormat" styleClass="tx_bold"/>
+										</f:facet>
+				                    </p:column>								  	
+					            </p:row>
+					        </p:columnGroup>
+						</p:dataTable>						
+					</p:fieldset>
+
+					
+					
+				</p:tab>		        
+		        
+		        </p:tabView>		        
+		</h:form>
+   		
+	</div>
+
+</ui:composition>

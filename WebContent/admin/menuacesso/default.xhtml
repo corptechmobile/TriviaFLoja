@@ -1,0 +1,171 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+    
+    <div class="tab-content-space">
+    
+    <div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+    
+    <f:metadata>
+    	<f:viewAction action="#{menuAcessoBean.clearSession}"/>
+    </f:metadata>
+    
+    <h:form id="consultaMenuAcesso">
+    	
+    	<p:growl id="msg" showDetail="true" life="3000"/>
+    	<p:focus context="panelFiltroMenuAcesso"/>
+    	<p:defaultCommand target="btnBuscar" />
+    	
+	    <p:toolbar id="tb">
+	        <f:facet name="left">
+	            <p:commandButton value="Novo" 
+								 actionListener="#{menuAcessoBean.novo}"
+								 update=":edicaoMenuAcesso"
+								 icon="icon-new"
+								 onclick="PF('bUIMenuAcesso').show()"
+								 >
+					 <p:resetInput target=":edicaoMenuAcesso" />
+				</p:commandButton>
+	            <p:commandButton value="Filtrar" icon="icon-filter" update="@none" onclick="openFilter('consultaMenuAcesso\\:panelFiltroMenuAcesso','consultaMenuAcesso\\:descricaoFilter')"  />
+	        </f:facet>
+	        <f:facet name="right">
+		        <p:commandButton icon="ui-icon-home" action="#{menuAcessoBean.addHome}" update="msg" title="Home" />
+		        <p:commandButton icon="ui-icon-star" actionListener="#{menuAcessoBean.addFavoritos}" update="msg" title="Favoritos" oncomplete="updateMenuHome();"/>
+        	</f:facet>
+	    </p:toolbar>
+	    
+	    <p:panel id="panelFiltroMenuAcesso" widgetVar="panelFiltroMenuAcesso" >
+	    	<div class="ui-fluid">
+	    	<p:panelGrid columns="3" columnClasses="ui-grid-col-0, ui-grid-col-0, ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+				
+				<p:inputText id="descricaoFilter" value="#{menuAcessoBean.descricaoFilter}" size="30" placeholder="Descrição">
+					<p:ajax event="keyup" update="@none" />
+				</p:inputText>
+				
+				<p:commandButton 
+					 id="btnBuscar" 
+					 value="Buscar"
+					 actionListener="#{menuAcessoBean.buscar}"
+					 update=":listagemMenuAcesso"
+					 icon="icon-search" 
+					 />
+					 
+				 <p:commandButton 
+					 id="btnLimpar" 
+					 value="Limpar"
+					 action="#{menuAcessoBean.limpar}"
+					 update="descricaoFilter :listagemMenuAcesso "
+					 icon="ui-icon-close" 
+					 />
+				
+	    	</p:panelGrid>
+	    	</div>
+	    </p:panel>
+	    
+	    <p:sticky target="tb" margin="50"/>
+	    
+    </h:form>
+	<h:form id="edicaoMenuAcesso" rendered="#{(contextoBean.usuarioLogado.admin or contextoBean.usuarioLogado.gerente) ? true : false}">
+	
+		<p:blockUI block="panelMenuAcesso" trigger="btnSalvar" widgetVar="bUIMenuAcesso">
+			LOADING<br />
+        	<p:graphicImage library="images" name="progress_bar.gif"/>
+		</p:blockUI>
+		
+		<p:panel id="panelMenuAcesso" widgetVar="panelMenuAcesso" header="#{menuAcessoBean.tituloAdd}" closable="true" >
+			
+			<p:focus context="panelMenuAcesso"/>
+			<p:messages id="msgAdd" showDetail="true" closable="true"/>
+			
+			<div class="ui-fluid">
+			<p:panelGrid columns="4" columnClasses="ui-grid-col-2,ui-grid-col-4" layout="grid" styleClass="ui-panelgrid-blank" >
+			
+					<h:outputLabel value="Pai:" for="parent"/>
+					<p:selectOneMenu  id="parent" value="#{menuAcessoBean.selecionada.parent}" filter="true" filterMatchMode="contains"  autoWidth="false">
+						<f:selectItem itemLabel="Root" itemValue="" />  
+						<f:selectItems value="#{menuAcessoBean.menuAcessoSelect}" />
+					</p:selectOneMenu>
+					
+					<h:outputLabel value="Descrição:" for="descricao"/>
+					<p:inputText id="descricao" value="#{menuAcessoBean.selecionada.descricao}" required="true" requiredMessage="Descrição é obrigatório" />
+					
+					<h:outputLabel value="Alt:" for="alt"/>
+					<p:inputText id="alt" value="#{menuAcessoBean.selecionada.alt}" />
+					
+					<h:outputLabel value="Página:" for="pgm"/>
+					<p:inputText id="pgm" value="#{menuAcessoBean.selecionada.pgm}" />
+					
+					<h:outputLabel value="Ordem:" for="ordem"/>
+					<p:spinner id="ordem" value="#{menuAcessoBean.selecionada.ordem}" size="4" />
+					
+			</p:panelGrid>
+			
+			</div>
+			<p:commandButton id="btnSalvar" 
+					value="Salvar" 
+						actionListener="#{menuAcessoBean.salvar}" 
+							update=":listagemMenuAcesso, :edicaoMenuAcesso"
+							icon="ui-icon-disk"  /> 
+			
+						
+		</p:panel>
+		
+	</h:form>
+	<h:form id="listagemMenuAcesso">
+	
+		<!-- <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" closeOnEscape="true" responsive="true">
+			<p:commandButton value="Sim" type="button" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+			<p:commandButton value="Não" type="button" styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+		</p:confirmDialog> -->
+	
+		<p:treeTable widgetVar="dataTableMenuAcesso" var="menuAcesso" value="#{menuAcessoBean.treeTable}" > 
+	        
+			<p:column headerText="Descrição">
+				#{menuAcesso.descricao}
+	        </p:column>
+	        
+	        <p:column headerText="Alt" priority="3">
+				#{menuAcesso.alt} 
+	        </p:column>
+	        
+	        <p:column headerText="Página" priority="3">
+				#{menuAcesso.pgm} 
+	        </p:column>
+	        
+			<p:column headerText="" styleClass="customCollumn3Icon">
+				<p:commandButton action="#{menuAcessoBean.editar}" 
+								update=":edicaoMenuAcesso" 
+								icon="ui-icon-pencil" 
+								title="Editar" 
+								onclick="PF('bUIMenuAcesso').show()">
+					<p:resetInput target=":edicaoMenuAcesso" />
+					<f:setPropertyActionListener target="#{menuAcessoBean.selecionada}" value="#{menuAcesso}" />
+				</p:commandButton>
+				<p:commandButton action="#{menuAcessoBean.add}" 
+								update=":edicaoMenuAcesso" 
+								icon="ui-icon-plus" 
+								title="Add" 
+								onclick="PF('bUIMenuAcesso').show()">
+					<f:setPropertyActionListener target="#{menuAcessoBean.parent}" value="#{menuAcesso}" />
+				</p:commandButton>
+				<p:commandButton action="#{menuAcessoBean.excluir}" update="@form, :edicaoMenuAcesso" icon="ui-icon-trash" title="Excluir" >
+					<f:setPropertyActionListener target="#{menuAcessoBean.selecionada}" value="#{menuAcesso}" />
+					<p:resetInput target=":edicaoMenuAcesso" />
+					<p:confirm header="Confirme" message="Deseja Excluir #{menuAcesso.descricao}?" icon="ui-icon-alert" />	
+				</p:commandButton>
+			</p:column>
+				
+		</p:treeTable>
+		
+	</h:form>
+	
+	<script>
+		$('#edicaoMenuAcesso\\:panelMenuAcesso').hide();
+		$('#consultaMenuAcesso\\:panelFiltroMenuAcesso').hide();
+	</script>
+	
+	</div>
+	
+</ui:composition>

@@ -1,0 +1,19 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      >
+    <body>
+	    <ui:composition>
+			
+			<h:graphicImage library="images" name="topo_logo2.jpg"></h:graphicImage>
+			<div style="float: right; font-size: 12px; padding-right: 10px; text-align: right;">
+				<p>Olá <b>#{contextoBean.usuarioLogado.nome}</b> (#{contextoBean.usuarioLogado.empresa.nome_fantasia})!</p>
+				<h2><ui:insert name="titulo"></ui:insert></h2>
+			</div>
+	    </ui:composition>
+    </body>
+</html>
+
+

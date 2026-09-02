@@ -1,0 +1,272 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"> 
+   	
+   	<div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+    <f:metadata>
+      <f:viewAction action="#{linhaProdutoMetaBean.clearSession}"/>
+    </f:metadata>
+
+		<h:form id="formLinhaProdutoMetaBuscar">
+
+			<p:growl id="msg" showDetail="true" life="3000" />
+			<p:focus context="panelFilterLinhaProdutoMetaBean" />
+			<p:defaultCommand target="btnBuscar" />
+
+		    <p:toolbar id="tb">
+		        <f:facet name="right">
+					<p:commandButton id="menuHome" icon="ui-icon-home"
+						actionListener="#{linhaProdutoMetaBean.addHome}" update="@form:msg"
+						process="@this" title="Home" />
+					<p:commandButton icon="ui-icon-star"
+						actionListener="#{linhaProdutoMetaBean.addFavoritos}"
+						update="@form:msg" process="@this" title="Favoritos"
+						oncomplete="updateMenuHome();" />
+	        	</f:facet>
+		    </p:toolbar>
+
+			<p:sticky target="tb" margin="50" />
+
+			<p:panel id="panelFilterLinhaProdutoMetaBean" widgetVar="panelFilterLinhaProdutoMetaBean" >
+				<div class="ui-fluid">
+				<p:panelGrid columns="7" columnClasses="ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+					<h:panelGroup>
+						<h:outputLabel value="Competência:" for="anoMes"/> <br />
+			        	<p:inputMask id="anoMes" value="#{linhaProdutoMetaBean.anoMes}" mask="9999/99" placeholder="Ano/Mês" size="7"  required="true" requiredMessage="Informe o Ano/Mês" converter="anoMesConverter"  />
+			        </h:panelGroup>
+			        
+			        <h:panelGroup>
+						<h:outputLabel value="Referência:" for="anoMesRef"/> <br />
+			        	<p:inputMask id="anoMesRef" value="#{linhaProdutoMetaBean.anoMesRef}" mask="9999/99" placeholder="Ano/Mês" size="7" required="true" requiredMessage="Informe o Ano/Mês de Referencia" converter="anoMesConverter"  />
+			        </h:panelGroup>
+			        
+			        <h:panelGroup>
+						<h:outputLabel value="Empresa:" for="empresaIdFilter"/> <br />
+			        	<p:selectOneMenu  id="empresaIdFilter" value="#{linhaProdutoMetaBean.empresaFilter}" filter="true" autoWidth="true" required="true" requiredMessage="Selecione uma Empresa">
+							<f:selectItem itemLabel="Todas" itemValue="#{null}" />  
+							<f:selectItems value="#{linhaProdutoMetaBean.empresaSelect}" /> 
+						</p:selectOneMenu>
+					</h:panelGroup>
+			        
+			        <h:panelGroup>
+						<h:outputLabel value="Vendedor:" for="vendedorIdFilter"/> <br />
+				        <p:selectOneMenu  id="vendedorIdFilter" value="#{linhaProdutoMetaBean.vendedorFilter}" converter="vendedorFBConverter" filter="true" autoWidth="true" required="true" requiredMessage="Selecione um Vendedor">
+							<f:selectItem itemLabel="Todos" itemValue="#{null}" />  
+							<f:selectItems value="#{linhaProdutoMetaBean.vendedorSelect}" /> 
+						</p:selectOneMenu>
+					</h:panelGroup>
+					
+					<h:panelGroup>			
+						<h:outputLabel value=" " /><br/>
+						<p:selectBooleanCheckbox id="semEstoqueFilter" value="#{linhaProdutoMetaBean.incluirDevolucao}" />
+						<p:outputLabel value=" Incluir Devolução " />
+					</h:panelGroup>
+					
+					<h:panelGroup>
+						<h:outputLabel value=" "/> <br />
+						<p:commandButton id="btnBuscar" value="Buscar"
+									actionListener="#{linhaProdutoMetaBean.buscar}"
+									update="@form :listaLinhaProdutoMeta" icon="icon-search"
+									onclick="PF('bUIDataTableLinhaProdMeta').show()" />	
+					</h:panelGroup>
+					
+					<h:panelGroup>
+						<h:outputLabel value=" "/> <br />
+						<p:commandButton 
+									 id="btnLimpar" 
+									 value="Limpar"
+									 action="#{linhaProdutoMetaBean.limpar}"
+									 update="@form :listaLinhaProdutoMeta"
+									 icon="ui-icon-close" 
+								 />	
+					</h:panelGroup>
+				
+				</p:panelGrid>
+				</div>
+			</p:panel>
+
+		</h:form>
+
+		<h:form id="listaLinhaProdutoMeta">
+		
+				<p:growl id="msg" showDetail="true" life="3000" />
+		     	<p:blockUI block="dtItensLinhaProdutoMetaBean" widgetVar="bUIDataTableLinhaProdMeta">
+					LOADING<br />
+		        	<p:graphicImage library="images" name="progress_bar.gif"/>
+				</p:blockUI>
+				
+				<p:panel id="panelFat" widgetVar="panelpanelFat" >
+					<div class="ui-fluid">
+						<p:panelGrid columns="5" columnClasses="ui-grid-col-0,ui-grid-col-0,ui-grid-col-0,ui-grid-col-0,ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+						        <h:outputLabel value="Aplicar" for="percAplicado"/>
+								<p:inputNumber id="percAplicado" value="#{linhaProdutoMetaBean.percAplicado}" placeholder="%" decimalPlaces="2" decimalSeparator="," thousandSeparator="." size="3" />
+						        <h:outputLabel value="sobre: " />
+						        <p:selectOneRadio value="#{linhaProdutoMetaBean.aplicarTipo}"  unselectable="true">
+						            <f:selectItem itemLabel="Meta" itemValue="0" noSelectionOption="false" />
+						            <f:selectItem itemLabel="Faturamento" itemValue="1" />
+						        </p:selectOneRadio>
+							<p:commandButton id="btnAplicar" value="Aplicar"
+								actionListener="#{linhaProdutoMetaBean.aplicar}"
+								update="@form :listaLinhaProdutoMeta" icon="ui-icon-refresh"
+								rendered="#{not empty linhaProdutoMetaBean.listaItens}"
+							 />	 
+						</p:panelGrid>	
+						<p:panelGrid columns="5" columnClasses="ui-grid-col-0,ui-grid-col-0,ui-grid-col-0,ui-grid-col-0,ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+								<h:outputLabel value="Atribuir" for="percAtribuido"/>
+								<p:inputNumber id="percAtribuido" value="#{linhaProdutoMetaBean.percAtribuido}" placeholder="%" decimalPlaces="2" decimalSeparator="," thousandSeparator="." size="3" />
+						        <h:outputLabel value="sobre: " />
+						        <p:selectOneRadio value="#{linhaProdutoMetaBean.atribuirTipo}" unselectable="true">
+						            <f:selectItem itemLabel="Positivação" itemValue="0" />
+						            <f:selectItem itemLabel="MixProduto" itemValue="1" />
+						        </p:selectOneRadio>
+							<p:commandButton id="btnAjuste" value="Atribuir"
+								actionListener="#{linhaProdutoMetaBean.atribuir}"
+								update="@form :listaLinhaProdutoMeta" icon="ui-icon-refresh"
+								rendered="#{not empty linhaProdutoMetaBean.listaItens}"
+								 />		  	 	 
+						</p:panelGrid>
+						<p:panelGrid columns="3" columnClasses="ui-grid-col-3,ui-grid-col-0,ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+							<h:outputLabel value=" " />
+							<p:commandButton id="btnCancelar" value="Cancelar"
+								actionListener="#{linhaProdutoMetaBean.buscar}"
+								update="@form :listaLinhaProdutoMeta" icon="ui-icon-close"
+								rendered="#{not empty linhaProdutoMetaBean.listaItens}"
+								 />	 
+							<p:commandButton id="btnSalvar2" value="Salvar"
+								actionListener="#{linhaProdutoMetaBean.salvar}"
+								update="@form :listaLinhaProdutoMeta" icon="ui-icon-disk"
+								rendered="#{not empty linhaProdutoMetaBean.listaItens}"
+								 />	
+								
+					    </p:panelGrid>	
+				    </div>
+				</p:panel>
+				<p:dataTable id="dtItensLinhaProdutoMetaBean" widgetVar="UIdtItensLinhaProdutoMetaBean"
+								var="linhaProdutoMetaItens" 
+								value="#{linhaProdutoMetaBean.listaItens}" 
+								paginator="false" 
+	                 			lazy="true"
+	                 			emptyMessage="Nenhum registro encontrado." 
+	                 			reflow="true">
+			
+				    <p:column style="width:200px;" priority="1">
+				    	<f:facet name="header">Linha Produto</f:facet>
+				    	<h:outputText value="#{linhaProdutoMetaItens.descLinhaProduto}" />
+				  	</p:column>
+				
+				  	<p:column priority="1" style="width:130px;" styleClass="customCollumnValor">
+					   <f:facet name="header">Prev #{linhaProdutoMetaBean.anoMesRef.substring(4,6)}/#{linhaProdutoMetaBean.anoMesRef.substring(0,4)}</f:facet>
+					   <h:outputText value="#{linhaProdutoMetaItens.valorPrevAnt}" converter="currencyFormat" >
+					   		<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+					   </h:outputText>		
+				  	</p:column>
+				
+				  	<p:column priority="1" style="width:130px;" styleClass="customCollumnValor">
+					   <f:facet name="header">Real #{linhaProdutoMetaBean.anoMesRef.substring(4,6)}/#{linhaProdutoMetaBean.anoMesRef.substring(0,4)}</f:facet>
+					   <h:outputText value="#{linhaProdutoMetaItens.valorRealAnt}" converter="currencyFormat" >
+					   		<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+					   </h:outputText>		
+				  	</p:column>
+
+				  	<p:column priority="1" style="width:130px;" styleClass="customCollumnValor">
+					   <f:facet name="header">(%)</f:facet>
+					   <h:outputText value="#{linhaProdutoMetaItens.percPrevRealAnt}" converter="currencyFormat" >
+					   		<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+					   </h:outputText>
+					   %		
+				  	</p:column>
+
+				  	<p:column priority="1" style="width:130px;" styleClass="customCollumnValor" >
+					   <f:facet name="header">Prev #{linhaProdutoMetaBean.anoMes.substring(4,6)}/#{linhaProdutoMetaBean.anoMes.substring(0,4)}</f:facet>
+					   <p:inputNumber id="grupo" value="#{linhaProdutoMetaItens.valor}" size="10" decimalPlaces="0" decimalSeparator="," thousandSeparator="." inputStyleClass="tx_right">
+					   	<p:ajax event="blur" update="listaLinhaProdutoMeta:totalPrevAtual listaLinhaProdutoMeta:totalPrevAnt listaLinhaProdutoMeta:totalPercPrevAtual " listener="#{linhaProdutoMetaBean.totalizador}"  />
+					   </p:inputNumber>
+				  	</p:column>
+
+				  	<p:column priority="1" style="width:130px;" styleClass="customCollumnValor">
+					   <f:facet name="header">#{linhaProdutoMetaBean.anoMesRef.substring(4,6)}/#{linhaProdutoMetaBean.anoMesRef.substring(0,4)} x #{linhaProdutoMetaBean.anoMes.substring(4,6)}/#{linhaProdutoMetaBean.anoMes.substring(0,4)}</f:facet>
+					   <h:outputText value="#{linhaProdutoMetaItens.percPrevRealAtual}" >
+   				  	   		<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+   				  	   </h:outputText>%
+				  	</p:column>
+
+				  	<p:column priority="1" style="width:130px;" styleClass="customCollumnValor">
+					   <f:facet name="header">(%) Positivação</f:facet>
+					   <h:outputText value="#{linhaProdutoMetaItens.percPositivacao}" converter="currencyFormat" >
+				  	   	<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+				  	   </h:outputText>%
+				  	</p:column>
+
+				  	<p:column priority="1" style="width:130px;" styleClass="customCollumnValor">
+					   <f:facet name="header">(%) MixProduto</f:facet>
+					   <h:outputText value="#{linhaProdutoMetaItens.mixProduto}" converter="currencyFormat" >
+				  	   	<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+				  	   </h:outputText>%
+				  	</p:column>
+			  </p:dataTable>
+	          <div class="ui-datatable ui-widget">
+					<table role="grid">
+						<ui:fragment rendered="#{not empty linhaProdutoMetaBean.listaItens}" >
+							<tr> 
+								<td class="ui-state-default" style="text-align:right;width: 90%;"><b>Previsão Orçamentária de #{linhaProdutoMetaBean.anoMesRef.substring(4,6)}/#{linhaProdutoMetaBean.anoMesRef.substring(0,4)}</b></td>
+								<td class="ui-state-default" align="right">
+									<h:outputLabel id="totalPrevAnt" value="#{linhaProdutoMetaBean.totalPrevAnt}" converter="currencyFormat" styleClass="tx_bold" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>											
+								</td>
+							</tr>
+							<tr> 
+								<td class="ui-state-default" style="text-align:right;width: 90%;"><b>Faturamento #{linhaProdutoMetaBean.anoMesRef.substring(4,6)}/#{linhaProdutoMetaBean.anoMesRef.substring(0,4)}</b></td>
+								<td class="ui-state-default" align="right">
+									<h:outputLabel value="#{linhaProdutoMetaBean.totalRealAnt}" converter="currencyFormat" styleClass="tx_bold" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>											
+								</td>
+							</tr>
+							<tr> 
+								<td class="ui-state-default" style="text-align:right;width: 90%;"><b>Prev. #{linhaProdutoMetaBean.anoMesRef.substring(4,6)}/#{linhaProdutoMetaBean.anoMesRef.substring(0,4)} x Fat. #{linhaProdutoMetaBean.anoMesRef.substring(4,6)}/#{linhaProdutoMetaBean.anoMesRef.substring(0,4)}</b></td>
+								<td class="ui-state-default" align="right">
+									<h:outputLabel value="#{linhaProdutoMetaBean.totalPercPrevFatAnt}" converter="currencyFormat" styleClass="tx_bold" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel> <b>(%)</b>											
+								</td> 
+							</tr>
+							<tr>
+								<td class="ui-state-default" style="text-align:right;width: 90%;"><b>Previsão Orçamentária de #{linhaProdutoMetaBean.anoMes.substring(4,6)}/#{linhaProdutoMetaBean.anoMes.substring(0,4)}</b></td>
+								<td class="ui-state-default" align="right">
+									<h:outputLabel id="totalPrevAtual" value="#{linhaProdutoMetaBean.totalPrevAtual}" converter="currencyFormat" styleClass="tx_bold" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>											
+								</td>
+							</tr>
+							<tr>
+								<td class="ui-state-default" style="text-align:right;width: 90%;"><b>Prev. #{linhaProdutoMetaBean.anoMesRef.substring(4,6)}/#{linhaProdutoMetaBean.anoMesRef.substring(0,4)} x Prev. #{linhaProdutoMetaBean.anoMes.substring(4,6)}/#{linhaProdutoMetaBean.anoMes.substring(0,4)}</b></td>
+								<td class="ui-state-default" align="right">
+									<h:outputLabel id="totalPercPrevAtual" value="#{linhaProdutoMetaBean.totalPercPrevAtual}" converter="currencyFormat" styleClass="tx_bold" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel> <b>(%)</b>										
+								</td>
+							</tr>
+						</ui:fragment>
+					</table>
+			  </div>	 	
+<!-- 
+      		  <p:commandButton id="btnSalvarItem" 
+						value="Salvar" 
+						actionListener="#{linhaProdutoMetaBean.salvar}" 
+						update="@form :listaLinhaProdutoMeta"
+						rendered="#{not empty linhaProdutoMetaBean.listaItens}"
+						icon="ui-icon-disk" />
+	 -->					
+		</h:form>
+		
+		<script>
+			//$('#edicaoLinhaProdutoMeta\\:panelLinhaProdutoMeta').hide();
+			//$('#formLinhaProdutoMetaBuscar\\:panelFilterLinhaProdutoMetaBean').hide();
+		</script>
+		
+   		
+
+</ui:composition> 

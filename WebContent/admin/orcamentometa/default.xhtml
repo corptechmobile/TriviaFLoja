@@ -1,0 +1,286 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"> 
+   	
+    <f:metadata>
+      <f:viewAction action="#{orcamentoMetaBean.clearSession}"/>
+    </f:metadata>
+
+		<h:form id="formOrcamentoMetaBuscar">
+
+			<p:growl id="msg" showDetail="true" life="3000" />
+			<p:focus context="panelFilterOrcamentoMetaBean" />
+			<p:defaultCommand target="btnBuscar" />
+
+		    <p:toolbar id="tb">
+		        <f:facet name="right">
+					<p:commandButton id="menuHome" icon="ui-icon-home"
+						actionListener="#{orcamentoMetaBean.addHome}" update="@form:msg"
+						process="@this" title="Home" />
+					<p:commandButton icon="ui-icon-star"
+						actionListener="#{orcamentoMetaBean.addFavoritos}"
+						update="@form:msg" process="@this" title="Favoritos"
+						oncomplete="updateMenuHome();" />
+	        	</f:facet>
+		    </p:toolbar>
+
+			<p:sticky target="tb" margin="50" />
+
+			<p:panel id="panelFilterOrcamentoMetaBean" widgetVar="panelFilterOrcamentoMetaBean" >
+				<div class="ui-fluid">
+				<p:panelGrid columns="5" columnClasses="ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+					<h:panelGroup>
+						<h:outputLabel value="Competência:" for="anoMes"/><br/>
+				        <p:inputMask id="anoMes" value="#{orcamentoMetaBean.anoMes}" mask="9999/99" placeholder="Ano/Mês" size="7"  required="true" requiredMessage="Informe o Ano/Mês" converter="anoMesConverter"  />
+					</h:panelGroup>
+					<h:panelGroup>
+						<h:outputLabel value="Referência:" for="anoMesRef"/><br/>
+				        <p:inputMask id="anoMesRef" value="#{orcamentoMetaBean.anoMesRef}" mask="9999/99" placeholder="Ano/Mês" size="7" required="true" requiredMessage="Informe o Ano/Mês de Referencia" converter="anoMesConverter"  />
+					</h:panelGroup>
+					<h:panelGroup>
+						<h:outputLabel value="Empresa:" for="empresaIdFilter"/><br/>
+				        <p:selectOneMenu  id="empresaIdFilter" value="#{orcamentoMetaBean.empresaFilter}" filter="true" autoWidth="true" required="true" requiredMessage="Selecione uma Empresa">
+							<f:selectItem itemLabel="Todas" itemValue="#{null}" />  
+							<f:selectItems value="#{orcamentoMetaBean.empresaSelect}" /> 
+						</p:selectOneMenu>
+					</h:panelGroup>
+					<h:panelGroup>
+						<h:outputLabel value=" " /><br/>
+						<p:commandButton id="btnBuscar" value="Buscar"
+										actionListener="#{orcamentoMetaBean.buscar}"
+										update="@form :listaOrcamentoMeta" icon="icon-search"
+										onclick="PF('bUIDataTableComissao').show()" />
+					</h:panelGroup>
+					<h:panelGroup>					
+						<h:outputLabel value=" " /><br/>
+						<p:commandButton 
+										 id="btnLimpar" 
+										 value="Limpar"
+										 action="#{orcamentoMetaBean.limpar}"
+										 update="@form :listaOrcamentoMeta "
+										 icon="ui-icon-close" 
+									 />	
+					</h:panelGroup>				
+				</p:panelGrid>
+				</div>
+			</p:panel>
+
+		</h:form>
+
+		<h:form id="listaOrcamentoMeta">
+		
+		     	<p:growl id="msgOrcamentoMeta" showDetail="true" life="3000" />
+		     	<p:blockUI block="dtItensOrcamentoMetaBean" widgetVar="bUIDataTableComissao">
+					LOADING<br />
+		        	<p:graphicImage library="images" name="progress_bar.gif"/>
+				</p:blockUI>
+				
+				<p:panel id="panelFat" widgetVar="panelpanelFat" >
+					<div class="ui-fluid">
+						<p:panelGrid columns="2" columnClasses="ui-grid-col-2,ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+							<h:outputLabel value="Aplicar(%) sobre a referência:" for="percAplicado"/>
+							<p:inputNumber id="percAplicado" value="#{orcamentoMetaBean.percAplicado}" placeholder="%" decimalPlaces="2" decimalSeparator="," thousandSeparator="." size="3" />
+							<h:outputLabel value="Previsão Faturamento:" for="valorOrcado"/>
+							<p:inputNumber id="valorOrcado" value="#{orcamentoMetaBean.valorOrcado}" decimalPlaces="0" decimalSeparator="," thousandSeparator="." required="true" requiredMessage="O valor orçado é obrigatório" />
+							<h:outputLabel value="" />
+							
+							<p:panelGrid columns="4" columnClasses="ui-grid-col-0,ui-grid-col-0,ui-grid-col-0,ui-grid-col-7" layout="grid" styleClass="ui-panelgrid-blank" >
+							<p:commandButton id="btnAplicar" value="Aplicar"
+								actionListener="#{orcamentoMetaBean.aplicar}"
+								update="@form :listaOrcamentoMeta" icon="ui-icon-refresh"
+								rendered="#{not empty orcamentoMetaBean.listaItens}"
+								 />	 
+							<p:commandButton id="btnCancelar" value="Cancelar"
+								actionListener="#{orcamentoMetaBean.buscar}"
+								update="@form :listaOrcamentoMeta" icon="ui-icon-close"
+								rendered="#{not empty orcamentoMetaBean.listaItens}"
+								 />	 
+							<p:commandButton id="btnSalvar2" value="Salvar"
+								actionListener="#{orcamentoMetaBean.salvar}"
+								update="@form :listaOrcamentoMeta" icon="ui-icon-disk"
+								rendered="#{not empty orcamentoMetaBean.listaItens}"
+								 />	
+							<p:commandButton id="btnAjuste" value="Ajustar dif. na previsão de #{orcamentoMetaBean.anoMes.substring(4,6)}/#{orcamentoMetaBean.anoMes.substring(0,4)}"
+								actionListener="#{orcamentoMetaBean.ajustar}"
+								update="@form :listaOrcamentoMeta" icon="ui-icon-disk"
+								rendered="#{not empty orcamentoMetaBean.listaItens}"
+								 />		  	 	 
+							</p:panelGrid>
+								
+					    </p:panelGrid>	
+				    </div>
+				</p:panel>
+				<p:dataTable id="dtItensOrcamentoMetaBean" widgetVar="UIdtItensOrcamentoMetaBean"
+								var="orcamentoMetaItens" 
+								value="#{orcamentoMetaBean.listaItens}" 
+								paginator="false" 
+	                 			lazy="true"
+	                 			emptyMessage="Nenhum registro encontrado." 
+	                 			reflow="true">
+			
+				    <p:column style="width:200px;" priority="1">
+				    	<f:facet name="header">Grupo Orçamento</f:facet>
+				    	<h:outputText value="#{orcamentoMetaItens.descOrcamentoGrupo}" />
+				  	</p:column>
+				
+				  	<p:column priority="1" style="width:130px;" styleClass="customCollumnValor">
+					   <f:facet name="header">Prev #{orcamentoMetaBean.anoMesRef.substring(4,6)}/#{orcamentoMetaBean.anoMesRef.substring(0,4)}</f:facet>
+					   <h:outputText value="#{orcamentoMetaItens.valorPrevAnt}" converter="currencyFormat" >
+					   		<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+					   </h:outputText>		
+				  	</p:column>
+				
+				  	<p:column priority="1" style="width:130px;" styleClass="customCollumnValor">
+					   <f:facet name="header">Real #{orcamentoMetaBean.anoMesRef.substring(4,6)}/#{orcamentoMetaBean.anoMesRef.substring(0,4)}</f:facet>
+					   <h:outputText value="#{orcamentoMetaItens.valorRealAnt}" converter="currencyFormat" >
+					   		<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+					   </h:outputText>		
+				  	</p:column>
+
+				  	<p:column priority="1" style="width:130px;" styleClass="customCollumnValor">
+					   <f:facet name="header">Diferença</f:facet>
+					   <h:outputText value="#{orcamentoMetaItens.valorPrevAnt-orcamentoMetaItens.valorRealAnt}" converter="currencyFormat" >
+					   		<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+					   </h:outputText>		
+				  	</p:column>
+
+				  	<p:column priority="1" style="width:130px;" styleClass="customCollumnValor">
+					   <f:facet name="header">(%)</f:facet>
+					   <h:outputText value="#{orcamentoMetaItens.percPrevRealAnt}" converter="currencyFormat" >
+					   		<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+					   </h:outputText>
+					   %		
+				  	</p:column>
+
+				  	<p:column priority="1" style="width:130px;" styleClass="customCollumnValor" >
+					   <f:facet name="header">Prev #{orcamentoMetaBean.anoMes.substring(4,6)}/#{orcamentoMetaBean.anoMes.substring(0,4)}</f:facet>
+					   <p:inputNumber id="grupo" value="#{orcamentoMetaItens.valorOrcado}" size="10" decimalPlaces="0" decimalSeparator="," thousandSeparator="." rendered="#{orcamentoMetaItens.percFaturamento==0.0}" inputStyleClass="tx_right">
+					   	<p:ajax event="blur" update="listaOrcamentoMeta:totalPrevAtual listaOrcamentoMeta:totalPrevAnt listaOrcamentoMeta:totalPercPrevAtual listaOrcamentoMeta:totalPrevFaturamento listaOrcamentoMeta:totalPercPrevFat" listener="#{orcamentoMetaBean.totalizador}"  />
+					   </p:inputNumber>
+					   <p:outputLabel value="#{orcamentoMetaItens.valorOrcado}" converter="currencyFormat" rendered="#{orcamentoMetaItens.percFaturamento>0}" >
+					   		<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+					   </p:outputLabel>		
+				  	</p:column>
+
+				  	<p:column priority="1" style="width:130px;" styleClass="customCollumnValor">
+					   <f:facet name="header">#{orcamentoMetaBean.anoMesRef.substring(4,6)}/#{orcamentoMetaBean.anoMesRef.substring(0,4)} x #{orcamentoMetaBean.anoMes.substring(4,6)}/#{orcamentoMetaBean.anoMes.substring(0,4)}</f:facet>
+					   <h:outputText value="#{orcamentoMetaItens.percPrevRealAtual}" >
+   				  	   		<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+   				  	   </h:outputText>%
+				  	</p:column>
+
+				  	<p:column priority="1" style="width:130px;" styleClass="customCollumnValor">
+					   <f:facet name="header">(%) s/Fat</f:facet>
+					   <h:outputText value="#{orcamentoMetaItens.percFaturamento}" converter="currencyFormat" >
+				  	   	<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+				  	   </h:outputText>%
+				  	</p:column>
+
+				  	<p:column  priority="1" style="width:130px;" styleClass="customCollumnValor">
+					   <f:facet name="header">Prev. Faturamento</f:facet>
+					   <h:outputText value="#{orcamentoMetaItens.prevFaturamento}" converter="currencyFormat" rendered="#{orcamentoMetaItens.prevFaturamento>0}" >
+					   		<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+					   </h:outputText>		
+				  	</p:column>
+				  	<!-- 
+				  	<p:columnGroup type="footer" id="dtTotais" >
+               				<p:row>
+					            <p:column footerText="Total" style="text-align:right;" styleClass="tx_bold" />
+					            <p:column style="text-align:right;" >
+					            	<f:facet name="footer">
+					                	<h:outputLabel value="#{orcamentoMetaBean.totalPrevAnt}" converter="currencyFormat" styleClass="tx_bold" />
+				                	</f:facet>
+					            </p:column>
+					            
+					            <p:column />
+					            <p:column footerText="Total" style="text-align:right;" styleClass="tx_bold" />
+					            <p:column style="text-align:right;" >
+					            	<f:facet name="footer">
+					                	<h:outputLabel id="totalPrevAtual" value="#{orcamentoMetaBean.totalPrevAtual}" converter="currencyFormat" styleClass="tx_bold" />
+				                	</f:facet>
+					            </p:column>
+					            <p:column style="text-align:right;" >
+					            	<f:facet name="footer">
+					                	<h:outputLabel id="totalPercPrevAtual" value="#{orcamentoMetaBean.totalPercPrevAtual}" converter="currencyFormat" styleClass="tx_bold" >
+						                	<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									   </h:outputLabel>%
+				                	</f:facet>
+					            </p:column>
+					            <p:column />
+					            <p:column />
+					        </p:row>
+					</p:columnGroup>
+					 -->
+			  </p:dataTable>
+	          <div class="ui-datatable ui-widget">
+					<table role="grid">
+						<ui:fragment rendered="#{not empty orcamentoMetaBean.listaItens}" >
+							<tr> 
+								<td class="ui-state-default" style="text-align:right;width: 90%;"><b>Previsão Orçamentária de #{orcamentoMetaBean.anoMesRef.substring(4,6)}/#{orcamentoMetaBean.anoMesRef.substring(0,4)}</b></td>
+								<td class="ui-state-default" align="right">
+									<h:outputLabel id="totalPrevAnt" value="#{orcamentoMetaBean.totalPrevAnt}" converter="currencyFormat" styleClass="tx_bold" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>											
+								</td>
+							</tr>
+							<tr>
+								<td class="ui-state-default" style="text-align:right;width: 90%;"><b>Faturamento de #{orcamentoMetaBean.anoMesRef.substring(4,6)}/#{orcamentoMetaBean.anoMesRef.substring(0,4)}</b></td>
+								<td class="ui-state-default" align="right">
+									<h:outputLabel id="totalRealAnt" value="#{orcamentoMetaBean.totalRealAnt}" converter="currencyFormat" styleClass="tx_bold" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>											
+								</td>
+							</tr>
+							<tr>
+								<td class="ui-state-default" style="text-align:right;width: 90%;"><b>Previsão Orçamentária de #{orcamentoMetaBean.anoMes.substring(4,6)}/#{orcamentoMetaBean.anoMes.substring(0,4)}</b></td>
+								<td class="ui-state-default" align="right">
+									<h:outputLabel id="totalPrevAtual" value="#{orcamentoMetaBean.totalPrevAtual}" converter="currencyFormat" styleClass="tx_bold" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>											
+								</td>
+							</tr>
+							<tr>
+								<td class="ui-state-default" style="text-align:right;width: 90%;"><b>#{orcamentoMetaBean.anoMesRef.substring(4,6)}/#{orcamentoMetaBean.anoMesRef.substring(0,4)} x #{orcamentoMetaBean.anoMes.substring(4,6)}/#{orcamentoMetaBean.anoMes.substring(0,4)}</b></td>
+								<td class="ui-state-default" align="right">
+									<h:outputLabel id="totalPercPrevAtual" value="#{orcamentoMetaBean.totalPercPrevAtual}" converter="currencyFormat" styleClass="tx_bold" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel> <b>(%)</b>										
+								</td>
+							</tr>
+							<tr>
+								<td class="ui-state-default" style="text-align:right;width: 90%;"><b>Previsão Faturamento #{orcamentoMetaBean.anoMes.substring(4,6)}/#{orcamentoMetaBean.anoMes.substring(0,4)}</b></td>
+								<td class="ui-state-default" align="right">
+									<h:outputLabel id="totalPrevFaturamento" value="#{orcamentoMetaBean.valorOrcado}" converter="currencyFormat" styleClass="tx_bold" >
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel>											
+								</td>
+							</tr>
+							<tr>
+								<td class="ui-state-default" style="text-align:right;width: 90%;"><b>Orcamento x Faturamento</b></td>
+								<td class="ui-state-default" align="right">
+									<h:outputLabel id="totalPercPrevFat" value="#{orcamentoMetaBean.totalPercPrevFat}" converter="currencyFormat" styleClass="tx_bold" >										
+										<f:convertNumber maxFractionDigits="0" minFractionDigits="0" locale="pt_BR" />
+									</h:outputLabel> <b>(%)</b>
+								</td>
+							</tr>
+						</ui:fragment>
+					</table>
+			  </div>	 	
+      		  <p:commandButton id="btnSalvarItem" 
+						value="Salvar" 
+						actionListener="#{orcamentoMetaBean.salvar}" 
+						update="@form :listaOrcamentoMeta listaOrcamentoMeta:msgOrcamentoMeta"
+						rendered="#{not empty orcamentoMetaBean.listaItens}"
+						icon="ui-icon-disk" />
+		</h:form>
+		
+		<script>
+			//$('#edicaoOrcamentoMeta\\:panelOrcamentoMeta').hide();
+			//$('#formOrcamentoMetaBuscar\\:panelFilterOrcamentoMetaBean').hide();
+		</script>
+		
+   		
+
+</ui:composition> 

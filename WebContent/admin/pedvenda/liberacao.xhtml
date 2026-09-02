@@ -1,0 +1,167 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+    
+    <div class="tab-content-space">
+    <div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+    <f:metadata>
+      <f:viewAction action="#{pedVendaConsultaLiberarBean.clearSession}"/>
+    </f:metadata>
+     
+     <!-- Filtro -->
+     <h:form id="consultaPedVendaBloqueado">
+     
+     	<p:growl id="msg" showDetail="true" life="3000"/>
+     	<p:focus context="panelFiltroPedVendaBloqueado"/>
+    	<p:defaultCommand target="btnBuscar" />
+    	
+    	<p:toolbar id="tb">
+	        <f:facet name="left">
+	        </f:facet>
+	        <f:facet name="right">
+		        <p:commandButton id="menuHome" icon="ui-icon-home" action="#{pedVendaConsultaLiberarBean.addHome}" update="msg" title="Home" />
+		        <p:commandButton icon="ui-icon-star" actionListener="#{pedVendaConsultaLiberarBean.addFavoritos}" update="msg" title="Favoritos" oncomplete="updateMenuHome();"/>
+        	</f:facet>
+	    </p:toolbar>
+	    
+	    <p:sticky target="tb" margin="50"/>
+	    
+	    <p:panel id="panelFiltroPedVendaBloqueado" widgetVar="panelFiltroPedVendaBloqueado" >
+    		<div class="ui-g">
+				<div class="ui-g-0 ui-md-3 ui-lg-0">
+					<p:inputText id="descricaoFilter" value="#{pedVendaConsultaLiberarBean.descricaoFilter}" placeholder="Código Pedido / Nome Cliente" style="width:100%;" />
+				</div>
+				
+				<ui:fragment rendered="#{contextoBean.empresaFilter}">
+				<div class="ui-g-0 ui-md-2 ui-lg-0">
+					<div class="ui-fluid">
+			        <p:selectOneMenu  id="empresa" value="#{pedVendaConsultaLiberarBean.empresaFilter}" filter="false" autoWidth="true">
+						<f:selectItem itemValue="" itemLabel="Empresas"/>
+						<f:selectItems value="#{pedVendaConsultaLiberarBean.empresasSelect}" /> 
+					</p:selectOneMenu>
+					</div>
+				</div>
+				</ui:fragment>
+				
+				<ui:fragment rendered="#{contextoBean.vendedorFilter}">
+				<div class="ui-g-0 ui-md-2 ui-lg-0">
+					<div class="ui-fluid">
+						<p:autoComplete id="vendedorCreateSelect" dropdown="true" scrollHeight="200"
+										queryDelay="1000"
+										minQueryLength="3" 
+										completeMethod="#{pedVendaConsultaLiberarBean.completeVendedor}" 
+										value="#{pedVendaConsultaLiberarBean.vendedorFilter}" 
+										var="ven" 
+										itemLabel="#{ven.nomeFantasia}" 
+										itemValue="#{ven}" 
+										converter="vendedorFBConverter" 
+										forceSelection="true"
+										emptyMessage="Nenhum Vendedor encontrado"
+										placeholder="Vendedores"
+										>
+										
+							<p:ajax event="itemSelect" listener="#{pedVendaConsultaLiberarBean.closeFilterVendedor}" update="@this"/> 
+							
+							<p:column>
+								<h:outputText value="#{ven.id}"/> <br/>
+								<h:outputText value="#{ven.nomeFantasia}"/>
+							</p:column>
+							
+						</p:autoComplete>
+					</div>
+				</div>
+       			</ui:fragment>
+      				
+				<div class="ui-g-0 ui-md-0 ui-lg-0">
+		        	<p:panelGrid columns="3" styleClass="ui-panelgrid-blank">
+				        <p:calendar id="dataFilter" value="#{pedVendaConsultaLiberarBean.dataFilter1}" pattern="dd/MM/yyyy" size="10" mask="99/99/9999" label="Data" converterMessage="Data inválida" />
+				        à
+				        <p:calendar id="dataFilter2" value="#{pedVendaConsultaLiberarBean.dataFilter2}" pattern="dd/MM/yyyy" size="10" mask="99/99/9999" label="Data" converterMessage="Data inválida" />
+			        </p:panelGrid>
+		        </div>
+				<div class="ui-g-0 ui-md-0 ui-lg-0">
+					<p:commandButton 
+						 id="btnBuscar" 
+						 value="Buscar"
+						 actionListener="#{pedVendaConsultaLiberarBean.buscar}"
+						 update=":listagemPedVendaBloqueado"
+						 icon="icon-search"  
+						 onclick="PF('bUIDataTablePedVendaBloqueado').show()"
+						 />
+				</div>
+				<div class="ui-g-0 ui-md-0 ui-lg-0">		 
+					 <p:commandButton 
+						 id="btnLimpar" 
+						 value="Limpar"
+						 action="#{pedVendaConsultaLiberarBean.limpar}"
+						 update="@form :listagemPedVendaBloqueado"
+						 icon="ui-icon-close" 
+						 onclick="PF('bUIDataTablePedVendaBloqueado').show()"
+						 />
+				</div>
+    		</div>
+	    </p:panel>
+     	
+     </h:form>
+     
+     <!-- Listagem -->
+     <h:form id="listagemPedVendaBloqueado">
+     
+     	<p:remoteCommand name="updateListPedVendaBloqueadoBean" update="@form" actionListener="#{pedVendaConsultaLiberarBean.buscar}" />
+     	
+     	<p:blockUI block="dtPedVendaBloqueado" widgetVar="bUIDataTablePedVendaBloqueado">
+			LOADING<br />
+        	<p:graphicImage library="images" name="progress_bar.gif"/>
+		</p:blockUI>
+		
+		<p:dataTable id="dtPedVendaBloqueado" var="pedVenda" reflow="true"
+			value="#{pedVendaConsultaLiberarBean.lista}" emptyMessage="Nenhuma registro encontrado.">
+					
+				<p:column sortBy="#{pedVenda.pedVendaId}" styleClass="customCollumnId"> 
+					<f:facet name="header">Pedido</f:facet>
+					<h:outputText value="#{pedVenda.pedVendaId}"/>
+		        </p:column>
+		        
+				<p:column sortBy="#{pedVenda.dtEntrada}" styleClass="customCollumnData">
+					<f:facet name="header">Entrada</f:facet>
+					<h:outputText value="#{pedVenda.dtEntrada}">
+						<f:convertDateTime pattern="dd/MM/yyyy" />
+					</h:outputText>	
+		        </p:column>
+
+		        <p:column sortBy="#{pedVenda.cliente.pessoa.razaoSocialNome}">
+					<f:facet name="header">Cliente</f:facet>
+					#{pedVenda.clienteDesc}
+		        </p:column>
+		        
+		        <p:column sortBy="#{pedVenda.vendedor.pessoa.nomeFantMnem}">
+					<f:facet name="header">Vendedor</f:facet>
+					#{pedVenda.vendedorDesc}
+		        </p:column>
+		        
+				<p:column styleClass="customCollumn1Icon">
+					<f:facet name="header"></f:facet>
+					<p:commandButton action="#{pedVendaLiberarBean.gerenciar}"
+						update="@none" process="@this" icon="ui-icon-gear" title="Gerenciar Liberação"
+						onstart="closeTab('pedVendaConsultaLiberarBean')" 
+						oncomplete="openTab('pedVendaConsultaLiberarBean', 'Liberar - #{pedVenda.pedVendaId}', 'Liberar - #{pedVenda.pedVendaId}', 'pedvenda/formliberacao.jsf')"
+						>
+						<f:setPropertyActionListener target="#{pedVendaLiberarBean.selecionadaId}" value="#{pedVenda.pedVendaId}" />
+					</p:commandButton>
+				</p:column>
+				
+			</p:dataTable>
+			
+			<p:toolbar id="tbTotal">
+		        <f:facet name="right">
+		        	Total: #{pedVendaConsultaLiberarBean.lista.size()}
+		        </f:facet>
+	        </p:toolbar>
+			
+		</h:form>
+     
+    </div>
+    
+</ui:composition>

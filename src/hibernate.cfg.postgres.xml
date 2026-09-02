@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC 
+    "-//Hibernate/Hibernate Configuration DTD//EN"
+    "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+	<hibernate-configuration> 
+	    <session-factory>
+	    
+		  	<!-- Descomnetar para poder fazer deploy  --> 
+		  	<property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property> 
+			<property name="connection.datasource">java:/comp/env/jdbc/TriviaFLojaPostGres</property> 
+			
+			<!--  
+			<property name="dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+			<property name="connection.driver_class">org.postgresql.Driver</property>
+			<property name="connection.url">jdbc:postgresql://192.168.0.155:5432/triviafloja</property>
+			<property name="connection.username">triviamobile</property>
+			<property name="connection.password">TechCorp0710</property> 
+			-->
+
+	        <property name="current_session_context_class">thread</property>        
+	        <property name="cache.provider_class">org.hibernate.cache.NoCacheProvider</property>
+			<property name="hibernate.hbm2ddl.auto">update</property> <!-- create | validate | update | none -->
+			<property name="show_sql">false</property>
+
+	        <!-- Menu -->
+	        <mapping class="br.com.webapp.model.menu.MenuAcesso" />
+	        <mapping class="br.com.webapp.model.menu.MenuHome" />
+	        <mapping class="br.com.webapp.model.menu.MenuFavorito" />
+	        <mapping class="br.com.webapp.model.menu.MenuRecente" />
+	        
+	        <!--  -->
+	        <mapping class="br.com.webapp.model.usuariogrupo.UsuarioGrupo" />
+	        <mapping class="br.com.webapp.model.usuario.Usuario" />
+	        
+	        <!--  -->
+	        <mapping class="br.com.webapp.model.configuracao.Configuracao" />
+	        
+	    </session-factory>
+	</hibernate-configuration>

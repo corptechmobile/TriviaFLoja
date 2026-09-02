@@ -1,0 +1,163 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" 
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:composite="http://java.sun.com/jsf/composite">
+	
+	
+	<composite:interface>
+	</composite:interface>
+	
+	<composite:implementation>
+	
+		<div class="ui-fluid">
+		
+		<p:dialog id="ovlPanelCalcPiso" widgetVar="ovlPanelCalcPiso" responsive="true" modal="true" resizable="false" draggable="false" onShow="updateFormCalcPiso()" closeOnEscape="true" closable="false">
+		
+			<h:form id="consultaCalcPiso" >
+			
+				<p:remoteCommand name="updateFormCalcPiso" update="@form" />
+			
+				<p:messages id="msgCalcPiso" showDetail="true" />
+				<p:focus context="medida" />
+				 
+				    <ui:fragment rendered="#{calcularPisoBean.renderedResultado==false}">
+				    	
+				    	<!--  -->
+				    	<div class="ui-g">
+			     			<div class="ui-g-12 ui-md-12 ui-lg-12">
+				    			<h:outputLabel value="Tamanho do Ambiente: " styleClass="tx_bold" />
+				    		</div>
+				    		<div class="ui-g-0 ui-md-0 ui-lg-0">
+						        <p:selectOneRadio id="medida" value="#{calcularPisoBean.altLargOuAreaTotal}">
+						        	<p:ajax event="change" update="@form" listener="#{calcularPisoBean.changeRadio}" />
+						            <f:selectItem itemLabel="Medidas" itemValue="altLarg"  />
+						            <f:selectItem itemLabel="Área" itemValue="areaTotal" />  
+						            <p:ajax update="@form" />
+						        </p:selectOneRadio>
+					      	</div>
+						</div>
+						
+						<!--  -->	
+						<ui:fragment rendered="#{calcularPisoBean.altLargOuAreaTotal eq 'altLarg'}">
+						
+							<div class="ui-g">
+				     			<div class="ui-g-6 ui-md-6 ui-lg-6">
+				     				<h:panelGroup>
+										<p:outputLabel value="Comprimento: " for="comp"/> <br />
+										<p:inputNumber value="#{calcularPisoBean.comprimento}" id="comp" decimalSeparator="," thousandSeparator="." decimalPlaces="#{calcularPisoBean.qtdDecimal}" required="true" requiredMessage="Preencha a Altura" onfocus="this.select()" size="10" />
+									</h:panelGroup>
+								</div>
+								<div class="ui-g-6 ui-md-6 ui-lg-6">
+									<h:panelGroup>
+										<p:outputLabel value="Largura: " for="larg"/> <br />
+										<p:inputNumber value="#{calcularPisoBean.largura}" id="larg" decimalSeparator="," thousandSeparator="." decimalPlaces="#{calcularPisoBean.qtdDecimal}" required="true" requiredMessage="Preencha a Largura" onfocus="this.select()" size="10"/>
+									</h:panelGroup>
+								</div>
+							</div>	
+							
+							<br />
+							<div class="ui-g">
+								<div class="ui-g-6 ui-md-6 ui-lg-6">
+									<p:commandButton id="btnCalcular" 
+										value="Calcular" 
+										actionListener="#{calcularPisoBean.calcularCompAlt}" 
+										update="@form"
+										icon="ui-icon-calculator" />
+								</div>
+								<div class="ui-g-6 ui-md-6 ui-lg-6">
+									<p:commandButton id="btnFecharCalcPiso"
+										value="Fechar"
+										process="@this"
+										icon="ui-icon-close"
+										onclick="PF('ovlPanelCalcPiso').hide()" />
+								</div>
+							</div>
+							
+						</ui:fragment>
+						
+						<!--  -->	
+						<ui:fragment rendered="#{calcularPisoBean.altLargOuAreaTotal eq 'areaTotal'}">
+						
+							<div class="ui-g">
+								<div class="ui-g-12 ui-md-12 ui-lg-12">
+									<p:outputLabel value="Área Total (m²): "/>
+								</div>
+				     			<div class="ui-g-0 ui-md-0 ui-lg-0">
+									<p:inputNumber value="#{calcularPisoBean.areaTotal}" size="15" decimalSeparator="," thousandSeparator="." decimalPlaces="#{calcularPisoBean.qtdDecimal}" onfocus="this.select()" required="true" requiredMessage="Preencha a Área Total (m²)" />
+								</div>
+							</div>
+							
+							<br />
+							
+							<div class="ui-g">
+								<div class="ui-g-6 ui-md-6 ui-lg-6">
+									<p:commandButton id="btnCalcular2" 
+										value="Calcular" 
+										action="#{calcularPisoBean.calcularAreaTotal}"
+										update="@form"
+										icon="ui-icon-calculator" />
+								</div>
+								<div class="ui-g-6 ui-md-6 ui-lg-6">
+									<p:commandButton id="btnFecharCalcPiso2"
+										value="Fechar"
+										process="@this"
+										icon="ui-icon-close"
+										onclick="PF('ovlPanelCalcPiso').hide()" />
+								</div>
+							</div>
+							
+				    	</ui:fragment>
+				    	
+			    	</ui:fragment>
+			    	
+			    	<h:panelGroup rendered="#{calcularPisoBean.renderedResultado}">	
+			    	
+			    		<h:outputText value="Resultado:" styleClass="tx_bold_16"/> 
+			    		
+			    		<p>
+							Para <h:outputText value="#{calcularPisoBean.areaTotal}" styleClass="tx_bold_16" converter="currencyFormat"/> m² a quantidade mínima é:
+						</p>
+						
+						<p>
+							<h:outputText value="#{calcularPisoBean.total}" styleClass="tx_bold_16" converter="currencyFormat"/> m² (Totalizando <h:outputText value="#{calcularPisoBean.volume}" styleClass="tx_bold_16" /> caixas)	
+						</p>
+						
+						<p>	
+							<p:selectBooleanCheckbox id="dezPorcento" value="#{calcularPisoBean.dezPorcento}">
+			        			<p:ajax update="@form" listener="#{calcularPisoBean.addDezPorcento}"/>
+			        		</p:selectBooleanCheckbox>
+							<p:outputLabel for="dezPorcento" value=" Adicionar 10% para perdas na instalação" /> 
+						</p>
+						
+						<div class="ui-g">
+							<div class="ui-g-6 ui-md-6 ui-lg-6">
+								<p:commandButton id="btnRefazerCalculo"
+									value="Refazer" 
+									actionListener="#{calcularPisoBean.novo}"
+									update="@form"
+									process="@this"
+									icon="ui-icon-refresh"
+								/>
+							</div>
+							<div class="ui-g-6 ui-md-6 ui-lg-6">
+								<p:commandButton id="btnFecharCalcPiso3"
+									value="Fechar"
+									process="@this"
+									icon="ui-icon-close"
+									onclick="PF('ovlPanelCalcPiso').hide()" />
+							</div>
+						</div>
+					</h:panelGroup>
+					
+		     </h:form>
+	     </p:dialog>
+	     
+	     </div>
+	      
+	</composite:implementation>
+	 
+</ui:composition>

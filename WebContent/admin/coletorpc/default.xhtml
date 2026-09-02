@@ -1,0 +1,467 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+	<div class="tab-content-space">
+		<div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+		<f:metadata>
+			<f:viewAction action="#{coletorPCBean.clearSession}" />
+		</f:metadata>
+
+		<!-- Filtro -->
+		<h:form id="consultaPlanilhaCega">
+
+			<p:growl id="msg" showDetail="true" life="3000" />
+			<p:focus context="panelFiltroPlanilhaCega" />
+			<p:defaultCommand target="btnBuscar" />
+
+			<p:toolbar id="tb">
+				<f:facet name="left"> 
+					<p:commandButton value="Novo"
+						actionListener="#{coletorPCBean.novaPlanilha}"
+						update="@this :edicaoPlanilhaCega" process="@this" icon="icon-new">
+						<p:resetInput target="@this" />
+					</p:commandButton>
+				</f:facet>
+				<f:facet name="right">
+					<p:commandButton id="menuHome" icon="ui-icon-home"
+						action="#{coletorPCBean.addHome}" update="@form:msg"
+						process="@this" title="Home" />
+					<p:commandButton icon="ui-icon-star"
+						actionListener="#{coletorPCBean.addFavoritos}"
+						update="@form:msg" process="@this" title="Favoritos"
+						oncomplete="updateMenuHome();" />
+				</f:facet>
+			</p:toolbar>
+
+			<p:panel id="panelFiltroPlanilhaCega"
+				widgetVar="panelFiltroPlanilhaCega" closable="true">
+				<div class="ui-fluid">
+					<p:panelGrid columns="7"
+						columnClasses="ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0, ui-grid-col-0"
+						layout="grid" styleClass="ui-panelgrid-blank">
+
+						<p:selectOneMenu id="empresaFilter"
+							value="#{coletorPCBean.empresaFilter}">
+							<f:selectItem itemLabel="Empresa" />
+							<f:selectItems value="#{coletorPCBean.empresasSelect}" />
+						</p:selectOneMenu>
+
+						<p:inputText id="planilhaCegaIdFilter"
+							value="#{coletorPCBean.planilhaCegaIdFilter}" placeholder="ID"
+							size="10" decimalPlaces="0" decimalSeparator=""
+							thousandSeparator="" />
+
+						<p:inputText id="fornecedorFilter"
+							value="#{coletorPCBean.fornecedorFilter}"
+							placeholder="Fornecedor" />
+
+						<p:inputText id="notafistalFilter"
+							value="#{coletorPCBean.notafiscalFilter}"
+							placeholder="Número da Nota Fiscal" />
+
+						<p:inputText id="produtoFilter"
+							value="#{coletorPCBean.produtoFilter}"
+							placeholder="Produto / Descrição / Código Interno" />
+
+						<p:panelGrid columns="3" styleClass="ui-panelgrid-blank">
+							<p:calendar id="data1Filter"
+								value="#{coletorPCBean.data1Filter}" pattern="dd/MM/yyyy"
+								size="10" mask="99/99/9999" label="Data"
+								converterMessage="Data inválida" />
+				        
+				        <p:calendar id="data2Filter"
+								value="#{coletorPCBean.data2Filter}" pattern="dd/MM/yyyy"
+								size="10" mask="99/99/9999" label="Data"
+								converterMessage="Data inválida" />
+						</p:panelGrid>
+
+						<h:panelGroup>
+							<p:selectBooleanCheckbox id="concluidoFilter"
+								value="#{coletorPCBean.concluidoFilter}">
+							</p:selectBooleanCheckbox> 
+							<p:outputLabel value=" Concluído" for="concluidoFilter" />
+						</h:panelGroup>
+												
+													
+						<p:commandButton id="btnBuscar" value="Buscar"
+							actionListener="#{coletorPCBean.buscar}"
+							update="@form :listagemPlanilhaCega" icon="icon-search" />
+
+			 <p:commandButton 
+						 id="btnLimpar" 
+						 value="Limpar"
+						 action="#{coletorPCBean.limpar}"
+						 update="@form :listagemPlanilhaCega"
+						 icon="ui-icon-close" 
+						 />
+
+						<h:commandLink rendered="#{not empty coletorPCBean.lista}">
+							<p:graphicImage library="images" name="excel16x16.png" />
+							<p:dataExporter type="xls"
+								target=":listagemPlanilhaCega:dtPlanilhaCega"
+								fileName="PlanilhaCega" />
+						</h:commandLink>
+
+					</p:panelGrid>
+				</div>
+			</p:panel>
+
+			<p:sticky target="tb" margin="50" />
+
+		</h:form>
+        
+       
+        
+       <!-- Cadastro -->
+     <h:form id="edicaoPlanilhaCega">
+     
+     	<p:blockUI block="panelPlanilhaCega" trigger="btnSalvar" widgetVar="bUIPlanilhaCega">
+			LOADING<br />
+        	<p:graphicImage library="images" name="progress_bar.gif"/>
+		</p:blockUI>
+		 <!-- dataTableNFCompra -->
+		<p:panel id="panelPlanilhaCega" widgetVar="panelPlanilhaCega" header="#{coletorPCBean.tituloAdd}" closable="true">
+			
+			<p:focus context="panelPlanilhaCega"/>
+		
+			<p:messages id="msgAdd" showDetail="true" showSummary="false" closable="false" escape="false"/>		
+			<div class="ui-fluid">
+			
+			<p:fieldset id="fildSetEmpresa" legend="Empresa" styleClass="painelFieldset">
+			
+				<h:panelGroup rendered="#{not empty coletorPCBean.empresa}">
+					<h:outputText value="#{coletorPCBean.empresa.cnpjCpf}" styleClass="tx_bold" /> <br/>
+					<h:outputText value="#{coletorPCBean.empresa.nomeFantasia}" /><br />
+					<h:outputText value="#{coletorPCBean.empresa.razaoSocial}" />
+				</h:panelGroup>
+				<p:selectOneMenu id="empresa"
+										value="#{coletorPCBean.empresa}" 
+											required="true" 
+												requiredMessage="Empresa é obrigatório" 
+													rendered="#{empty coletorPCBean.empresa}">
+					<f:selectItem itemLabel="Empresa" itemValue="" />  
+					<f:selectItems value="#{coletorPCBean.empresasSelect}" />
+					<p:ajax update="@form:fildSetEmpresa @form:fildSetFornecedor @form:fildSetControleCodigoLote" listener="#{coletorPCBean.verificarEmpresa}" />
+				</p:selectOneMenu>
+			</p:fieldset>
+			
+		
+			
+			<p:fieldset id="fildSetFornecedor" legend="Fornecedor" styleClass="painelFieldset" >
+			
+				<p:autoComplete id="fornecedorCreateSelect" dropdown="true" scrollHeight="200"
+                           size="40"
+                           queryDelay="1000" 
+                           minQueryLength="3" 
+                           completeMethod="#{coletorPCBean.completeFornecedor}" 
+                           value="#{coletorPCBean.fornecedor}"
+                           var="forn" 
+                           converter="fornecedorFBConverter"
+                           itemLabel="#{forn.razaoSocial}" 
+                           itemValue="#{forn}" 
+                           forceSelection="true"
+                           emptyMessage="Nenhum Fornecedor encontrado"
+                           rendered="#{coletorPCBean.filterFornecedor}">
+                           > 
+                  <p:ajax event="itemSelect" listener="#{coletorPCBean.closeFilterFornecedor}" update="@form:msgAdd @form:panelGridFildSetPlanilhaCega"/>
+                  
+                  <p:column>
+          
+                     <h:outputText value="#{forn.cnpjCpf}" rendered="#{forn.tipoPessoa == 'J' or forn.tipoPessoa == 'O'}" converter="converter.CNPJConverter" styleClass="tx_bold" />
+					 <h:outputText value="#{forn.cnpjCpf}" rendered="#{forn.tipoPessoa == 'F'}" converter="converter.CPFConverter" styleClass="tx_bold"/><br/>
+                     <h:outputText value="#{forn.razaoSocial}" styleClass="tx_bold"/>
+                  </p:column>
+                  
+               </p:autoComplete>
+               
+               <h:panelGroup rendered="#{!coletorPCBean.filterFornecedor}">
+                  <p:outputLabel value="#{coletorPCBean.fornecedor.id}" /> <br/>
+                  <h:outputText value="#{coletorPCBean.fornecedor.cnpjCpf}" rendered="#{coletorPCBean.fornecedor.tipoPessoa == 'J' or coletorPCBean.fornecedor.tipoPessoa == 'O'}" converter="converter.CNPJConverter" styleClass="tx_bold" />
+				  <h:outputText value="#{coletorPCBean.fornecedor.cnpjCpf}" rendered="#{coletorPCBean.fornecedor.tipoPessoa == 'F'}" converter="converter.CPFConverter" styleClass="tx_bold"/><br/> 
+                  <p:outputLabel value="#{coletorPCBean.fornecedor.razaoSocial}" styleClass="#{coletorPCBean.fornecedor.ativo == 1 ? 'tx_red_14' : 'tx_14'}"/>
+               </h:panelGroup>
+               
+		    </p:fieldset>  
+		    
+		 
+		    
+	 		<!-- Grid de notais fiscais fornecedor / Itens Planilha Cega -->
+	 		
+	 		
+	 		<!-- fragmento nfs -->	
+	 			<p:fragment id="panelGridFildSetPlanilhaCega">
+						<div class="w3-row">
+							<div class="w3-col m12 s12 l8">
+								<p:fieldset id="fildSetNFCompra" legend="Notas Fiscais"
+								rendered="#{not empty coletorPCBean.listaNFCompra}"
+									styleClass="painelFieldset">
+
+									<p:dataTable id="dataTableNFCompra"
+										emptyMessage="Nenhuma Nota Fiscal encontrada"
+										value="#{coletorPCBean.listaNFCompra}" var="nf"
+										selection="#{coletorPCBean.nfsSelected}" rowKey="#{nf.id}"
+										sortBy="#{nf.id}"
+										reflow="true">
+										<p:ajax event="rowSelect"
+											listener="#{coletorPCBean.onRowSelect}"
+											update=":consultaPlanilhaCega:msg @form:msgAdd @form:panelGridFildSetPlanilhaCega @form:fildSetFornecedor @form:groupBtncoletorPCBean " />
+										<p:ajax event="rowUnselect"
+											listener="#{coletorPCBean.unRowSelect}"
+											update=":consultaPlanilhaCega:msg @form:msgAdd @form:panelGridFildSetPlanilhaCega @form:fildSetFornecedor @form:groupBtncoletorPCBean " />
+										<p:ajax event="rowSelectCheckbox"
+											listener="#{coletorPCBean.onRowSelect}"
+											update=":consultaPlanilhaCega:msg @form:msgAdd @form:panelGridFildSetPlanilhaCega @form:fildSetFornecedor @form:groupBtncoletorPCBean" />
+										<p:ajax event="rowUnselectCheckbox"
+											listener="#{coletorPCBean.unRowSelect}"
+											update=":consultaPlanilhaCega:msg @form:msgAdd @form:panelGridFildSetPlanilhaCega @form:fildSetFornecedor @form:groupBtncoletorPCBean" />
+										<p:ajax event="toggleSelect"
+											listener="#{coletorPCBean.onRowSelectAll}"
+											update=":consultaPlanilhaCega:msg @form:msgAdd @form:panelGridFildSetPlanilhaCega @form:fildSetFornecedor @form:groupBtncoletorPCBean" />
+
+										<f:facet name="header"></f:facet>
+										<p:column selectionMode="multiple"
+											style="width:50px;text-align:center" />
+
+										<p:column headerText="Número">
+											<h:outputText value="#{nf.numNf}" /> - <h:outputText
+												value="#{nf.serieNf}" />
+										</p:column>
+
+										<p:column headerText="Itens" styleClass="customCollumnValor">
+					 					#{itens.size()}
+					 				</p:column>
+
+										<p:column headerText="Emissão" styleClass="customCollumnData">
+											<h:outputText value="#{nf.dtEmissao}">
+												<f:convertDateTime pattern="dd/MM/yyyy" />
+											</h:outputText>
+										</p:column>
+
+										<p:column headerText="Entrada" styleClass="customCollumnData">
+											<h:outputText value="#{nf.dtEntrada}">
+												<f:convertDateTime pattern="dd/MM/yyyy" />
+											</h:outputText>
+										</p:column>
+
+										<p:column headerText="Valor" styleClass="customCollumnValor">
+											<h:outputText value="#{nf.valorTotalNf}"
+												converter="currencyFormat" />
+										</p:column>
+
+										<p:column headerText="Volume" styleClass="customCollumnValor">
+											<h:outputText value="#{nf.volume}">
+												<f:convertNumber minFractionDigits="0" />
+											</h:outputText>
+										</p:column>
+
+										<p:column headerText="Status">
+											<h:outputText value="#{nf.statusDesc}" />
+										</p:column>
+
+									</p:dataTable>
+								</p:fieldset>
+							</div>
+							<div class="w3-col m12 s12 l12">
+								<p:fieldset id="fildSetPlanilhaCegaItens" legend="Planilha Cega"
+									styleClass="painelFieldset"
+									rendered="#{not empty coletorPCBean.itens}">
+
+									<p:dataTable id="dataTablePlanilhaCegaItens"
+										value="#{coletorPCBean.itens}" var="item">
+
+										<p:column headerText="Produto">
+											<h:outputText value="#{item.produtoDesc} (#{item.produtoCod})" />
+										</p:column>
+
+										<p:column headerText="Quantidade"
+											styleClass="customCollumnValor">
+											<h:outputText value="#{item.quantidade}">
+												<f:convertNumber maxFractionDigits="1" locale="pt_BR" />
+											</h:outputText>
+										</p:column>
+
+										<p:column headerText="Unidade" styleClass="customCollumnValor">
+											<h:outputText value="#{item.unidadeDesc}" />
+										</p:column>
+
+									</p:dataTable>
+								</p:fieldset>
+							</div>
+						</div>
+					</p:fragment>
+					
+					 <p:fieldset id="fildSetControleCodigoLote" styleClass="painelFieldset" rendered="#{coletorPCBean.filterFornecedor or coletorPCBean.editando}">
+				    	<p:panelGrid columns="2" columnClasses="ui-grid-col-0, ui-grid-col-0" layout="grid" styleClass="ui-panelgrid-blank" >
+				    		<p:outputLabel value=" "/>
+		             		<h:panelGroup>
+		             			<p:selectBooleanCheckbox id="informarLote" value="#{coletorPCBean.selecionada.informarLote}" disabled="#{empty coletorPCBean.empresa}" />
+		             			<p:outputLabel value=" Deseja informar o Código do Lote na Conferência da Planilha Cega? " for="informarLote" />
+		             		</h:panelGroup>
+		               </p:panelGrid>
+				    </p:fieldset>  
+		 		
+								 	
+		 	</div>
+	 		
+	 		<br />
+	 		
+	 		<h:panelGroup id="groupBtncoletorPCBean" >
+	
+		 		<p:commandButton id="btnSalvar" 
+		 						value="Salvar" 
+		 						actionListener="#{coletorPCBean.salvar}" 
+		 						icon="icon-save" 
+		 						update="@form :listagemPlanilhaCega :consultaPlanilhaCega:msg :edicaoPlanilhaCega "
+		 						disabled="#{coletorPCBean.disabledBtnSalvar}" 
+		 						/>
+		 						
+		 		<p:commandButton id="btnLiberarConf" 
+		 						value="Liberar" 
+		 						actionListener="#{coletorPCBean.liberar}" 
+		 						icon="icon-planilhacega-liberar" 
+		 						update="@form :listagemPlanilhaCega :consultaPlanilhaCega:msg"
+		 						disabled="#{coletorPCBean.disabledBtnLiberarConf}" 
+		 						>
+					<p:confirm header="Confirme" message="Deseja liberar para conferência?" icon="ui-icon-alert" />	
+		 		</p:commandButton>
+		 						
+	 		</h:panelGroup>
+	 		
+	 	</p:panel>
+	 	
+     </h:form>  
+        
+				<!-- Listagem -->
+		<h:form id="listagemPlanilhaCega">
+
+			<p:blockUI block="dtPlanilhaCega"
+				widgetVar="bUIDataTablePlanilhaCega">
+			LOADING<br />
+				<p:graphicImage library="images" name="progress_bar.gif" />
+			</p:blockUI>
+
+			<p:dataTable id="dtPlanilhaCega" var="planilhaCega"
+				value="#{coletorPCBean.lista}"
+				emptyMessage="Nenhum registro encontrado" rows="20" paginator="true"
+				paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+				rowsPerPageTemplate="10,20,40" reflow="true">
+
+				<p:column sortBy="#{planilhaCega.id}" styleClass="customCollumnId">
+					<f:facet name="header">ID</f:facet>
+					<h:outputText value="#{planilhaCega.id}" />
+				</p:column>
+
+				<p:column sortBy="#{planilhaCega.dtCriacao}"
+					styleClass="customCollumnDataHora">
+					<f:facet name="header">Data</f:facet>
+					<h:outputText value="#{planilhaCega.dtCriacao}">
+						<f:convertDateTime pattern="dd/MM/yyyy" />
+					</h:outputText>
+					<br />
+					<h:outputText value="#{planilhaCega.usuarioDesc}" />
+				</p:column>
+
+				<p:column sortBy="#{planilhaCega.dtInicio}"
+					styleClass="customCollumnDataHora">
+					<f:facet name="header">Início</f:facet>
+					<h:outputText value="#{planilhaCega.dtInicio}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</h:outputText>
+				</p:column>
+
+				<p:column sortBy="#{planilhaCega.dtTermino}"
+					styleClass="customCollumnDataHora">
+					<f:facet name="header">Fim</f:facet>
+					<h:outputText value="#{planilhaCega.dtTermino}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</h:outputText>
+				</p:column>
+
+				<p:column sortBy="#{planilhaCega.empresaDesc}">
+					<f:facet name="header">Empresa</f:facet>
+					<h:outputText value="#{planilhaCega.empresaDesc}" />
+				</p:column>
+
+				<p:column sortBy="#{planilhaCega.fornecedorDesc}">
+					<f:facet name="header">Fornecedor</f:facet>
+					<h:outputText
+						value="#{planilhaCega.fornecedorDesc}" />
+				</p:column>
+
+				<p:column sortBy="#{planilhaCega.status}"
+					styleClass="customCollumnId" exportable="false">
+					<f:facet name="header">Situação</f:facet>
+					<h:graphicImage library="icons" name="status_planilhacega_0.png"
+						rendered="#{planilhaCega.status=='0'}" title="Em digitação" />
+					<h:graphicImage library="icons" name="status_planilhacega_1.png"
+						rendered="#{planilhaCega.status=='1'}"
+						title="Liberado para conferência" />
+					<h:graphicImage library="icons" name="status_planilhacega_2.png"
+						rendered="#{planilhaCega.status=='2'}" title="Em conferência" />
+					<h:graphicImage library="icons" name="status_planilhacega_3.png"
+						rendered="#{planilhaCega.status=='3'}" title="Finalizada" />
+				</p:column>
+
+
+
+				<p:column styleClass="customCollumn3Icon" exportable="false">
+					<f:facet name="header"></f:facet>
+					<p:commandButton action="#{coletorPCBean.editar}"
+						update=":edicaoPlanilhaCega" icon="ui-icon-pencil" title="Editar"
+						onstart="closeTab('planilhaCegaBean')"
+						onclick="PF('bUIPlanilhaCega').show()"
+							disabled="#{planilhaCega.status!='A'}"
+						>
+						<p:resetInput target=":edicaoPlanilhaCega" />
+						<f:setPropertyActionListener
+							target="#{coletorPCBean.selecionadaId}"
+							value="#{planilhaCega.id}" />
+					</p:commandButton>
+					
+					<p:commandButton action="#{coletorPCGerenciarBean.gerenciar}"
+						update="@none" process="@this" icon="ui-icon-gear"
+						title="Gerenciar"
+						onstart="closeTab('planilhaCegaBean'); closeEdicaoPlanilhaCega();"
+						oncomplete="openTab('planilhaCegaBean', 'Planilha Cega - #{planilhaCega.id}', 'Planilha Cega - #{planilhaCega.id}', 'coletorpc/gerenciar.jsf')"
+						rendered="true" disabled="#{planilhaCega.status=='A'}">				
+						<f:setPropertyActionListener
+							target="#{coletorPCGerenciarBean.selecionada}" value="#{null}" />
+						<f:setPropertyActionListener
+							target="#{coletorPCGerenciarBean.selecionadaId}"
+							value="#{planilhaCega.id}" />
+					</p:commandButton>
+
+					<p:commandButton action="#{coletorPCBean.excluir}"
+						update=":consultaPlanilhaCega:msg @form :edicaoPlanilhaCega" icon="ui-icon-trash"
+						oncomplete="closeEdicaoPlanilhaCega()"
+						title="Excluir">
+						<f:setPropertyActionListener
+							target="#{coletorPCBean.selecionadaId}" value="#{planilhaCega.id}" />
+						<p:confirm header="Excluir"
+							message="Confirma a Exclusão de TODAS as leituras?"
+							icon="ui-icon-alert" />
+					</p:commandButton>
+				</p:column>
+				
+			
+			</p:dataTable>
+			<p:toolbar>
+				<f:facet name="right">
+		        	Total: #{coletorPCBean.lista.size()}
+		        </f:facet>
+			</p:toolbar>
+
+		</h:form>
+		
+	</div>
+    <script>
+			function closeEdicaoPlanilhaCega() {
+				$('#edicaoPlanilhaCega\\:panelPlanilhaCega').hide();
+			}	
+			closeEdicaoPlanilhaCega();
+	</script>
+	
+</ui:composition>

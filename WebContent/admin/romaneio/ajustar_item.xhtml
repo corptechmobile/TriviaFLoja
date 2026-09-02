@@ -1,0 +1,235 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+    
+    <div class="tab-content-space">
+    <div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+    
+    <f:metadata>
+      <f:viewAction action="#{romaneioGerenciarBean.clearSession}"/>
+    </f:metadata>
+    
+    <!--  -->
+    <h:form id="msgRomaneioGerenciar">
+     	<p:growl id="msg" showDetail="true" showSummary="false" life="3000"/>	
+    </h:form>
+     
+    <!-- Cadastro -->
+    <h:form id="edicaoRomaneioGerenciar">
+     
+     	<p:toolbar id="tb">
+	        <f:facet name="left">
+	        	<p:commandButton id="btnRefresh" 
+		 						value="Atualizar" 
+		 						actionListener="#{romaneioGerenciarBean.atualizar}" 
+		 						icon="ui-icon-refresh" 
+		 						update="@form" />
+		 						
+	            <p:commandButton id="btnCancelar" 
+		 						value="Cancelar" 
+		 						actionListener="#{romaneioGerenciarBean.cancelar}" 
+		 						icon="ui-icon-cancel" 
+		 						update="@form"
+		 						rendered="#{romaneioGerenciarBean.renderedBtnCancelar}"> 
+					<p:confirm header="Confirme" message="Deseja realmente cancelar o Romaneio?" icon="ui-icon-alert" />	
+		 		</p:commandButton>
+	            
+	            <p:commandButton id="btnFinalizarConf" 
+		 						value="Ajustar" 
+		 						actionListener="#{romaneioGerenciarBean.ajustar}" 
+		 						icon="ui-icon-wrench" 
+		 						update="@form"
+		 						rendered="#{romaneioGerenciarBean.renderedBtnAjuste}"> 
+					<p:confirm header="Confirme" message="Deseja ajustar a conferência?" icon="ui-icon-alert" />	
+		 		</p:commandButton>
+		 		
+	        </f:facet>
+	        <f:facet name="right">
+        	</f:facet>
+	    </p:toolbar>
+     
+     	<p:blockUI block="panelRomaneioGerenciar" trigger="btnFinalizarConf btnRefresh btnFinalizarConf" widgetVar="bUIRomaneioGerenciar">
+			LOADING<br />
+        	<p:graphicImage library="images" name="progress_bar.gif"/>
+		</p:blockUI>
+		 
+		<p:panel id="panelRomaneioGerenciar" widgetVar="panelRomaneioGerenciar" closable="true">
+			
+			<p:focus context="panelRomaneioGerenciar"/>
+			<p:messages id="msgAdd" showDetail="true" showSummary="false" closable="false"/>
+			
+			<!-- Detalhes -->
+			<div class="ui-fluid">
+				<p:panelGrid id="painelEdicaoItem2" columns="3" columnClasses="ui-grid-col-4,ui-grid-col-4,ui-grid-col-4" layout="grid" styleClass="ui-panelgrid-blank">
+					<h:panelGroup>
+						<h:outputText value="Romaneio" /> <br/>
+						<h:outputText value="#{romaneioGerenciarBean.selecionada.romaneioId}" styleClass="tx_bold" /> <br/>
+					</h:panelGroup>
+	                <h:panelGroup>
+	               		<h:outputText value="Proc. Transp" /> <br/>
+	                	<h:outputText value="#{romaneioGerenciarBean.selecionada.procTranspId}" styleClass="tx_bold"/> <br/>
+	                </h:panelGroup>
+
+					<h:panelGroup>
+						<p:outputLabel value="Status " /><br />
+						<h:outputText rendered="#{romaneioGerenciarBean.selecionada.status=='0'}" value="Em Aberto" styleClass="tx_bold"/>
+						<h:outputText rendered="#{romaneioGerenciarBean.selecionada.status=='1'}" value="Em conferência" styleClass="tx_bold"/>
+						<h:outputText rendered="#{romaneioGerenciarBean.selecionada.status=='2'}" value="Conferido com Corte" styleClass="tx_bold"/>
+						<h:outputText rendered="#{romaneioGerenciarBean.selecionada.status=='3'}" value="Conferido" styleClass="tx_bold"/>
+						<h:outputText rendered="#{romaneioGerenciarBean.selecionada.status=='4'}" value="Finalizado" styleClass="tx_bold"/>
+						<h:outputText rendered="#{romaneioGerenciarBean.selecionada.status=='5'}" value="Cancelado" styleClass="tx_bold"/>
+					</h:panelGroup>
+					<h:panelGroup>	
+						<p:outputLabel value="Liberado " /><br/>
+		              	<h:outputText value="#{romaneioGerenciarBean.selecionada.momentoGer}" styleClass="tx_bold">
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+						</h:outputText>
+						<h:outputText value=" - #{romaneioGerenciarBean.selecionada.usuarioGer}" styleClass="tx_bold" />
+					</h:panelGroup>
+					<h:panelGroup rendered="#{not empty romaneioGerenciarBean.selecionada.momentoCorte}">  	
+		              	<ui:fragment styleClass="tx_bold">
+						<p:outputLabel value="Conferido com Corte "  /><br/>
+		              	<h:outputText value="#{romaneioGerenciarBean.selecionada.momentoCorte}" styleClass="tx_bold">
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+						</h:outputText>
+						<h:outputText value=" - #{romaneioGerenciarBean.selecionada.usuarioCorte}" styleClass="tx_bold" />
+						</ui:fragment>
+					</h:panelGroup>
+		            <h:panelGroup rendered="#{not empty romaneioGerenciarBean.selecionada.momentoConf}">  	
+		              	<ui:fragment styleClass="tx_bold">
+						<p:outputLabel value="Conferido "  /><br/>
+		              	<h:outputText value="#{romaneioGerenciarBean.selecionada.momentoConf}" styleClass="tx_bold">
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+						</h:outputText>
+						<h:outputText value=" - #{romaneioGerenciarBean.selecionada.usuarioConf}" styleClass="tx_bold" />
+						</ui:fragment>
+					</h:panelGroup>	
+					<h:panelGroup rendered="#{not empty romaneioGerenciarBean.selecionada.momentoCanc}">
+						<ui:fragment  styleClass="tx_bold">
+						<p:outputLabel value="Cancelado "  /><br/>
+						<h:outputText value="#{romaneioGerenciarBean.selecionada.momentoCanc}" styleClass="tx_bold" >
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+						</h:outputText>
+						<h:outputText value=" - #{romaneioGerenciarBean.selecionada.usuarioCanc}" styleClass="tx_bold" />
+						</ui:fragment>
+					</h:panelGroup>	
+			        <h:panelGroup rendered="#{not empty romaneioGerenciarBean.selecionada.momentoFinalizado}">	
+						<ui:fragment  styleClass="tx_bold">
+						<p:outputLabel value="Finalizado "  /><br/>
+						<h:outputText value="#{romaneioGerenciarBean.selecionada.momentoFinalizado}" styleClass="tx_bold">
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+						</h:outputText>
+						<h:outputText value=" - #{romaneioGerenciarBean.selecionada.usuarioFinalizado}" styleClass="tx_bold" />
+						</ui:fragment>
+					</h:panelGroup>
+				</p:panelGrid>
+			</div>
+			
+			<br />
+				
+				<div class="w3-row">
+				  
+				  <div class="w3-col m8 s12 l12">  
+				    <p:fieldset id="fildSetRomaneioItens" 
+			 						legend="Itens" 
+			 							 styleClass="painelFieldset">
+			 				
+			 				<p:tabView id="tabViewItensMov" widgetVar="tabViewItensMov">
+			 					<p:ajax event="tabClose" listener="#{romaneioGerenciarBean.onTabCloseAssocCodBarras}" update="@form:fildSetRomaneioItens"/>
+    							<p:tab title="Itens (#{romaneioGerenciarBean.itens.size()})">
+    								<!-- Itens  -->
+    								<!-- 
+    								<ui:param name="totalListaCodBarras" value="#{romaneioGerenciarBean.listaCodBarras.size()}" />
+					 				 -->
+					 				<p:dataTable id="dataTableRomaneioItens" 
+						 				value="#{romaneioGerenciarBean.itens}" 
+						 				var="item"
+						 				reflow="true"
+						 				emptyMessage="Nenhuma item encontrado." ><!-- rowStyleClass="#{item.qtdAvaria gt 0 or ((item.quantidade-(item.qtdLeitura+item.qtdAvaria+item.qtdDevolvida)) lt 0) or (!(item.produtoPrazo > item.tolShelfLife) and item.controlaLote == 1) ? 'customRowColorAvaria' : null}" -->
+						 				
+						 				<p:column headerText="Produto">
+						 					<h:outputText value="#{item.produtoCod} " /> <br />
+						 					<h:outputText value="#{item.produtoDesc}" />
+						 				</p:column>
+						 				
+						 				<p:column headerText="Qtd" styleClass="customCollumnValor">
+						 					<h:outputText value="#{item.qtdRomaneio}" styleClass="tx_bold">
+						 						<f:convertNumber maxFractionDigits="1" locale="pt_BR" />
+						 					</h:outputText> #{item.unidadeDesc} 
+						 				</p:column>
+						 				
+						 				<p:column headerText="Conferido" styleClass="customCollumnValor">
+						 					<h:outputText value="#{item.qtdConferida}" styleClass="tx_bold">
+						 						<f:convertNumber maxFractionDigits="1" locale="pt_BR" />
+						 					</h:outputText> #{item.unidadeDesc} 
+						 				</p:column>
+						 				
+						 				<p:column headerText="Ajuste" styleClass="customCollumnValor">
+						 					<h:outputText value="#{item.qtdAjuste-item.qtdRetirada}">
+						 						<f:convertNumber maxFractionDigits="1" />
+						 					</h:outputText> #{item.unidadeDesc}  
+						 				</p:column>
+						 				
+						 				<p:column headerText="" styleClass="customCollumn1Icon">
+						 					<h:graphicImage library="images" name="#{item.qtdRomaneio!=(item.qtdConferida+item.qtdRetirada) ? 'help_C.png' : 'help_F.png'}" width="12" />
+						 					<h:graphicImage library="images" name="warning.png" rendered="#{(item.qtdRomaneio > (item.qtdConferida+item.qtdRetirada))}" width="12"/>
+						 				</p:column>
+						 				
+						 				<p:columnGroup type="footer">
+								            <p:row>
+								                <p:column style="text-align:right">
+								                	<f:facet name="footer">
+								                		<h:outputText value="Total:" styleClass="tx_bold" />
+								                	</f:facet>
+								                </p:column>
+								                <p:column style="text-align:right">
+								                	<f:facet name="footer" >
+								                		<h:outputText value="#{romaneioGerenciarBean.totalQtdRomaneio}" styleClass="tx_bold"><f:convertNumber maxFractionDigits="0" locale="pt_BR" /></h:outputText>
+								                	</f:facet>
+								                </p:column> 
+								                <p:column style="text-align:right">
+								                	<f:facet name="footer">
+								                		<h:outputText value="#{romaneioGerenciarBean.totalQtdConferida}" styleClass="tx_bold"><f:convertNumber maxFractionDigits="0" locale="pt_BR" /></h:outputText>
+								                	</f:facet>
+								                </p:column>
+								                <p:column style="text-align:right">
+								                	<f:facet name="footer">
+								                		<h:outputText value="#{romaneioGerenciarBean.totalQtdAjuste}" styleClass="tx_bold"><f:convertNumber maxFractionDigits="0" locale="pt_BR" /></h:outputText>
+							                		</f:facet>
+								                </p:column>
+								                <p:column footerText="" />
+								            </p:row>
+								        </p:columnGroup>
+								        
+								        <p:column styleClass="customCollumn1Icon" exportable="false">
+										<f:facet name="header"></f:facet>
+										<p:commandButton action="#{romaneioGerenciarBean.ajustar}"
+												update="@none" process="@this" icon="icon-save"
+												title="Salvar Ajuste"
+												onstart="closeTab('romaneioGerenciarBean'); closeEdicaoRomaneio();"
+												oncomplete="openTab('romaneioGerenciarBean', 'Produto: #{item.produtoCod} - #{item.produtoDesc}', 'Produto: #{item.produtoCod} - #{item.produtoDesc}', 'romaneio/ajustarItem.jsf')"
+												rendered="true">				
+												<f:setPropertyActionListener
+													target="#{romaneioGerenciarBean.itemSelecionado}" value="#{item}" />
+											</p:commandButton>
+										</p:column>
+						 				
+						 		</p:dataTable>
+						 	</p:tab>
+						    
+					    </p:tabView>	
+					    		 
+			 		</p:fieldset>
+				  </div>
+				  
+				</div>
+				
+	 	</p:panel>
+	 	
+     </h:form>
+     
+    </div>
+    
+</ui:composition>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	>
+
+	<ui:composition template="/templates/common/principal.xhtml">
+	
+		<ui:define name="corpo">
+		
+		<p:dialog footer="by www.corptech.com.br"
+               modal="true"  
+               closable="false"  
+               position="center"  
+               widgetVar="modalLogin"  
+               showEffect="slide"   
+               draggable="false"  
+               resizable="false"  
+               visible="true"
+               responsive="true"
+               width="280"
+               >           
+ 
+				<form id="login" method="post" action="${request.contextPath}/j_spring_security_check">
+					
+					<div class="baseLogin">
+					
+						<p:graphicImage library="images" name="LogoTrivia_login.png" width="200"></p:graphicImage>
+						
+						<h:panelGroup rendered="#{!empty param.login_error or !empty param.exception}">
+							<span style="color:red;"><b></b></span>
+							<div class="ui-messages ui-widget">
+								<div class="ui-messages-error ui-corner-all">
+								<span class="ui-messages-error-icon"></span>
+								<ul>
+									<li>
+										<!-- <span class="ui-messages-error-summary">Error!</span> -->
+										<span class="ui-messages-error-detail">
+											<h:outputLabel rendered="#{param.login_error==1}">Login/Senha inválido!</h:outputLabel>
+											<h:outputLabel rendered="#{param.exception==2}">Ocorreu um problema com a sua sessão, por favor entre novamente com seu Login/Senha.</h:outputLabel>
+											<h:outputLabel rendered="#{param.exception==3}">Ocorreu um error no sistema, por favor entre novamente com seu Login/Senha.</h:outputLabel>
+										</span>
+									</li>
+								</ul>
+								</div>
+							</div>
+						</h:panelGroup>
+						
+						<div class="ui-fluid">
+							<p>
+								<p:inputText id="j_username" placeholder="Login" onblur="value=value.toUpperCase()" style="text-transform: uppercase"/>
+							</p>
+							<p>
+								<p:password id="j_password" placeholder="Senha" />
+							</p>
+							<p>
+								<input type="submit" value="Entrar" />
+							</p>
+							
+						</div>
+					</div>
+					
+					<!-- #{SPRING_SECURITY_LAST_EXCEPTION.message} -->
+				</form>
+			
+			</p:dialog>
+			
+			<script>
+				document.getElementById("login").j_username.value = "#{SPRING_SECURITY_LAST_USERNAME}";
+			</script>
+			<!-- document.getElementById("login").j_password.value = "123456"; -->
+			<!-- <input type="checkbox" name="_spring_security_remember_me"/> Entrar automaticamente -->
+			<!-- <p:commandButton value="Entrar" actionListener="${request.contextPath}/j_spring_security_check" /> -->
+				
+		</ui:define>
+	</ui:composition>
+	
+</html>

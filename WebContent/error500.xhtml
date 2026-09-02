@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	>
+
+	<ui:composition template="/templates/common/principal.xhtml">
+	
+		<ui:define name="corpo">
+		
+		<p:dialog footer="by www.corptech.com.br"
+               modal="true"  
+               closable="false"  
+               position="center"  
+               widgetVar="modalLogin"  
+               showEffect="slide"   
+               draggable="false"  
+               resizable="false"  
+               visible="true"
+               responsive="true"
+               width="300"
+               >           
+ 
+ 				<div class="baseLogin">
+					
+						<p:graphicImage library="images" name="LogoTrivia_login.png" width="200"></p:graphicImage>
+						
+						<h:panelGroup>
+							<span style="color:red;"><b></b></span>
+							<div class="ui-messages ui-widget">
+								<div class="ui-messages-error ui-corner-all">
+								<span class="ui-messages-error-icon"></span>
+								<ul>
+									<li>
+										<span class="ui-messages-error-summary">Error 500</span><br/>
+										<span class="ui-messages-error-detail">Desculpe o transtorno!</span>
+									</li>
+								</ul>
+								</div>
+							</div>
+						</h:panelGroup>
+						
+						<!-- <p:button value="Voltar para tela de login" icon="ui-icon-person" href="login.jsf"/> -->
+						
+				</div>
+			
+			</p:dialog>
+			
+		</ui:define>
+	</ui:composition>
+	
+</html>

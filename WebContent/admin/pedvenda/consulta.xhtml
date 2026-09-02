@@ -1,0 +1,313 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+   	
+   	<div class="tab-content-space">
+    
+    	<div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+    	<f:metadata>
+	      <f:viewAction action="#{pedVendaConsultaBean.clearSession}"/>
+	    </f:metadata>
+    
+	    <!-- Filtro -->
+	     <h:form id="formPedVendaConsulta">
+	     
+	     	<p:growl id="msg" showDetail="true" life="3000"/>
+	     	<p:focus context="panelFiltroPedVendaConsulta"/>
+	    	<p:defaultCommand target="btnBuscar" />
+	    	
+	    	<p:toolbar id="tb">
+	    		<f:facet name="left">
+	    			
+	    			<!-- <p:menuButton value="Novo" rendered="false">
+				        <p:menuitem value="Pedido" actionListener="#{pedVendaNovoBean.novoPedVendaNormal}" update="@none" icon="icon-new" onstart="closeTab('pedVendaNovoBean')" oncomplete="openTab('pedVendaNovoBean', 'Pedido / Novo', 'Pedido / Novo', 'pedvenda/novo.jsf?id=1')"/>
+				        <p:menuitem value="Encomenda" actionListener="#{pedVendaNovoBean.novoPedVendaEncomenda}" update="@none" icon="icon-new" onstart="closeTab('pedVendaNovoBean')" oncomplete="openTab('pedVendaNovoBean', 'Encomenda / Novo', 'Encomenda / Novo', 'pedvenda/novo.jsf?id=1')"/>
+				        <p:menuitem value="Composto" actionListener="#{pedVendaNovoBean.novoPedVendaProdComposto}" ajax="@none" icon="icon-new" onstart="closeTab('pedVendaNovoBean')" oncomplete="openTab('pedVendaNovoBean', 'Composto / Novo', 'Composto / Novo', 'pedvenda/novo.jsf?id=1')"/>
+				    </p:menuButton> -->
+				    
+		            <p:commandButton value="Novo" 
+									 actionListener="#{pedVendaNovoBean.novoPedVendaNormal}"
+									 update="@none"
+									 process="@this"
+									 icon="icon-new"
+									 onstart="closeTab('pedVendaNovoBean')" 
+									 oncomplete="openTab('pedVendaNovoBean', 'Pedido / Novo', 'Pedido / Novo', 'pedvenda/novo.jsf?id=1')"
+									 />
+									 
+					<p:commandButton value="Encomenda" 
+									 actionListener="#{pedVendaNovoBean.novoPedVendaEncomenda}"
+									 update="@none"
+									 process="@this"
+									 icon="icon-new"
+									 onstart="closeTab('pedVendaNovoBean')" 
+									 oncomplete="openTab('pedVendaNovoBean', 'Encomenda / Novo', 'Encomenda / Novo', 'pedvenda/novo.jsf?id=1')"
+									 rendered="#{pedVendaNovoBean.renderedBtnEncomenda}"
+									 />
+									 
+					<p:commandButton value="Composto" 
+									 actionListener="#{pedVendaNovoBean.novoPedVendaProdComposto}"
+									 update="@none"
+									 process="@this"
+									 icon="icon-new"
+									 onstart="closeTab('pedVendaNovoBean')" 
+									 oncomplete="openTab('pedVendaNovoBean', 'Composto / Novo', 'Composto / Novo', 'pedvenda/novo.jsf?id=1')"
+									 rendered="#{pedVendaNovoBean.renderedBtnComposto}"
+									 />
+									 
+	       		</f:facet>
+		        <f:facet name="right">
+			        <p:commandButton id="menuHome" icon="ui-icon-home" actionListener="#{pedVendaConsultaBean.addHome}" update="@form:msg" process="@this" title="Home" />
+			        <p:commandButton icon="ui-icon-star" actionListener="#{pedVendaConsultaBean.addFavoritos}" update="@form:msg" process="@this" title="Favoritos" oncomplete="updateMenuHome();" />
+	        	</f:facet>
+		    </p:toolbar>
+		    
+		    <p:sticky target="tb" margin="50"/>
+		    
+		    <p:panel id="panelFiltroPedVendaConsulta" widgetVar="panelFiltroPedVendaConsulta" >
+		    	<div class="ui-fluid">
+		    	<div class="ui-g">
+		    	
+		    		<div class="ui-g-6 ui-md-2 ui-lg-0">
+		    			<h:outputLabel for="numPedidoFilter" value="N.Pedido:"/> <br/>
+						<p:inputNumber id="numPedidoFilter" value="#{pedVendaConsultaBean.numPedidoFilter}" placeholder="" style="width:100%;" decimalSeparator="" thousandSeparator="" decimalPlaces="0" >
+							<f:convertNumber maxFractionDigits="0" minFractionDigits="0"  />
+						</p:inputNumber>
+					</div>
+					
+        			<ui:fragment rendered="#{contextoBean.empresaFilter}">
+        			<div class="ui-g-6 ui-md-2 ui-lg-0">
+						<h:outputLabel for="empresa" value="Empresa: "/> <br/>
+				        <p:selectOneMenu  id="empresa" value="#{pedVendaConsultaBean.empresaFilter}" filter="false" autoWidth="true">
+							<f:selectItem itemValue="" itemLabel="Todos"/>
+							<f:selectItems value="#{pedVendaConsultaBean.empresasSelect}" /> 
+						</p:selectOneMenu>
+					</div>
+					</ui:fragment>
+					<ui:fragment rendered="#{contextoBean.vendedorFilter}">
+					<div class="ui-g-6 ui-md-3 ui-lg-0">
+						<h:outputLabel for="vendedorCreateSelect" value="Vendedor:"/> <br />
+						<p:autoComplete id="vendedorCreateSelect" dropdown="true" scrollHeight="200"
+										queryDelay="1000"
+										minQueryLength="3" 
+										completeMethod="#{pedVendaConsultaBean.completeVendedor}" 
+										value="#{pedVendaConsultaBean.vendedorFilter}" 
+										var="ven" 
+										itemLabel="#{ven.nomeFantasia}" 
+										itemValue="#{ven}" 
+										converter="vendedorFBConverter" 
+										forceSelection="true"
+										emptyMessage="Nenhum Vendedor encontrado"
+										placeholder="Vendedor">
+										
+							<p:ajax event="itemSelect" listener="#{pedVendaConsultaBean.closeFilterVendedor}" update="@this"/> 
+							
+							<p:column>
+								<h:outputText value="#{ven.id}"/> <br/>
+								<h:outputText value="#{ven.nomeFantasia}"/>
+							</p:column>
+							
+						</p:autoComplete>
+					</div>
+					</ui:fragment>
+					<div class="ui-g-6 ui-md-3 ui-lg-0">
+						<h:outputLabel for="clienteCreateSelect" value="Cliente:"/> <br />
+						<p:autoComplete id="clienteCreateSelect" dropdown="true" scrollHeight="200"
+										queryDelay="1000"
+										minQueryLength="3" 
+										completeMethod="#{pedVendaConsultaBean.completeCliente}"  
+										value="#{pedVendaConsultaBean.clienteFilter}" 
+										var="cli" 
+										itemLabel="#{cli.razaoSocial}" 
+										itemValue="#{cli}" 
+										converter="clienteFBConverter" 
+										forceSelection="true"
+										emptyMessage="Nenhum Cliente encontrado"
+										placeholder="Cliente">
+										
+							<p:ajax event="itemSelect" listener="#{pedVendaConsultaBean.closeFilterCliente}" update="@this"/> 
+							
+							<p:column>
+								<h:outputText value="#{cli.cnpjCpf}" rendered="#{cli.tipoPessoa == 'J' or cli.tipoPessoa == 'O'}" converter="converter.CNPJConverter" styleClass="tx_bold" />
+								<h:outputText value="#{cli.cnpjCpf}" rendered="#{cli.tipoPessoa == 'F'}" converter="converter.CPFConverter" styleClass="tx_bold"/><br/>
+								<h:outputText value="#{cli.razaoSocial}" />
+							</p:column>
+							
+						</p:autoComplete>
+					</div>
+					<div class="ui-g-6 ui-md-2 ui-lg-0">
+					<h:panelGroup>
+						<h:outputLabel for="status" value="Status"/> <br />
+						<p:selectOneMenu  id="status" value="#{pedVendaConsultaBean.statusFilter}" filter="false" autoWidth="true">
+							<f:selectItem itemValue="" itemLabel="Todos"/>
+							<f:selectItems value="#{pedVendaConsultaBean.statusSelect}" /> 
+						</p:selectOneMenu>
+					</h:panelGroup>
+					</div>
+				</div>
+				
+        		<div class="ui-g">
+        			
+        			<div class="ui-g-0 ui-md-0 ui-lg-0">
+        				<p:outputLabel for="carteira" value="Pedidos em carteira: " />
+	        			<p:selectBooleanCheckbox id="carteira" value="#{pedVendaConsultaBean.carteiraFilter}"/>
+        			</div>
+	     			<div class="ui-g-0 ui-md-0 ui-lg-0">
+	        			<h:outputLabel for="desPeriodo" value="Desconsiderar período: " />
+		        		<p:selectBooleanCheckbox id="desPeriodo" value="#{pedVendaConsultaBean.desconsPeriodoFilter}">
+		        			<p:ajax update="@form"/>
+		        		</p:selectBooleanCheckbox>
+	        		</div>
+	        		<div class="ui-g-0 ui-md-0 ui-lg-0">
+						<p:panelGrid columns="4" styleClass="ui-panelgrid-blank" rendered="#{pedVendaConsultaBean.desconsPeriodoFilter == false}">
+							<p:selectOneMenu id="tipoData" value="#{pedVendaConsultaBean.tipoDataFilter}" rendered="#{pedVendaConsultaBean.desconsPeriodoFilter == false}" autoWidth="true">
+								<f:selectItem itemValue="entrada" itemLabel="Entrada"/>
+								<f:selectItem itemValue="efetivacao" itemLabel="Efetivação"/>
+								<f:selectItem itemValue="conclusao" itemLabel="Conclusão"/>
+							</p:selectOneMenu>
+					        <p:calendar id="dataFilter1" value="#{pedVendaConsultaBean.dataFilter1}" pattern="dd/MM/yyyy" size="10" mask="99/99/9999" label="Data" converterMessage="Data inválida" />
+					        <h:outputLabel value=" à " />
+					        <p:calendar id="dataFilter2" value="#{pedVendaConsultaBean.dataFilter2}" pattern="dd/MM/yyyy" size="10" mask="99/99/9999" label="Data" converterMessage="Data inválida" />
+				        </p:panelGrid>
+			        </div>
+        		</div>
+		        
+		    	<div class="ui-g">
+	     			<div class="ui-g-0 ui-md-0 ui-lg-0">
+			    		<p:commandButton 
+							 id="btnBuscar"
+							 value="Buscar"
+							 actionListener="#{pedVendaConsultaBean.buscar}"
+							 update=":listagemPedVendaConsulta exportExcel"
+							 icon="icon-search"
+							 onclick="PF('bUIDataTablePedVendaConsulta').show()"
+							 />
+					</div>
+					<div class="ui-g-0 ui-md-0 ui-lg-0">	 
+						 <p:commandButton 
+							 id="btnLimpar" 
+							 value="Limpar"
+							 action="#{pedVendaConsultaBean.limpar}"
+							 update=" @form :listagemPedVendaConsulta "
+							 icon="ui-icon-close" 
+							 onclick="PF('bUIDataTablePedVendaConsulta').show()"
+							 />
+					</div>
+					<div class="ui-g-0 ui-md-0 ui-lg-0">	 
+						<h:panelGroup id="exportExcel"> 
+							<p:commandButton icon="icon-excel" disabled="#{empty pedVendaConsultaBean.lista}" title="Exportar para excel" ajax="false">
+					            <p:dataExporter type="xls" target=":listagemPedVendaConsulta:dtPedVendaConsulta" fileName="pedVendas"  />
+					        </p:commandButton>
+				    	</h:panelGroup>
+			    	</div>
+		    	</div>
+		    	</div>
+		    </p:panel>
+	     	
+	     </h:form>
+	   	
+	<!-- Listagem -->
+     <h:form id="listagemPedVendaConsulta">
+     
+     	<p:remoteCommand name="updatePedVendaExcluidaBean" update="@form :formPedVendaConsulta" actionListener="#{pedVendaConsultaBean.pedVendaExcluido}" />
+     	<p:remoteCommand name="updatePedVendaConsultaBean" update="@form" actionListener="#{pedVendaConsultaBean.buscar}" /> 
+     	
+     	<p:blockUI block="dtPedVendaConsulta" widgetVar="bUIDataTablePedVendaConsulta" trigger="dtPedVendaConsulta">
+			LOADING<br />
+        	<p:graphicImage library="images" name="progress_bar.gif"/>
+		</p:blockUI>
+		
+		<p:dataTable id="dtPedVendaConsulta" var="pedVenda" reflow="true" value="#{pedVendaConsultaBean.lista}" emptyMessage="Nenhum registro encontrado.">
+
+			<p:column sortBy="#{pedVenda.pedVendaId}" styleClass="customCollumnId" priority="1">
+				<f:facet name="header">Pedido</f:facet>
+				<h:outputText value="#{pedVenda.pedVendaId}" styleClass="tx_bold" />
+        	</p:column>
+        	
+        	<p:column sortBy="#{pedVenda.encomendaToString}" styleClass="customCollumnId" priority="5">
+				<f:facet name="header">Tipo</f:facet>
+				<h:outputText value="#{pedVenda.encomendaToString}"/>
+        	</p:column>
+        	
+        	<p:column sortBy="#{pedVenda.empresaDesc}" rendered="#{pedVendaConsultaBean.empresaFilter == null}" priority="3">
+        		<f:facet name="header">Empresa</f:facet>
+				<h:outputText value="#{pedVenda.empresaDesc}"/>
+        	</p:column>
+        	
+			<p:column sortBy="#{pedVenda.clienteDesc}" rendered="#{pedVendaConsultaBean.clienteFilter == null}" priority="1">
+				<f:facet name="header">Cliente</f:facet>
+				<h:outputText value="#{pedVenda.clienteDesc} "  />
+				<h:outputText value="(#{pedVenda.nomeCliente})" rendered="#{pedVenda.nomeCliente != '' and pedVenda.nomeCliente != null}" />
+        	</p:column>
+        	
+        	<p:column sortBy="#{pedVenda.condPagtoDesc}" styleClass="customCollumnDataHora" priority="5">
+				<f:facet name="header">Cond.Pagto</f:facet>
+				<h:outputText value="#{pedVenda.condPagtoDesc}" />
+        	</p:column>
+        	
+        	<p:column sortBy="#{pedVenda.vendedorDesc}" rendered="#{pedVendaConsultaBean.vendedorFilter == null}" priority="1">
+				<f:facet name="header">Vendedor</f:facet>
+				<h:outputText value="#{pedVenda.vendedorDesc}" />
+        	</p:column>
+        	
+        	<p:column sortBy="#{pedVenda.dtEntrada}" styleClass="customCollumnDataHora" priority="1">
+        		<f:facet name="header">Entrada</f:facet>
+   				<h:outputText value="#{pedVenda.dtEntrada}" >
+   					<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+   				</h:outputText>
+   			</p:column>
+   			
+   			<p:column sortBy="#{pedVenda.dtEfetivacao}" styleClass="customCollumnDataHora" priority="5">
+   				<f:facet name="header">Efetivação</f:facet>
+   				<h:outputText value="#{pedVenda.dtEfetivacao}" >
+   					<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+   				</h:outputText>
+   			</p:column>
+   			
+   			<p:column sortBy="#{pedVenda.dtConclusao}" styleClass="customCollumnDataHora" priority="5">
+   				<f:facet name="header">Conclusão</f:facet>
+   				<h:outputText value="#{pedVenda.dtConclusao}" >
+   					<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+   				</h:outputText>
+   			</p:column>
+   			
+   			<!-- <p:column headerText="Forma Pagamento" sortBy="#{pedVenda.formaPagtoDesc}">
+   				<h:outputText value="#{pedVenda.formaPagtoDesc}"/>
+   			</p:column> -->
+				
+			<p:column sortBy="#{pedVenda.pedVendaStatusDesc}" rendered="#{pedVendaConsultaBean.statusFilter == null}" priority="1" styleClass="customCollumnDataHora">
+				<f:facet name="header">Status</f:facet>
+				<h:outputText value="#{pedVenda.pedVendaStatusDesc}" />
+        	</p:column>	
+        	
+        	<p:column styleClass="customCollumnValor" sortBy="#{pedVenda.valor}" priority="1">
+        		<f:facet name="header">Valor</f:facet>
+	            <h:outputText value="#{pedVenda.valor}" styleClass="tx_bold" converter="currencyFormat"/>
+	        </p:column>
+	        
+	        <p:column styleClass="customCollumn1Icon" exportable="false" priority="1">
+				<f:facet name="header"></f:facet>
+				<p:commandButton action="#{pedVendaNovoBean.editar}"
+					update="@none" process="@this" icon="ui-icon-pencil" title="Editar"
+					onstart="closeTab('pedVendaNovoBean')" 
+					oncomplete="openTab('pedVendaNovoBean', '#{pedVenda.encomendaToString} / #{pedVenda.pedVendaId}', '#{pedVenda.encomendaToString} / #{pedVenda.pedVendaId}', 'pedvenda/novo.jsf?id=1');"
+					>
+					<f:setPropertyActionListener target="#{pedVendaNovoBean.selecionadaId}" value="#{pedVenda.pedVendaId}" />
+				</p:commandButton>
+				
+			</p:column>	
+	        
+		</p:dataTable>
+		<p:toolbar id="tbTotal">
+	        <f:facet name="right">
+	        	<h:outputText value="Total: "/>
+	        	<h:outputText value="#{pedVendaConsultaBean.valorTotal}" converter="currencyFormat" styleClass="tx_bold" />
+	        </f:facet>
+        </p:toolbar>
+		
+	</h:form>
+	
+	</div>
+	
+</ui:composition>

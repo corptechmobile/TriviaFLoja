@@ -1,0 +1,190 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+   	
+   	<div class="tab-content-space">
+    
+    	<div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+    	<f:metadata>
+	      <f:viewAction action="#{ecfVendasPeriodoBean.clearSession}"/>
+	    </f:metadata>
+	    
+	    
+     
+	    <!-- Filtro -->
+	     <h:form id="formECFVendasPeriodo">
+	     	
+	     	<p:toolbar id="tb">
+		        <f:facet name="right">
+			        <p:commandButton id="menuHome" icon="ui-icon-home" actionListener="#{ecfVendasPeriodoBean.addHome}" update="@form:msg" process="@this" title="Home" />
+			        <p:commandButton icon="ui-icon-star" actionListener="#{ecfVendasPeriodoBean.addFavoritos}" update="@form:msg" process="@this" title="Favoritos" oncomplete="updateMenuHome();" />
+	        	</f:facet>
+	   		</p:toolbar>
+	     
+	     	<p:growl id="msg" showDetail="true" life="3000"/>
+	     	<p:focus context="panelFiltroECFVendasPeriodo"/>
+	    	<p:defaultCommand target="btnBuscar" />
+	    	
+		    <p:panel id="panelFiltroECFVendasPeriodo" widgetVar="panelFiltroECFVendasPeriodo" >
+		    	<div class="ui-fluid">
+		    	<div class="ui-g">
+        			<ui:fragment>
+        			<div class="ui-g-6 ui-md-3 ui-lg-0">
+						<h:outputLabel for="empresa" value="Empresa: "/> <br/>
+				        <p:selectOneMenu  id="empresa" value="#{ecfVendasPeriodoBean.empresaFilter}" filter="false" autoWidth="true">
+							<f:selectItems value="#{ecfVendasPeriodoBean.empresasSelect}" /> 
+						</p:selectOneMenu>
+					</div>
+					</ui:fragment>
+					
+					<div class="ui-g-0 ui-md-0 ui-lg-0">
+	        			<h:outputText value="Média em Função: " /> <br />
+						<p:selectOneMenu  id="mediaEmFuncao" value="#{ecfVendasPeriodoBean.mediaEmFuncao}" filter="false" autoWidth="true">
+							<f:selectItem itemValue="clientes" itemLabel="Clientes"/> 
+							<f:selectItem itemValue="vendas" itemLabel="Vendas"/> 
+						</p:selectOneMenu>
+			        </div>
+				
+	        		<div class="ui-g-0 ui-md-0 ui-lg-0">
+	        			<h:outputText value="Período: " /> <br />
+						<p:panelGrid columns="4" styleClass="ui-panelgrid-blank">
+					        <p:calendar id="dataFilter1" value="#{ecfVendasPeriodoBean.dataFilter1}" pattern="dd/MM/yyyy" size="10" mask="99/99/9999" label="Data" converterMessage="Data inválida" />
+					        <h:outputLabel value=" à " />
+					        <p:calendar id="dataFilter2" value="#{ecfVendasPeriodoBean.dataFilter2}" pattern="dd/MM/yyyy" size="10" mask="99/99/9999" label="Data" converterMessage="Data inválida" />
+				        </p:panelGrid>
+			        </div>
+			        
+        		</div>
+		        
+		    	<div class="ui-g">
+	     			<div class="ui-g-0 ui-md-0 ui-lg-0">
+			    		<p:commandButton 
+							 id="btnBuscar"
+							 value="Buscar"
+							 actionListener="#{ecfVendasPeriodoBean.buscar}"
+							 update=":listagemECFVendasPeriodo"
+							 icon="icon-search"
+							 onclick="PF('bUIDataTableECFVendasPeriodo').show()"
+							 />
+					</div>
+					<div class="ui-g-0 ui-md-0 ui-lg-0">	 
+						 <p:commandButton 
+							 id="btnLimpar" 
+							 value="Limpar"
+							 action="#{ecfVendasPeriodoBean.limpar}"
+							 update=" @form :listagemECFVendasPeriodo "
+							 icon="ui-icon-close" 
+							 onclick="PF('bUIDataTableECFVendasPeriodo').show()"
+							 />
+					</div>
+					
+		    	</div>
+		    	</div>
+		    </p:panel>
+	     	
+	     </h:form>
+	   	
+	<!-- Listagem -->
+     <h:form id="listagemECFVendasPeriodo">
+     
+     	<p:remoteCommand name="updateECFVendasPeriodoBean" update="@form" actionListener="#{ecfVendasPeriodoBean.buscar}" /> 
+     	
+     	<p:blockUI block="dtECFVendasPeriodo" widgetVar="bUIDataTableECFVendasPeriodo" trigger="dtECFVendasPeriodo">
+			LOADING<br />
+        	<p:graphicImage library="images" name="progress_bar.gif"/>
+		</p:blockUI>
+		
+		
+		<p:dataTable id="dtECFVendasPeriodo" var="diaSemana" value="#{ecfVendasPeriodoBean.listaDiasSemanaHeaders.entrySet().toArray()}" scrollable="true" scrollWidth="100%" emptyMessage="Nenhum resultado encontrado.">
+             <p:column style="text-align:left;">
+             	<f:facet name="header">Dias</f:facet>
+           		#{diaSemana.value}
+           	 </p:column>
+           	 
+           	 <p:columns var="col" value="#{ecfVendasPeriodoBean.listaHorasHeaders.entrySet().toArray()}" styleClass="tx_right #{ecfVendasPeriodoBean.findStyleClassCell(diaSemana.key, col.key)}">
+           	 	<f:facet name="header">#{col.value}</f:facet>
+    			<h:outputText value="#{ecfVendasPeriodoBean.findNumClientes(diaSemana.key, col.key)}" /> <br />
+    			<h:outputText value="#{ecfVendasPeriodoBean.findNumVendas(diaSemana.key, col.key)}">
+					<f:convertNumber minFractionDigits="0" maxFractionDigits="0" locale="pt_BR" type="currency" />
+    			</h:outputText> <br />
+    			<h:outputText value="#{ecfVendasPeriodoBean.findPercTotal(diaSemana.key, col.key)}">
+					<f:convertNumber minFractionDigits="0" maxFractionDigits="0" locale="pt_BR" />
+    			</h:outputText>%
+           	 </p:columns>
+           	 
+           	 <p:column style="text-align:right;" styleClass="#{ecfVendasPeriodoBean.findStyleClassCellTotal(diaSemana.key, 'dia')}">
+           	 	<f:facet name="header">Total</f:facet>
+           	 	<h:outputText value="#{ecfVendasPeriodoBean.findNumTotalClientes(diaSemana.key)}"/> <br />
+    			<h:outputText value="#{ecfVendasPeriodoBean.findNumTotalVendas(diaSemana.key)}">
+					<f:convertNumber minFractionDigits="0" maxFractionDigits="0" locale="pt_BR" type="currency" />
+    			</h:outputText> <br/>
+    			
+    			<h:outputText value="#{ecfVendasPeriodoBean.findPercDiaTotal(diaSemana.key)}">
+					<f:convertNumber minFractionDigits="0" maxFractionDigits="0" locale="pt_BR" />
+    			</h:outputText>%
+    			
+    			<!-- <h:outputText value="M: "/>
+    			<h:outputText value="#{ecfVendasPeriodoBean.findMediaDia(diaSemana.key)}" rendered="#{ecfVendasPeriodoBean.mediaEmFuncao eq 'vendas'}">
+					<f:convertNumber minFractionDigits="0" maxFractionDigits="0" locale="pt_BR" type="currency" />
+    			</h:outputText>
+    			
+    			<h:outputText value="#{ecfVendasPeriodoBean.findMediaDia(diaSemana.key)}" rendered="#{ecfVendasPeriodoBean.mediaEmFuncao eq 'clientes'}">
+					<f:convertNumber integerOnly="true" />
+    			</h:outputText> -->
+           	 </p:column>
+
+			<p:columnGroup type="footer">
+				<p:row>
+					<p:column footerText="Total" style="text-align:left;" styleClass="tx_bold" />
+					<p:columns var="col" value="#{ecfVendasPeriodoBean.listaHorasHeaders.entrySet().toArray()}" style="text-align:right;" styleClass="#{ecfVendasPeriodoBean.findStyleClassCellTotal(col.key, 'hora')}">
+		           	 	<f:facet name="footer">
+							<h:outputText value="#{ecfVendasPeriodoBean.findNumTotalClientesHora(col.key)}"/> <br />
+		    				<h:outputText value="#{ecfVendasPeriodoBean.findNumTotalVendasHora(col.key)}" >
+								<f:convertNumber minFractionDigits="0" maxFractionDigits="0" locale="pt_BR" type="currency" />
+			    			</h:outputText> <br />
+			    			<h:outputText value="#{ecfVendasPeriodoBean.findPercHoraTotal(col.key)}">
+								<f:convertNumber minFractionDigits="0" maxFractionDigits="0" locale="pt_BR" />
+			    			</h:outputText>%
+						</f:facet>
+		           	</p:columns>
+					<p:column style="text-align:right;">
+						<f:facet name="footer">
+						
+							<h:outputText value="#{ecfVendasPeriodoBean.totalNumClientesGeral}"/><br />
+							
+		    				<h:outputText value="#{ecfVendasPeriodoBean.totalNumVendasGeral}">
+								<f:convertNumber minFractionDigits="0" maxFractionDigits="0" locale="pt_BR" type="currency" />
+			    			</h:outputText><br />
+			    			
+			    			<!-- <h:outputText value="M D: "/><br />
+			    			<h:outputText value="#{ecfVendasPeriodoBean.mediaGeralDia}" rendered="#{ecfVendasPeriodoBean.mediaEmFuncao eq 'vendas'}">
+								<f:convertNumber minFractionDigits="0" maxFractionDigits="0" locale="pt_BR" type="currency" />
+			    			</h:outputText>
+			    			
+			    			<h:outputText value="#{ecfVendasPeriodoBean.mediaGeralDia}" rendered="#{ecfVendasPeriodoBean.mediaEmFuncao eq 'clientes'}">
+								<f:convertNumber integerOnly="true" />
+			    			</h:outputText>
+			    			<br />
+			    			<h:outputText value="M H: "/><br />
+			    			<h:outputText value="#{ecfVendasPeriodoBean.mediaGeralHora}" rendered="#{ecfVendasPeriodoBean.mediaEmFuncao eq 'vendas'}">
+								<f:convertNumber minFractionDigits="0" maxFractionDigits="0" locale="pt_BR" type="currency" />
+			    			</h:outputText>
+			    			
+			    			<h:outputText value="#{ecfVendasPeriodoBean.mediaGeralHora}" rendered="#{ecfVendasPeriodoBean.mediaEmFuncao eq 'clientes'}">
+								<f:convertNumber integerOnly="true" />
+			    			</h:outputText>  -->
+			    			
+						</f:facet>
+					</p:column>
+				</p:row>
+			</p:columnGroup>
+
+		</p:dataTable> 
+	
+	</h:form>
+	
+	</div>
+	
+</ui:composition>

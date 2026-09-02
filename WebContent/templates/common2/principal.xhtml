@@ -1,0 +1,137 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+	
+	<h:head id="main">
+		
+		<title>#{contextoBean.titulo}</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1" ></meta>
+		
+		<h:outputScript>var progressBarWMS = "${resource['images/progress_bar.gif']}";</h:outputScript>
+	
+		<h:outputScript library="primefaces" name="jquery/jquery.js" target="head" />
+		<h:outputScript library="primefaces" name="jquery/jquery-plugins.js" target="head" />
+		<h:outputScript library="primefaces" name="fileupload/fileupload.js" />
+		<h:outputScript library="primefaces" name="imagecropper/imagecropper.js" />
+		<h:outputScript library="primefaces" name="clock/clock.js" />
+		<h:outputScript library="primefaces" name="colorpicker/colorpicker.js" />
+		<h:outputScript library="primefaces" name="inputswitch/inputswitch.js" />
+		<h:outputScript library="primefaces" name="gmap/gmap.js" />
+		<h:outputScript library="primefaces" name="photocam/photocam.js" />
+		<h:outputScript library="primefaces" name="layout/layout.js" />
+		<h:outputScript library="primefaces" name="inputnumber/inputnumber.js" />
+		<h:outputScript library="primefaces" name="printer/printer.js" />
+		<h:outputScript library="primefaces" name="moment/moment.js" />
+		<h:outputScript library="primefaces" name="schedule/schedule.js" />
+		
+		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	    <script type="text/javascript">
+	    	google.charts.load('current', {'packages':['corechart']});
+        </script>
+        
+		<h:outputScript library="js" name="common_tabhome.js" />
+		<h:outputScript library="js" name="common_w3.js" target="body" />
+		<h:outputScript library="js" name="idle_monitor_view.js" target="body" />
+		<h:outputScript library="js" name="locales_primefaces_scheldule.js" target="body" />
+		<h:outputScript library="js" name="dashboardlaboratorio.js" target="body" />
+		<h:outputScript library="js" name="dashboardvenda.js" target="body" />	
+		<h:outputScript library="js" name="dashboardfat.js" target="body" />		
+		
+		<h:outputStylesheet library="css" name="w3.css"  />
+		<h:outputStylesheet library="css" name="w3-theme-black.css"  />
+		
+		<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css"></link>
+		
+		<link rel="apple-touch-icon" sizes="57x57" href="#{resource['favicon/apple-icon-57x57.png']}" /> 
+		<link rel="apple-touch-icon" sizes="60x60" href="#{resource['favicon/apple-icon-60x60.png']}" />
+		<link rel="apple-touch-icon" sizes="72x72" href="#{resource['favicon/apple-icon-72x72.png']}" />
+		<link rel="apple-touch-icon" sizes="76x76" href="#{resource['favicon/apple-icon-76x76.png']}" />
+		<link rel="apple-touch-icon" sizes="114x114" href="#{resource['favicon/apple-icon-114x114.png']}" />
+		<link rel="apple-touch-icon" sizes="120x120" href="#{resource['favicon/apple-icon-120x120.png']}" />
+		<link rel="apple-touch-icon" sizes="144x144" href="#{resource['favicon/apple-icon-144x144.png']}" />
+		<link rel="apple-touch-icon" sizes="152x152" href="#{resource['favicon/apple-icon-152x152.png']}" />
+		<link rel="apple-touch-icon" sizes="180x180" href="#{resource['favicon/apple-icon-180x180.png']}" />
+		<link rel="icon" type="image/png" sizes="192x192" href="#{resource['favicon/android-icon-192x192.png']}" />
+		<link rel="icon" type="image/png" sizes="32x32" href="#{resource['favicon/favicon-32x32.png']}" />
+		<link rel="icon" type="image/png" sizes="96x96" href="#{resource['favicon/favicon-96x96.png']}" />
+		<link rel="icon" type="image/png" sizes="16x16" href="#{resource['favicon/favicon-16x16.png']}" />
+		<link rel="manifest" href="#{resource['favicon/manifest.json']}" />
+		<meta name="msapplication-TileColor" content="#ffffff" />
+		<meta name="msapplication-TileImage" content="#{resource['favicon/ms-icon-144x144.png']}" />
+		<meta name="theme-color" content="#ffffff" />
+		
+		<h:outputStylesheet library="primefaces" name="fileupload/fileupload.css"  />
+		<h:outputStylesheet library="primefaces" name="imagecropper/imagecropper.css"  />
+		<h:outputStylesheet library="primefaces" name="colorpicker/colorpicker.css"  />
+		<h:outputStylesheet library="primefaces" name="inputswitch/inputswitch.css"  />
+		<h:outputStylesheet library="primefaces" name="layout/layout.css"  />
+		<h:outputStylesheet library="primefaces" name="schedule/schedule.css"  />
+		<h:outputStylesheet library="css" name="common-primefaces.css"  />
+		<h:outputStylesheet library="css" name="common-button.css"  />
+		<h:outputStylesheet library="css" name="common-followup.css"  />
+		<h:outputStylesheet library="css" name="common-text.css"  />
+		
+		<style>
+			body{
+				font-family: "Roboto", sans-serif;
+				font-size: 1em !important;
+			}
+			
+			td, th{
+				font-family: "Roboto", sans-serif;
+				font-size: 1em !important;
+			}
+			
+			html, h1, h2, h3, h4, h5, h6 {
+				font-family: "Roboto", sans-serif;
+				font-size: small !important;
+			}
+			
+			.txt_default{
+				font-family: "Roboto", sans-serif;
+				font-size: 1em !important;
+			}
+			
+			.txt_bold{
+				font-weight: bold;
+			}
+			
+			.w3-sidenav a, .w3-sidenav h4 {
+				padding: 12px;
+			}
+			
+			.w3-navbar a {
+				padding-top: 12px !important;
+				padding-bottom: 12px !important;
+			}
+			
+			
+			
+			.clip-circle {
+			  border-radius: 50%;
+			}
+			
+			.panelUrlDescricao{
+				margin-bottom: 10px;
+			}
+			
+			.topAlignContentGrid{
+				vertical-align: top;
+			}
+			
+		</style>
+			
+	</h:head>
+    
+    <h:body>
+	    <div id="content">
+	    	<!-- <ui:include src="sessionTimeOut.xhtml" /> -->
+	       	<ui:insert name="content" />
+	    </div>
+	</h:body>
+    
+    <!-- <script type="text/javascript" src="http://maps.google.com/maps/api/js?key=AIzaSyAlvUdyhwwc3FQ57WDje6jWcll-Bf0jtMM" /> -->
+
+</html>

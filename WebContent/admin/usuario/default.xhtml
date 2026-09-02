@@ -1,0 +1,206 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core">
+
+	<div class="tab-content-space">
+		<div id="tabViewVar:Title:tab_#{param.id}" class="panelUrlDescricao"></div>
+
+		<f:metadata>
+			<f:viewAction action="#{usuarioBean.clearSession}" />
+		</f:metadata>
+
+		<h:form id="consultaUsuario">
+
+			<p:growl id="msg" escape="true" showDetail="true" sticky="true"
+				life="3000" />
+			<p:focus context="panelFiltroUsuario" />
+			<p:defaultCommand target="btnBuscar" />
+
+			<p:toolbar id="tb">
+				<f:facet name="right">
+					<p:commandButton id="menuHome" icon="ui-icon-home"
+						action="#{usuarioBean.addHome}" update="msg" title="Home" />
+					<p:commandButton icon="ui-icon-star"
+						actionListener="#{usuarioBean.addFavoritos}" update="msg"
+						title="Favoritos" oncomplete="updateMenuHome()" />
+				</f:facet>
+			</p:toolbar>
+
+			<p:panel id="panelFiltroUsuario" widgetVar="panelFiltroUsuario"
+				closable="true">
+				<div class="ui-fluid">
+					<p:panelGrid columns="4"
+						columnClasses="ui-grid-col-2,ui-grid-col-0,ui-grid-col-0,ui-grid-col-0"
+						layout="grid" styleClass="ui-panelgrid-blank">
+						<p:inputText id="descricaoFilter"
+							value="#{usuarioBean.descricaoFilter}" placeholder="Nome / Login">
+							<p:ajax event="keyup" update="@none" />
+						</p:inputText>
+
+						<p:selectOneMenu id="situacaoFilter"
+							value="#{usuarioBean.situacaoFilter}">
+							<f:converter converterId="javax.faces.Boolean" />
+							<f:selectItem itemLabel="Ativo" itemValue="true" />
+							<f:selectItem itemLabel="Inativo" itemValue="false" />
+						</p:selectOneMenu>
+
+						<p:commandButton id="btnBuscar" value="Buscar"
+							actionListener="#{usuarioBean.buscar}" update=":listagemUsuario"
+							icon="icon-search" />
+
+						<p:commandButton id="btnLimpar" value="Limpar"
+							action="#{usuarioBean.limpar}"
+							update="descricaoFilter situacaoFilter :listagemUsuario "
+							icon="ui-icon-close" />
+
+					</p:panelGrid>
+				</div>
+			</p:panel>
+
+			<p:sticky target="tb" margin="50" />
+
+		</h:form>
+		<h:form id="edicaoUsuario">
+
+			<p:blockUI block="panelUsuario" trigger="btnSalvar"
+				widgetVar="bUIUsuario">
+			LOADING<br />
+				<p:graphicImage library="images" name="progress_bar.gif" />
+			</p:blockUI>
+
+			<p:panel id="panelUsuario" widgetVar="panelUsuario"
+				header="#{usuarioBean.tituloAdd}" closable="true">
+
+				<p:focus context="panelUsuario" />
+				<p:messages id="msgAdd" showDetail="true" showSummary="false" />
+
+				<div class="ui-fluid">
+
+					<p:panelGrid columns="9"
+						columnClasses="ui-grid-col-0,ui-grid-col-2,ui-grid-col-0,ui-grid-col-1,ui-grid-col-0,ui-grid-col-2,ui-grid-col-1,ui-grid-col-0,ui-grid-col-0"
+						layout="grid" styleClass="ui-panelgrid-blank">
+
+						<h:outputLabel value="Nome: " />
+						<h:outputLabel value="#{usuarioBean.usuarioFB.nome}"
+							styleClass="tx_bold" />
+
+						<h:outputLabel value="Login: " />
+						<h:outputLabel value="#{usuarioBean.usuarioFB.login}"
+							styleClass="tx_bold" />
+
+						<h:outputLabel value="Grupo: " />
+						<p:selectOneMenu id="usuarioGrupo"
+							value="#{usuarioBean.usuario.usuarioGrupo}" required="true"
+							requiredMessage="Grupo de Usuário é obrigatório"
+							rendered="#{not empty usuarioBean.usuario}">
+							<f:selectItem itemLabel="Selecione" itemValue="" />
+							<f:selectItems value="#{usuarioBean.usuarioGruposSelect}" />
+						</p:selectOneMenu>
+						
+						<h:outputLabel value=" " />
+						<h:outputLabel value="Conferente " />
+						<p:selectOneMenu id="conferenteFilter"
+						    value="#{usuarioBean.conferente}"
+						    converter="conferenteFBConverter">
+							<f:selectItem itemLabel="Selecione" itemValue="" />
+							<f:selectItems value="#{usuarioBean.conferentesSelect}" />
+						</p:selectOneMenu>
+
+					</p:panelGrid>
+
+					<p:panel id="panelUsuarioDivergencia"
+						widgetVar="panelUsuarioDivergencia"
+						header="CONFIGURAÇÕES PARA APROVAÇÃO DE DIVERGÊNCIAS">
+						<p:treeTable widgetVar="dataTableUsuarioDivergencia"
+							var="divergencia" value="#{usuarioBean.treeTable}"
+							selectionMode="checkbox"
+							selection="#{usuarioBean.treeTableSelected}">
+							<p:ajax event="select" listener="#{usuarioBean.onNodeSelect}"
+								update="@none" />
+							<p:ajax event="unselect" listener="#{usuarioBean.onNodeUnselect}"
+								update="@none" />
+							<p:column headerText="Descrição">
+							#{divergencia.divergenciaDesc}
+				        </p:column>
+						</p:treeTable>
+					</p:panel>
+					<p:panelGrid columns="1" columnClasses="ui-grid-col-0"
+						layout="grid" styleClass="ui-panelgrid-blank">
+						<p:commandButton id="btnSalvar" value="Salvar"
+							action="#{usuarioBean.salvar}"
+							update=":listagemUsuario, :edicaoUsuario" icon="icon-save" />
+					</p:panelGrid>
+
+				</div>
+
+			</p:panel>
+
+		</h:form>
+		<h:form id="listagemUsuario">
+
+			<p:dataTable widgetVar="dataTableUsuarios" var="usuario"
+				value="#{usuarioBean.lista}" paginator="true" rows="15"
+				paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+				rowsPerPageTemplate="5,10,15,20,30" reflow="true">
+
+				<p:column sortBy="#{usuario.id}" styleClass="customCollumnId"
+					priority="3">
+					<f:facet name="header">ID</f:facet>
+				#{usuario.id} 
+	        </p:column>
+
+				<p:column sortBy="#{usuario.nome}">
+					<f:facet name="header">Nome</f:facet>
+				#{usuario.nome}
+	        </p:column>
+
+				<p:column sortBy="#{usuario.login}">
+					<f:facet name="header">Login</f:facet>
+				#{usuario.login}
+	        </p:column>
+
+				<p:column>
+					<f:facet name="header">Grupo</f:facet>
+				#{usuarioBean.verGrupoUsuario(usuario.id)}
+	        </p:column>
+
+				<p:column style="width:70px;" priority="4">
+					<f:facet name="header">Status</f:facet>
+					<center>
+						<h:outputText value="#{usuario.ativo==0 ? 'Inativo': 'Ativo'}" />
+					</center>
+				</p:column>
+
+				<p:column styleClass="customCollumn2Icon">
+					<f:facet name="header"></f:facet>
+					<p:commandButton action="#{usuarioBean.editar}"
+						update=":edicaoUsuario" icon="ui-icon-pencil" title="Editar"
+						onclick="PF('bUIUsuario').show()">
+						<p:resetInput target=":edicaoUsuario" />
+						<f:setPropertyActionListener target="#{usuarioBean.usuarioFB}"
+							value="#{usuario}" />
+					</p:commandButton>
+
+					<p:commandButton actionListener="#{mudarSenhaBean.editar}"
+						update="@none" process="@this" icon="ui-icon-locked"
+						title="Editar" onclick="closeTab('mudarSenhaBean')"
+						oncomplete="javascript:openTab('mudarSenhaBean', 'Alterar Senha', 'Alterar Senha', 'password.jsf');">
+						<f:setPropertyActionListener
+							target="#{mudarSenhaBean.selecionadaId}" value="#{usuario.id}" />
+					</p:commandButton>
+				</p:column>
+
+			</p:dataTable>
+
+		</h:form>
+
+
+	</div>
+
+	<script>
+		$('#edicaoUsuario\\:panelUsuario').hide();
+	</script>
+
+</ui:composition>
