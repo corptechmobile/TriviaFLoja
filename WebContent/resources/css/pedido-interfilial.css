@@ -157,6 +157,40 @@
     margin-left: 10px;
 }
 
+.pedido-interfilial .pedido-atendimento-acoes-filtro {
+    align-items: flex-end;
+    display: flex;
+    gap: 6px;
+    padding-top: 18px;
+}
+
+.pedido-interfilial .pedido-atendimento-atrasado td {
+    background-color: #fff7f5;
+}
+
+.pedido-interfilial .pedido-atendimento-data-atrasada,
+.pedido-interfilial .pedido-atendimento-alerta {
+    color: #c62828;
+    font-weight: 700;
+}
+
+.pedido-interfilial .pedido-atendimento-alerta {
+    display: block;
+    font-size: 10px;
+    margin-top: 3px;
+    text-transform: uppercase;
+}
+
+.pedido-interfilial .pedido-atendimento-status {
+    background: #e8f3fb;
+    border-radius: 11px;
+    color: #176a98;
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+}
+
 @media (max-width: 768px) {
     .pedido-interfilial .pedido-interfilial-cabecalho {
         align-items: flex-start;
