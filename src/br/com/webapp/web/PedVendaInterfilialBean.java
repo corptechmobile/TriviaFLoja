@@ -1128,7 +1128,7 @@ public class PedVendaInterfilialBean implements Serializable {
 			limparDadosAtendimento();
 			
 			ProdutoEstoqueFBRN produtoEstoqueFBRN = new ProdutoEstoqueFBRN();
-			produtoSelecionada.setEstoques(produtoEstoqueFBRN.listar(selecionada.getEncomenda(), consultarEstoqueRede ? null : selecionada.getEmpresaId(), contextoBean.getUsuarioLogado().getId(), produtoSelecionada.getId(), produtoSelecionada.getControlaLote(), Funcoes.SO_ESTOQUE, produtoSelecionada.getPermiteVendaSemEstoque()));
+			produtoSelecionada.setEstoques(produtoEstoqueFBRN.listar(selecionada.getEncomenda(), consultarEstoqueRede && !selecionada.getIsProdComposto() ? null : selecionada.getEmpresaId(), contextoBean.getUsuarioLogado().getId(), produtoSelecionada.getId(), produtoSelecionada.getControlaLote(), Funcoes.SO_ESTOQUE, produtoSelecionada.getPermiteVendaSemEstoque()));
 			if(selecionada.getIsProdComposto()) {
 				produtoSelecionada.setComposicoes(new ProdCompostoItemFBRN().listar(produtoSelecionada.getId()));
 			}
@@ -1155,7 +1155,7 @@ public class PedVendaInterfilialBean implements Serializable {
 			
 			produtoSelecionada = new ProdutoFBRN().carregar(selecionada.getEncomenda(), produtoId, selecionada.getEncomenda(), selecionada.getEmpresaId(), selecionada.getMovFiscTipo().getOpFiscTipoId(), contextoBean.getUsuarioLogado().getId(), selecionada.getTabPrecoId(), selecionada.getCondPagtoId(), Funcoes.IS_TRANSFERENCIA, Funcoes.COMPARTILHA_ESTOQUE, Funcoes.EMP_ENCH_EST_COMPART, comEstoqueFilter, semEstoqueFilter, selecionada.getFreteTipoId());
 			ProdutoEstoqueFBRN produtoEstoqueFBRN = new ProdutoEstoqueFBRN();
-			produtoSelecionada.setEstoques(produtoEstoqueFBRN.listar(selecionada.getEncomenda(), consultarEstoqueRede ? null : selecionada.getEmpresaId(), contextoBean.getUsuarioLogado().getId(), produtoSelecionada.getId(), produtoSelecionada.getControlaLote(), Funcoes.SO_ESTOQUE, produtoSelecionada.getPermiteVendaSemEstoque()));
+			produtoSelecionada.setEstoques(produtoEstoqueFBRN.listar(selecionada.getEncomenda(), consultarEstoqueRede && !selecionada.getIsProdComposto() ? null : selecionada.getEmpresaId(), contextoBean.getUsuarioLogado().getId(), produtoSelecionada.getId(), produtoSelecionada.getControlaLote(), Funcoes.SO_ESTOQUE, produtoSelecionada.getPermiteVendaSemEstoque()));
 			pedVendaItem = new PedVendaItemFBRN().editar(pedVendaItemId, produtoSelecionada, selecionada.getEncomenda());
 			descItem = pedVendaItem.getPercDesconto();
 
