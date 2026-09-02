@@ -115,7 +115,7 @@ public class PedidoAtendimentoFBRN {
             }
 
             salvarItens(pedidoAtendimento.getId(),
-                    pedVendaItem, produto.getEstoques());
+                    pedVendaItem, produto.getEstoques(), observacao);
 
             new ProdutoEstoqueFBRN().bloqueEstoque(
                     empresaAtendimentoId, produto.getId());
@@ -171,7 +171,8 @@ public class PedidoAtendimentoFBRN {
 
     private void salvarItens(Integer pedidoAtendimentoId,
             PedVendaItemFB pedVendaItem,
-            List<ProdutoEstoqueFB> estoques) throws DAOException {
+            List<ProdutoEstoqueFB> estoques,
+            String observacao) throws DAOException {
         for (ProdutoEstoqueFB estoque : estoques) {
             if (estoque.getQtdReservar() != null
                     && estoque.getQtdReservar().doubleValue() > 0.0) {
@@ -183,6 +184,7 @@ public class PedidoAtendimentoFBRN {
                 item.setLocalidadeId(estoque.getLocalidadeId());
                 item.setProdutoLoteId(estoque.getProdutoLoteId());
                 item.setQuantidade(estoque.getQtdReservar());
+                item.setObservacao(observacao);
                 pedidoAtendimentoDAO.insertItem(item);
             }
         }
