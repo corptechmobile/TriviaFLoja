@@ -35,6 +35,28 @@
     letter-spacing: .08em;
 }
 
+.pedido-interfilial .pedido-interfilial-cabecalho-acoes {
+    align-items: flex-end;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pedido-interfilial .pedido-interfilial-btn-planejamento {
+    background: #0787c1;
+    border: 1px solid #0676a9;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 13px;
+}
+
+.pedido-interfilial .pedido-interfilial-btn-planejamento:hover {
+    background: #0676a9;
+}
+
 .pedido-interfilial .pedido-interfilial-seguranca {
     align-items: center;
     background: #fff;
@@ -197,7 +219,12 @@
         flex-direction: column;
     }
 
-    .pedido-interfilial .pedido-interfilial-seguranca {
+    .pedido-interfilial .pedido-interfilial-cabecalho-acoes {
+        align-items: flex-start;
         margin-top: 12px;
+    }
+
+    .pedido-interfilial .pedido-interfilial-seguranca {
+        margin-top: 0;
     }
 }
