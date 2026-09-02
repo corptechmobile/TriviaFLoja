@@ -80,10 +80,10 @@ public class PedidoAtendimentoFBDAOHibernate implements PedidoAtendimentoFBDAO {
             sql.append("INSERT INTO PEDATENDITEM (")
                .append("ID_PEDATENDITEM, ID_PEDATENDIMENTO, ")
                .append("ID_PEDVENDAITEM, ID_PRODUTO, ID_LOCALIDADE, ")
-               .append("ID_PRODUTOLOTE, QUANTIDADE) VALUES (")
+               .append("ID_PRODUTOLOTE, QUANTIDADE, OBSERVACAO) VALUES (")
                .append(":ID, :ID_PEDATENDIMENTO, :ID_PEDVENDAITEM, ")
                .append(":ID_PRODUTO, :ID_LOCALIDADE, ")
-               .append(":ID_PRODUTOLOTE, :QUANTIDADE)");
+               .append(":ID_PRODUTOLOTE, :QUANTIDADE, :OBSERVACAO)");
 
             Query query = session.createSQLQuery(sql.toString());
             query.setParameter("ID", item.getId());
@@ -93,6 +93,7 @@ public class PedidoAtendimentoFBDAOHibernate implements PedidoAtendimentoFBDAO {
             query.setParameter("ID_LOCALIDADE", item.getLocalidadeId());
             query.setParameter("ID_PRODUTOLOTE", item.getProdutoLoteId());
             query.setParameter("QUANTIDADE", item.getQuantidade());
+            query.setParameter("OBSERVACAO", item.getObservacao());
             query.executeUpdate();
 
             return item.getId();
@@ -167,10 +168,10 @@ public class PedidoAtendimentoFBDAOHibernate implements PedidoAtendimentoFBDAO {
             throws DAOException {
         try {
             StringBuilder sql = new StringBuilder();
-            sql.append("DELETE FROM PEDATENDIMENTO a ")
-               .append(" WHERE a.ID_PEDVENDA = :ID_PEDVENDA ")
+            sql.append("DELETE FROM PEDATENDIMENTO ")
+               .append(" WHERE PEDATENDIMENTO.ID_PEDVENDA = :ID_PEDVENDA ")
                .append(" AND NOT EXISTS (SELECT 1 FROM PEDATENDITEM i ")
-               .append(" WHERE i.ID_PEDATENDIMENTO = a.ID_PEDATENDIMENTO)");
+               .append(" WHERE i.ID_PEDATENDIMENTO = PEDATENDIMENTO.ID_PEDATENDIMENTO)");
             Query query = session.createSQLQuery(sql.toString());
             query.setParameter("ID_PEDVENDA", pedVendaId);
             query.executeUpdate();
