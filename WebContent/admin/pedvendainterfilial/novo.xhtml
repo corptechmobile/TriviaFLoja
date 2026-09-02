@@ -1,0 +1,1496 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"   
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:util="http://java.sun.com/jsf/composite/components/util">
+    
+    <div class="tab-content-space">
+    <div id="tabViewVar:Title:tab_pedVendaInterfilialBean" class="panelUrlDescricao" style="display: none;"></div>
+    
+    <util:calculadorapiso id="calcPisoComponente"/>  
+    
+    
+    <p:dialog id="dialogModifCliPedVendaNovo" widgetVar="dialogModifCliPedVendaNovo" header="Modificar Cliente"  onShow="updateFormCalcPiso()" responsive="true" modal="true" resizable="false" draggable="false" closeOnEscape="true" position="0" positionType="absolute">
+    	<h:form id="formModifCliPedVendaNovo">
+    		<p:panel id="panelFilterCliPedVenda" widgetVar="panelFilterCliPedVenda" >
+		    	<div class="ui-g">
+					<div class="ui-g-12 ui-md-2 ui-lg-0">
+						<p:inputText id="descricaoFilterCli" value="#{pedVendaInterfilialBean.descricaoFilterCli}" placeholder="Nome fantasia / Razão Social" style="width:100%;" />
+					</div>
+					<div class="ui-g-0 ui-md-0 ui-lg-0">
+						<p:commandButton 
+							 id="btnBuscarCli" 
+							 value="Buscar"
+							 actionListener="#{pedVendaInterfilialBean.buscarCli}"
+							 update="@form"
+							 icon="icon-search"
+							 onclick="PF('bUIDTCliModPedVenda').show()"
+							 />
+					</div>
+		    	</div>
+		    </p:panel>
+		    
+		    <p:blockUI block="dtCliModPedVenda" widgetVar="bUIDTCliModPedVenda">
+				LOADING<br />
+	        	<p:graphicImage library="images" name="progress_bar.gif"/>
+			</p:blockUI>
+			
+			<p:dataTable id="dtCliModPedVenda" var="cliente" reflow="true"
+				value="#{pedVendaInterfilialBean.listaCli}" emptyMessage="Nenhum registro encontrado."
+				selection="#{pedVendaInterfilialBean.clienteModif}"
+				selectionMode="single"
+				rowKey="#{cliente.id}"
+				>
+				
+				<p:ajax event="rowSelect" update="@form :formStepsPedVendaBean :formVerCliPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean" listener="#{pedVendaInterfilialBean.verificarCpfCnpjModifCli}" onsuccess="PF('dialogModifCliPedVendaNovo').hide()" />
+	
+				<p:column sortBy="#{cliente.id}" styleClass="customCollumnId" priority="4">
+					<f:facet name="header">COD</f:facet>
+					<h:outputText value="#{cliente.id} " />
+	        	</p:column>
+	
+				<p:column sortBy="#{cliente.cnpjCpf}"
+					styleClass="customCollumnCpfCnpj" priority="1">
+					<f:facet name="header">CPF/CNPJ</f:facet>
+					<h:outputText value="#{cliente.cnpjCpf}"
+						rendered="#{cliente.tipoPessoa == 'J' or cliente.tipoPessoa == 'O'}"
+						converter="converter.CNPJConverter" />
+					<h:outputText value="#{cliente.cnpjCpf}"
+						rendered="#{cliente.tipoPessoa == 'F'}"
+						converter="converter.CPFConverter" />
+				</p:column>
+	
+				<p:column sortBy="#{cliente.razaoSocial}" priority="5">
+					<f:facet name="header">Razão Social</f:facet>
+					<h:outputText value="#{cliente.razaoSocial}" />
+	        	</p:column>
+	
+				<p:column sortBy="#{cliente.nomeFantasia}" priority="1">
+					<f:facet name="header">Nome Fantasia</f:facet>
+					<h:outputText value="#{cliente.nomeFantasia}" />
+	        	</p:column>
+	
+				<p:column sortBy="#{cliente.bairro}" priority="5" styleClass="customCollumnBairro">
+					<f:facet name="header">Bairro</f:facet>
+					<h:outputText value="#{cliente.bairro}" />
+	       		</p:column>
+	
+				<p:column sortBy="#{cliente.cidade}" priority="4">
+					<f:facet name="header">Cidade</f:facet>
+					<h:outputText value="#{cliente.cidade}" />
+	        	</p:column>
+	        
+	        	<p:column sortBy="#{cliente.estado.id}" styleClass="customCollumnEstado" priority="4" >
+					<f:facet name="header">UF</f:facet>
+					<h:outputText value="#{cliente.estadoId}" />
+	        	</p:column>
+	
+				<p:column sortBy="#{cliente.ativo}" styleClass="customCollumnId" priority="4">
+					<f:facet name="header">Ativo</f:facet>
+					<h:outputText value="#{cliente.ativo == 1 ? 'Ativo' : 'Inativo' }" />
+		        </p:column>
+	
+			</p:dataTable>
+    	</h:form>
+    </p:dialog>
+    
+     <!-- Filtro -->
+     <h:form id="formFiltroPedVenda">
+     	<p:growl id="msg" showDetail="true" life="6000"/>
+     </h:form>
+     
+     <!-- Steps --> 
+     <h:form id="formStepsPedVendaBean">
+     
+     	<p:growl id="msg" showDetail="true" showSummary="false" life="6000"/>
+     	
+     	<div class="ui-g">
+     		<div class="ui-g-3 ui-md-3 ui-lg-0">
+	     		<h:panelGroup rendered="#{not empty pedVendaInterfilialBean.empresa.id}">
+	     			<p:outputLabel value="Empresa: " /><br/> 
+					<h:outputText value="#{pedVendaInterfilialBean.empresa.cnpjCpf}"
+						converter="converter.CNPJConverter" /><br />
+	     			<p:outputLabel value="#{pedVendaInterfilialBean.empresa.nomeFantasia}" styleClass="txt_bold" />
+	     		</h:panelGroup>
+     		</div>
+     		<div class="ui-g-2 ui-md-2 ui-lg-0">
+	     		<h:panelGroup rendered="#{not empty pedVendaInterfilialBean.vendedor}">
+	     			<p:outputLabel value="Vendedor: " /> <br />
+	     			<p:outputLabel value="#{pedVendaInterfilialBean.vendedor.id} " /> <br />
+	     			<p:outputLabel value="#{pedVendaInterfilialBean.vendedor.nomeFantasia}" styleClass="txt_bold" />
+	     		</h:panelGroup>
+     		</div>
+     		<div class="ui-g-3 ui-md-3 ui-lg-0">
+	     		<h:panelGroup rendered="#{not empty pedVendaInterfilialBean.cliente.id}">
+	     			<p:outputLabel value="Cliente: " /> 
+	     			<p:commandButton id="btnModifClientePedVenda"
+	     					action="#{pedVendaInterfilialBean.editarCliente}"
+							update="@form :formModifCliPedVendaNovo :formStepsPedVendaBean :formVerCliPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean :formFilterCliPedVenda" 
+							process="@this" 
+							icon="ui-icon-pencil" 
+							title="Modificar o Cliente do Pedido"
+							rendered="#{pedVendaInterfilialBean.selecionada.podeEditar}" 
+							oncomplete="PF('dialogModifCliPedVendaNovo').show()"/>
+	     			<br />
+					<p:outputLabel value="#{pedVendaInterfilialBean.cliente.id} " /> <br />
+	     			<p:outputLabel value="#{pedVendaInterfilialBean.cliente.razaoSocial}" styleClass="txt_bold" /><br />
+	     			<p:outputLabel value="#{pedVendaInterfilialBean.nomeConsumidor}" styleClass="txt_bold" />
+	     		</h:panelGroup>
+     		</div>
+     		<div class="ui-g-3 ui-md-3 ui-lg-0">
+	     		<h:panelGroup rendered="#{not empty pedVendaInterfilialBean.selecionada.id}">
+	     			<p:outputLabel value="Pedido: " /> 
+	     			<p:commandButton id="btnExcluir" 
+							update="@form :formVerCliPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean" 
+							process="@this"
+							action="#{pedVendaInterfilialBean.excluir}" 
+							icon="ui-icon-trash" 
+							rendered="#{pedVendaInterfilialBean.selecionada.podeExcluir}"
+							onsuccess="verTabsPedidosAfterExcluir();"
+							title="Excluir">
+						<f:setPropertyActionListener target="#{pedVendaInterfilialBean.selecionadaId}" value="#{pedVendaInterfilialBean.selecionada.id}" />
+						<p:confirm header="Confirme" message="Deseja Excluir?" icon="ui-icon-alert" />
+					</p:commandButton>
+	     			<br />
+	     			<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.id}" styleClass="tx_bold_16" /><br />
+	     			<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.pedVendaStatus.descricao} " />
+	     			<h:outputText value=" em " rendered="#{pedVendaInterfilialBean.selecionada.pedVendaStatus.id eq 2}" /> 
+	     			<h:outputText value="#{pedVendaInterfilialBean.selecionada.dataUltAlteracao}" styleClass="tx_bold" rendered="#{pedVendaInterfilialBean.selecionada.pedVendaStatus.id eq 2}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</h:outputText>
+	     		</h:panelGroup>
+     		</div>
+     		<div class="ui-g-1 ui-md-1 ui-lg-0">
+	     		<h:panelGroup rendered="${not empty pedVendaInterfilialBean.listaPedVendaItem}"> 
+	     			<p:outputLabel value="Total: " /> <br />
+	     			<h:outputText value="${pedVendaInterfilialBean.selecionada.valPedido}" converter="currencyFormat" styleClass="tx_bold_16" /> <br />
+					<h:panelGroup>
+						<ui:fragment rendered="#{pedVendaInterfilialBean.selecionada.condPagto.parcelas gt 1}" >
+							<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.condPagto.getParcelas(pedVendaInterfilialBean.selecionada.valPedido)}" styleClass="tx_bold" /> <br />
+						</ui:fragment>
+						<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.condPagto.descricao}" styleClass="tx_bold" />
+					</h:panelGroup><br />
+					<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.freteTipo.descricao}" styleClass="tx_bold" rendered="#{pedVendaInterfilialBean.selecionada.podeEditar == false and pedVendaInterfilialBean.selecionada.freteTipo!=null}"/>
+					
+	     		</h:panelGroup>
+     		</div>
+     	</div>
+     	
+	    <p:steps activeIndex="#{pedVendaInterfilialBean.stepIndex}" styleClass="custom" readonly="false" rendered="#{pedVendaInterfilialBean.renderedStep}">
+		   <p:menuitem value="Cliente" actionListener="#{pedVendaInterfilialBean.openCliente}" update="@form :formVerCliPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean :formFilterCliPedVenda"  />
+		   <p:menuitem value="Itens" actionListener="#{pedVendaInterfilialBean.openItens}" update="@form :formVerCliPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean :formFilterCliPedVenda" />
+		   <p:menuitem value="Concluir" actionListener="#{pedVendaInterfilialBean.openCondPagto}" update="@form :formVerCliPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean :formFilterCliPedVenda" />
+		</p:steps>
+		 
+	 </h:form>
+     
+     <!-- Verificar Cliente -->
+     <h:form id="formVerCliPedVendaBean">
+     
+     	<p:blockUI block="panelVerCliPedVendaBean" id="bUIVerCliPedVenda" widgetVar="bUIVerCliPedVenda">
+			LOADING<br />
+        	<p:graphicImage library="images" name="progress_bar.gif"/>
+		</p:blockUI>
+		
+		<p:focus context="panelVerCliPedVendaBean"/>
+     
+	    <p:panel id="panelVerCliPedVendaBean" rendered="#{pedVendaInterfilialBean.stepIndex==0}">
+	    
+    		<p:defaultCommand target="btnVerCli" />
+    	 	
+    	 	<p:fieldset rendered="#{empty pedVendaInterfilialBean.cliente.id or pedVendaInterfilialBean.renderedBuscaCli == true or pedVendaInterfilialBean.clienteNaoEncontrado == true}" styleClass="painelFieldset">
+	    	 	<div class="ui-g">
+	    	 		<ui:fragment rendered="#{pedVendaInterfilialBean.podeMudarEmpresa}">
+		     			<div class="ui-g-6 ui-md-6 ui-lg-0">
+				    		<div class="ui-fluid">
+					    		<h:panelGroup>
+						    		<p:outputLabel value="Empresa"/><br/>
+						    		<p:selectOneMenu id="empresa"
+														value="#{pedVendaInterfilialBean.empresa}" 
+															required="true" 
+																requiredMessage="Selecione uma Empresa" 
+																	filter="true" 
+																		filterMatchMode="contains" 
+																			autoWidth="false">
+										<p:ajax event="change" process="@this" update="@form:empresa @form:panelVerCliPedVendaBean :formStepsPedVendaBean" listener="#{pedVendaInterfilialBean.carregaClientePadrao}" />
+										<f:selectItems value="#{pedVendaInterfilialBean.empresaSelectItem}" />
+									</p:selectOneMenu>
+								</h:panelGroup>	
+							</div>
+						</div>
+					</ui:fragment>
+					<ui:fragment rendered="#{pedVendaInterfilialBean.podeMudarVendedor}">
+						<div class="ui-g-6 ui-md-6 ui-lg-0">
+				    		<div class="ui-fluid">
+					    		<h:panelGroup>
+						    		<p:outputLabel value="Vendedor"/><br/>
+						    		<p:selectOneMenu id="vendedor"
+															value="#{pedVendaInterfilialBean.vendedor}" 
+																required="true" 
+																	requiredMessage="Selecione um Vendedor" 
+																		filter="true" 
+																			filterMatchMode="contains" 
+																				autoWidth="false"
+																					converter="vendedorFBConverter">
+											<p:ajax event="change" process="@this"  />
+											<f:selectItem itemLabel="Vendedor" itemValue="#{null}" />  
+											<f:selectItems value="#{pedVendaInterfilialBean.vendedorSelectItem}" />
+										</p:selectOneMenu>
+								</h:panelGroup>	
+							</div>
+						</div>
+					</ui:fragment>
+				</div>
+			
+				<p:selectOneRadio id="customRadio" value="#{pedVendaInterfilialBean.cliente.tipoPessoa}" layout="custom">
+					<p:ajax update="panelGroupOpt1 panelGroupOpt2 panelGroupOpt3 btnCadastrarCli"
+					        listener="#{pedVendaInterfilialBean.verificarTipoPessoa}" oncomplete=""   />
+					<f:selectItem itemLabel="Outros" itemValue="O" />
+					<f:selectItem itemLabel="Física" itemValue="F" />
+					<f:selectItem itemLabel="Jurídica" itemValue="J" />
+				</p:selectOneRadio>
+				
+				<h:panelGrid columns="3" id="customRadioGrid">
+					<p:radioButton id="opt1" for="customRadio" itemIndex="0"  />
+					<h:outputLabel for="opt1" value="#{pedVendaInterfilialBean.nomePO}" />
+					<h:panelGroup id="panelGroupOpt1">
+						<h:outputLabel value="     "/>
+						<p:inputText id="outros" type="hidden" value="#{pedVendaInterfilialBean.outros}"    />
+						<p:inputText id="nomeConsumidor" value="#{pedVendaInterfilialBean.nomeConsumidor}" required="true" requiredMessage="Informe o nome do cliente!" placeholder="Nome do Cliente" rendered="#{pedVendaInterfilialBean.cliente.tipoPessoa == 'O'}" />
+					</h:panelGroup>
+					
+					<p:radioButton id="opt2" for="customRadio" itemIndex="1"/>
+					<h:outputLabel for="opt2" value="Física" />
+					<h:panelGroup id="panelGroupOpt2">
+					<p:inputMask id="cpf" placeholder="CPF" value="#{pedVendaInterfilialBean.cpf}" mask="999.999.999-99" required="true" requiredMessage="Preencha o CPF" maxlength="15" rendered="#{pedVendaInterfilialBean.cliente.tipoPessoa == 'F'}" >
+						<f:validator validatorId="validator.CPFValidator" /> 
+						<f:converter converterId="converter.CPFConverter" />
+					</p:inputMask>
+					</h:panelGroup>
+					
+					<p:radioButton id="opt3" for="customRadio" itemIndex="2"/>
+					<h:outputLabel for="opt3" value="Jurídica" />
+					<h:panelGroup id="panelGroupOpt3">
+					<p:inputMask id="cnpj" placeholder="CNPJ" value="#{pedVendaInterfilialBean.cnpj}" mask="99.999.999/9999-99" required="true" requiredMessage="Preencha o CNPJ" maxlength="19" rendered="#{(pedVendaInterfilialBean.cliente.tipoPessoa == 'J')}">
+						<f:validator validatorId="validator.CNPJValidator" />
+						<f:converter converterId="converter.CNPJConverter" />
+					</p:inputMask>
+					</h:panelGroup>
+				</h:panelGrid>
+						
+				<p:panelGrid id="painelEdicaoItem2" columns="1" columnClasses="ui-grid-col-12" layout="grid" styleClass="ui-panelgrid-blank">
+					
+						
+					
+					<h:panelGroup>
+						<p:commandButton id="btnVerCli" 
+											update="@form :formStepsPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean :formFilterCliPedVenda"
+											actionListener="#{pedVendaInterfilialBean.verificarCpfCnpj}" 
+											onstart="PF('bUIVerCliPedVenda').show()" 
+											onerror="PF('bUIVerCliPedVenda').hide()" 
+											oncomplete="PF('bUIVerCliPedVenda').hide()"
+											icon="ui-icon-circle-check"
+											value="Verificar" 
+											 />		
+						<p:commandButton id="btnCadastrarCli" 
+											update="@form :formStepsPedVendaBean" 
+											actionListener="#{clienteNovoBean.cadastrar(pedVendaInterfilialBean.cliente)}" 
+											onstart="closeTab('clienteNovoBean');" 
+											oncomplete="openTab('clienteNovoBean', 'Cliente Novo', 'Cliente Novo', 'cliente/form.jsf')"
+											icon="icon-clientes" 
+											value="Cadastrar"
+											rendered="#{pedVendaInterfilialBean.podeCadastrarCliente}"
+											 /><!--  -->											 
+					</h:panelGroup>												 
+												 	
+
+		        </p:panelGrid>
+			
+			</p:fieldset>
+			
+			<p:fieldset rendered="#{not empty pedVendaInterfilialBean.cliente.id and pedVendaInterfilialBean.renderedBuscaCli == false and pedVendaInterfilialBean.clienteNaoEncontrado == false}" styleClass="painelFieldset">
+			
+				<div style="float:right;">
+					<p:commandButton action="#{clienteNovoBean.editar}"
+						update="@none" process="@this" icon="ui-icon-pencil" title="Editar dados do Cliente"
+						onstart="closeTab('clienteNovoBean')" 
+						oncomplete="openTab('clienteNovoBean', 'Cliente / #{pedVendaInterfilialBean.cliente.id}', 'Cliente / #{pedVendaInterfilialBean.cliente.id}', 'cliente/form.jsf?id=1')"
+						>
+						<f:setPropertyActionListener target="#{clienteNovoBean.selecionada}" value="#{pedVendaInterfilialBean.cliente}" />
+					</p:commandButton>
+				</div>
+				
+    			<p:defaultCommand target="btnVerCliAvancar" />
+    			
+    			<div class="ui-g">
+    			
+    				<div class="ui-g-12 ui-md-6 ui-lg-6">
+						<p:outputLabel value="#{pedVendaInterfilialBean.cliente.razaoSocial}" styleClass="tx_bold"/>
+						<p:outputLabel value=" (#{pedVendaInterfilialBean.cliente.nomeFantasia})" />
+					</div>
+					
+					<div class="ui-g-12 ui-md-6 ui-lg-6">
+						<p:outputLabel value="E-mail: " />
+						<p:outputLabel value="#{pedVendaInterfilialBean.cliente.email}" styleClass="tx_bold"/>
+					</div>
+					
+    				<div class="ui-g-12 ui-md-6 ui-lg-6">
+					 	<p:outputLabel value="CNPJ:" for="cnpj" rendered="#{pedVendaInterfilialBean.cliente.tipoPessoa == 'J'}" /> 
+						<p:outputLabel rendered="#{(pedVendaInterfilialBean.cliente.tipoPessoa == 'J')}" value="#{pedVendaInterfilialBean.cliente.cnpjCpf}" styleClass="tx_bold">
+							<f:converter converterId="converter.CNPJConverter" />
+						</p:outputLabel>
+					</div>
+					
+					<div class="ui-g-12 ui-md-6 ui-lg-6">
+						<p:outputLabel value="Insc. Estadual:" rendered="#{pedVendaInterfilialBean.cliente.tipoPessoa == 'J'}"/>
+						<p:outputLabel value="#{pedVendaInterfilialBean.cliente.inscEst}" rendered="#{pedVendaInterfilialBean.cliente.tipoPessoa == 'J'}" styleClass="tx_bold"/>
+					</div>
+					
+					<div class="ui-g-12 ui-md-6 ui-lg-6">
+						<p:outputLabel value="Insc. Municipal:" rendered="#{pedVendaInterfilialBean.cliente.tipoPessoa == 'J'}"/>
+						<p:outputLabel value="#{pedVendaInterfilialBean.cliente.inscMun}" rendered="#{pedVendaInterfilialBean.cliente.tipoPessoa == 'J'}" styleClass="tx_bold"/>
+					</div>
+					
+					<div class="ui-g-12 ui-md-6 ui-lg-6">
+						<p:outputLabel value="CPF: " rendered="#{pedVendaInterfilialBean.cliente.tipoPessoa == 'F'}"/>
+						<p:outputLabel rendered="#{pedVendaInterfilialBean.cliente.tipoPessoa == 'F'}" value="#{pedVendaInterfilialBean.cliente.cnpjCpf}" styleClass="tx_bold">
+							<f:converter converterId="converter.CPFConverter" />
+						</p:outputLabel>
+					</div>
+					
+					<div class="ui-g-12 ui-md-6 ui-lg-6">
+						<p:outputLabel value="RG: " rendered="#{pedVendaInterfilialBean.cliente.tipoPessoa == 'F'}" />
+						<p:outputLabel value="#{pedVendaInterfilialBean.cliente.numRg}" size="15" maxlength="15" rendered="#{pedVendaInterfilialBean.cliente.tipoPessoa == 'F'}" styleClass="tx_bold"/>
+					</div>
+					
+				</div>	
+			
+			<p:fieldset legend="Endereço" styleClass="painelFieldset">
+					
+				<p:outputLabel value="#{pedVendaInterfilialBean.cliente.logradouro}, #{pedVendaInterfilialBean.cliente.complemento}, #{pedVendaInterfilialBean.cliente.bairro}, #{pedVendaInterfilialBean.cliente.municipioId}, #{pedVendaInterfilialBean.cliente.estadoId}, " styleClass="tx_bold"/>
+				
+				<p:outputLabel value="#{pedVendaInterfilialBean.cliente.cep}" styleClass="tx_bold">
+					<f:converter converterId="cepConverter" />
+				</p:outputLabel>
+				
+				<br />
+				
+				<p:outputLabel value="Ponto de Referência: " />
+				<p:outputLabel value="#{pedVendaInterfilialBean.cliente.pontoReferencia}" styleClass="tx_bold"/>
+				
+			</p:fieldset>
+		
+			<p:fieldset legend="Telefone" styleClass="painelFieldset">
+				<div class="ui-g">
+					<div class="ui-g-12 ui-md-4 ui-lg-0">
+						<p:outputLabel value="#{pedVendaInterfilialBean.cliente.codArea}" style="margin-right: 5px;" />
+						<p:outputLabel value="#{pedVendaInterfilialBean.cliente.numero}" style="margin-right: 10px;" >
+							<f:converter converterId="converter.NumberPhoneConverter" styleClass="tx_bold"/>
+						</p:outputLabel>
+						<p:outputLabel value="Ramal: #{pedVendaInterfilialBean.cliente.ramal}" styleClass="tx_bold" rendered="#{not empty pedVendaInterfilialBean.cliente.ramal}"/>
+					</div>
+				</div>
+			</p:fieldset>
+			
+		<p:commandButton id="btnVerCliVoltar" 
+				value="Voltar" 
+				actionListener="#{pedVendaInterfilialBean.openFilterCli}" 
+				update="@form :formStepsPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean :formFilterCliPedVenda"
+				process="@this"
+				icon="ui-icon-arrow-1-w"  
+				rendered="#{pedVendaInterfilialBean.stepIndex==0 and empty pedVendaInterfilialBean.listaPedVendaItem}"
+				/> 
+				
+		<p:commandButton id="btnVerCliAvancar" 
+				value="Próximo" 
+				actionListener="#{pedVendaInterfilialBean.openItens}" 
+				update="@form :formStepsPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean :formFilterCliPedVenda"
+				process="@this"
+				icon="ui-icon-arrow-1-e"  
+				/> 
+		</p:fieldset>
+			
+	    </p:panel>
+     	
+     </h:form>
+     
+    <!--  <p:dialog id="dialogFilterCliPedVenda" widgetVar="dialogFilterCliPedVenda" header="Buscar Cliente" onShow="updateFormCalcPiso()" responsive="true" modal="true" resizable="false" draggable="false" closeOnEscape="true" position="0" positionType="absolute">-->
+    	<h:form id="formFilterCliPedVenda">
+			<ui:fragment rendered="#{pedVendaInterfilialBean.stepIndex==0 and pedVendaInterfilialBean.renderedBuscaCli}">
+			<p:growl id="msgPainelProdCatEstoqueEAAssoc" life="3000" showDetail="true" showSummary="false" escape="true"  />
+					     <p:toolbar id="tb" >
+					        <f:facet name="left" >
+					            <p:commandButton value="Filtrar" 
+												 icon="icon-filter" 
+												 update="@none" 
+   				 	            				 onclick="openFilter('formFilterCliPedVenda\\:panelFilterCliPedVenda','formFilterCliPedVenda\\:descricaoFilterCli')"
+   				 	            				 rendered="#{pedVendaInterfilialBean.stepIndex==0}"
+												 />
+					        </f:facet>
+					    </p:toolbar>
+					    
+					    <p:sticky target="tb" margin="50" rendered=""/>
+						<p:fieldset styleClass="painelFieldset" rendered="#{pedVendaInterfilialBean.stepIndex==0}">
+				    		<p:panel id="panelFilterCliPedVenda" widgetVar="panelFilterCliPedVenda" rendered="#{pedVendaInterfilialBean.stepIndex==0}"  >
+						    	<f:facet name="actions">
+									<p:commandLink styleClass="ui-panel-titlebar-icon ui-corner-all ui-state-default" title="Fechar" update="@none" process="@none" onclick="openFilter('formFilterCliPedVenda\\:panelFilterCliPedVenda','formFilterCliPedVenda\\:descricaoFilterCli')">
+										<h:outputText styleClass="ui-icon ui-icon-closethick" />
+									</p:commandLink>
+								</f:facet>
+				
+						    	<div class="ui-g">
+									<div class="ui-g-12 ui-md-2 ui-lg-0">
+										<p:inputText id="descricaoFilterCli" value="#{pedVendaInterfilialBean.descricaoFilterCli}" placeholder="Nome fantasia / Razão Social" style="width:100%;" />
+									</div>
+									<div class="ui-g-0 ui-md-0 ui-lg-0">
+										<p:commandButton 
+											 id="btnBuscarCli" 
+											 value="Buscar"
+											 actionListener="#{pedVendaInterfilialBean.buscarCli}"
+											 update="@form"
+											 icon="icon-search"
+											 onclick="PF('bUIDTCliPedVenda').show()"
+											 />
+									</div>
+						    	</div>
+						    
+						    
+						    <p:blockUI block="dtCliPedVenda" widgetVar="bUIDTCliPedVenda">
+								LOADING<br />
+					        	<p:graphicImage library="images" name="progress_bar.gif"/>
+							</p:blockUI>
+							
+							<p:dataTable id="dtCliPedVenda" var="cliente" reflow="true"
+								value="#{pedVendaInterfilialBean.listaCli}" emptyMessage="Nenhum registro encontrado."
+								selection="#{pedVendaInterfilialBean.clienteBusca}"
+								selectionMode="single"
+								rowKey="#{cliente.id}"
+								rows="5" paginator="true"
+								paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
+								rowsPerPageTemplate="5,10,20,50,100"
+								rowExpandMode="single"
+								rowIndexVar="index"							
+								>
+								
+								<p:ajax event="rowSelect" update="@form :formVerCliPedVendaBean :formFilterCliPedVenda :formStepsPedVendaBean :formItensPedVendaBean :formFilterCliPedVenda:msgPainelProdCatEstoqueEAAssoc" listener="#{pedVendaInterfilialBean.verificarCpfCnpjBuscaCli}"  />
+					
+								<p:column sortBy="#{cliente.id}" styleClass="customCollumnId" priority="4">
+									<f:facet name="header">COD</f:facet>
+									<h:outputText value="#{cliente.id} " />
+					        	</p:column>
+					
+								<p:column sortBy="#{cliente.cnpjCpf}"
+									styleClass="customCollumnCpfCnpj" priority="1">
+									<f:facet name="header">CPF/CNPJ</f:facet>
+									<h:outputText value="#{cliente.cnpjCpf}"
+										rendered="#{cliente.tipoPessoa == 'J' or cliente.tipoPessoa == 'O'}"
+										converter="converter.CNPJConverter" />
+									<h:outputText value="#{cliente.cnpjCpf}"
+										rendered="#{cliente.tipoPessoa == 'F'}"
+										converter="converter.CPFConverter" />
+								</p:column>
+					
+								<p:column sortBy="#{cliente.razaoSocial}" priority="5">
+									<f:facet name="header">Razão Social</f:facet>
+									<h:outputText value="#{cliente.razaoSocial}" />
+					        	</p:column>
+					
+								<p:column sortBy="#{cliente.nomeFantasia}" priority="1">
+									<f:facet name="header">Nome Fantasia</f:facet>
+									<h:outputText value="#{cliente.nomeFantasia}" />
+					        	</p:column>
+					
+								<p:column sortBy="#{cliente.bairro}" priority="5" styleClass="customCollumnBairro">
+									<f:facet name="header">Bairro</f:facet>
+									<h:outputText value="#{cliente.bairro}" />
+					       		</p:column>
+					
+								<p:column sortBy="#{cliente.cidade}" priority="4">
+									<f:facet name="header">Cidade</f:facet>
+									<h:outputText value="#{cliente.cidade}" />
+					        	</p:column>
+					        
+					        	<p:column sortBy="#{cliente.estado.id}" styleClass="customCollumnEstado" priority="4" >
+									<f:facet name="header">UF</f:facet>
+									<h:outputText value="#{cliente.estadoId}" />
+					        	</p:column>
+					
+								<p:column sortBy="#{cliente.ativo}" styleClass="customCollumnId" priority="4">
+									<f:facet name="header">Ativo</f:facet>
+									<h:outputText value="#{cliente.ativo == 1 ? 'Ativo' : 'Inativo' }" />
+						        </p:column>
+					
+							</p:dataTable>
+							</p:panel>
+							</p:fieldset>	
+			</ui:fragment>							    		
+    	</h:form>
+    <!-- </p:dialog>  -->
+     
+     
+     <!-- Itens -->
+     <h:form id="formItensPedVendaBean">
+     	<p:blockUI block="panelItensPedVendaBean" id="bUIItensPedVendaBean" widgetVar="bUIItensPedVendaBean" trigger="dtItensPedVendaBean btnSalvarItem">
+			LOADING<br />
+        	<p:graphicImage library="images" name="progress_bar.gif"/>
+		</p:blockUI>
+		
+		<p:focus context="panelResultFilterPedVendaBean"/>
+		<!-- <p:remoteCommand name="loadFormItensPedVendaBean" update="@form" oncomplete="closePanelResultFilterPedVendaBean()" /> -->
+     
+     	<p:panel id="panelItensPedVendaBean" rendered="#{pedVendaInterfilialBean.stepIndex==1}">
+     		
+     		
+     		<p:fieldset id="fieldFilterPedVendaInfo" legend="Informações Pedido" styleClass="painelFieldset" >
+     			<div class="ui-g">
+					<ui:fragment >
+						<div class="ui-g-0 ui-md-0 ui-lg-0">
+							<div class="ui-fluid">
+							<h:panelGroup>
+								<p:outputLabel value="Forma Pagto:" /> <br />
+								<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.formaPagto.descricao}" styleClass="tx_bold" rendered="#{(pedVendaInterfilialBean.selecionada.podeEditar == false and empty pedVendaInterfilialBean.listaPedVendaCartao)}"/>
+								
+								<ui:fragment rendered="#{pedVendaInterfilialBean.selecionada.podeEditar}">
+								<div class="ui-g"> 
+									<div class="ui-g-0 ui-md-0 ui-lg-0">
+										<div class="ui-fluid">
+											<p:selectOneMenu id="formaPagto" value="#{pedVendaInterfilialBean.selecionada.formaPagto}" 
+											    autoWidth="true" 
+											    disabled="#{pedVendaInterfilialBean.cliente.tipoPessoa == 'O'}">
+												<f:selectItems value="#{pedVendaInterfilialBean.formaPagtoSelectItem}" /> 
+												<p:ajax event="change" process="@this" update="@form :formStepsPedVendaBean" listener="#{pedVendaInterfilialBean.verificarFormaPagto}"  />
+											</p:selectOneMenu>
+										</div>
+									</div>
+								</div>
+								</ui:fragment>
+								
+								<p:repeat var="cartoes" value="#{pedVendaInterfilialBean.listaPedVendaCartao}"  >
+									<h:outputText value="#{cartoes.nomeAdministradora}" styleClass="tx_bold" />
+									<h:outputText value=" - R$ " />
+									<h:outputText value="#{cartoes.valor}" converter="currencyFormat" />
+									<h:outputText value="  em #{cartoes.qtdParcela}x" rendered="#{not empty cartoes.qtdParcela}" /> 
+									<br />
+								</p:repeat>
+							</h:panelGroup>
+							</div>
+						</div>
+					</ui:fragment>		     		
+
+
+		     		<ui:fragment >
+		     			<div class="ui-g-0 ui-md-0 ui-lg-0">
+		        			<div class="ui-fluid">
+					        	<p:outputLabel value="Condição de Pgto:" /> <br />
+					        	<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.condPagto.descricao}" styleClass="tx_bold" rendered="#{pedVendaInterfilialBean.selecionada.podeEditar == false}" />
+					        	<p:selectOneMenu id="condPagto" value="#{pedVendaInterfilialBean.selecionada.condPagto}" autoWidth="true" rendered="#{pedVendaInterfilialBean.selecionada.podeEditar}">
+									<f:selectItems var="item" value="#{pedVendaInterfilialBean.condPagtoSelectItem}" />
+									<p:ajax event="change" update="@form :formStepsPedVendaBean" listener="#{pedVendaInterfilialBean.verificarCondPagto}"  /> 
+								</p:selectOneMenu>
+							</div>
+						</div>
+					</ui:fragment>
+		     		<ui:fragment >
+					<div class="ui-g-0 ui-md-0 ui-lg-0">
+						<h:panelGroup>	
+							<p:outputLabel value="Frete:" /> <br />
+							<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.freteTipo.descricao}" styleClass="tx_bold" rendered="#{pedVendaInterfilialBean.selecionada.podeEditar == false}" />
+							<ui:fragment rendered="#{pedVendaInterfilialBean.selecionada.podeEditar}">
+								<div class="ui-fluid">
+									<p:selectOneMenu id="freteTipo" value="#{pedVendaInterfilialBean.selecionada.freteTipo}" autoWidth="true" disabled="#{pedVendaInterfilialBean.cliente.tipoPessoa=='O'}">
+										<f:selectItems value="#{pedVendaInterfilialBean.freteTipoSelectItem}" />
+										<f:selectItem itemValue="#{null}" itemLabel="Ambos"  />
+										<p:ajax event="change" process="@this" update="@form :formStepsPedVendaBean" listener="#{pedVendaInterfilialBean.verificarFreteTipo}" />
+									</p:selectOneMenu>
+								</div>
+							</ui:fragment>
+						</h:panelGroup>
+					</div>
+					</ui:fragment>
+		     		<ui:fragment >
+					<div class="ui-g-0 ui-md-0 ui-lg-0">
+						<h:panelGroup>
+							<p:outputLabel value="Tipo Mov Fiscal:" /> <br />
+							<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.movFiscTipo.descricao}" styleClass="tx_bold" rendered="#{pedVendaInterfilialBean.selecionada.podeEditar == false}"/>
+							
+							<!--  and pedVendaInterfilialBean.renderedSelectMovFiscTipo -->
+							<ui:fragment rendered="#{pedVendaInterfilialBean.selecionada.podeEditar}">
+							<div class="ui-g">
+								<div class="ui-g-0 ui-md-0 ui-lg-0">
+									<div class="ui-fluid">
+										<p:selectOneMenu id="movFiscTipo" value="#{pedVendaInterfilialBean.selecionada.movFiscTipo}" 
+										                 autoWidth="true"
+										                 disabled="#{pedVendaInterfilialBean.cliente.tipoPessoa == 'O'}">
+											<f:selectItems value="#{pedVendaInterfilialBean.tipoMovFiscSelectItem}" /> 
+											<p:ajax event="change" process="@this" update="@form :formStepsPedVendaBean" listener="#{pedVendaInterfilialBean.verificarMovFiscTipo}" />
+										</p:selectOneMenu>
+									</div>
+								</div>
+							</div>
+							</ui:fragment>
+						</h:panelGroup>						
+						<!-- 
+						<h:panelGroup>
+							<p:outputLabel value="Mov. Fiscal:" /> <br />
+							<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.movFiscTipo.descricao}" styleClass="tx_bold"/>
+		        		</h:panelGroup>
+						 -->
+					</div>
+					</ui:fragment>     				
+     				</div>	
+     		</p:fieldset>
+     		
+     		<p:fieldset id="fieldFilterPedVendaBean" legend="Consultar Produtos" styleClass="painelFieldset" rendered="#{pedVendaInterfilialBean.selecionada.podeEditar}">
+	     		<div class="ui-g">
+	     			<div class="ui-g-6 ui-md-3 ui-lg-0">
+		     			<p:outputLabel value="Codigo ou Descrição:" rendered="#{pedVendaInterfilialBean.filterPorCodBarra==false}" />
+		     			<p:outputLabel value="Codigo de Barras:" rendered="#{pedVendaInterfilialBean.filterPorCodBarra}" />
+		     			 <br />
+		     			<p:inputText id="descProdFilter" value="#{pedVendaInterfilialBean.descProdFilter}" rendered="#{pedVendaInterfilialBean.filterPorCodBarra==false}" autocomplete="off" style="width:100%;" />
+		     			<p:inputText id="codBarraFilter" value="#{pedVendaInterfilialBean.codBarraFilter}" rendered="#{pedVendaInterfilialBean.filterPorCodBarra}" autocomplete="off" style="width:100%;" required="true" requiredMessage="Informe o Código de Barras" />
+		     		</div>	
+		     		<ui:fragment rendered="#{pedVendaInterfilialBean.filterPorCodBarra==false and pedVendaInterfilialBean.selecionada.isProdComposto==false}">
+						<div class="ui-g-6 ui-md-3 ui-lg-0">
+							<p:outputLabel value="Linha de Produto:" /> <br />
+							<p:inputText id="linhaFilter"
+								value="#{pedVendaInterfilialBean.linhaProdFilter}"
+								style="width:100%;" />
+						</div>
+					</ui:fragment>		
+		     		<ui:fragment rendered="#{pedVendaInterfilialBean.selecionada.isProdComposto}">
+						<div class="ui-g-12 ui-md-3 ui-lg-0">
+							<p:outputLabel value="Fabricante:" /> <br />
+							<p:inputText id="fabricanteFilter" value="#{pedVendaInterfilialBean.fabricanteFilter}" autocomplete="off" style="width:100%;" />
+			     		</div>
+		     		</ui:fragment>
+		     		<ui:fragment> 
+		     			<!-- #{pedVendaInterfilialBean.selecionada.isPedido} -->
+			     		<!-- nao incluir no filtro
+			     		<div class="ui-g-0 ui-md-0 ui-lg-0">
+			     			<p:selectBooleanCheckbox id="comEstoqueFilter" value="#{pedVendaInterfilialBean.comEstoqueFilter}" />
+			     			<p:outputLabel for="comEstoqueFilter" value=" Com estoque " />
+			     		</div> 
+			     		-->
+			     		<div class="ui-g-0 ui-md-0 ui-lg-0">
+			     			<p:outputLabel value=" " /> <br />
+			     			<p:selectBooleanCheckbox id="semEstoqueFilter" value="#{pedVendaInterfilialBean.semEstoqueFilter}" />
+			     			<p:outputLabel for="semEstoqueFilter" value=" Sem estoque " />
+			     		</div>
+		     		</ui:fragment>
+		     		<div class="ui-g-0 ui-md-0 ui-lg-0">	
+		     			<p:outputLabel value=" " /> <br />
+		     			<p:commandButton id="btnBuscarProd" 
+										update="@form"
+										actionListener="#{pedVendaInterfilialBean.buscarProduto}" 
+										icon="icon-search" 
+										value="Buscar"
+										>
+							<p:resetInput target="codBarraFilter descProdFilter" />
+							<p:focus context="fieldFilterPedVendaBean" />
+							<!-- <p:focus context="panelItensPedVendaBean" />-->
+						</p:commandButton>
+						<!--  -->
+					</div>
+					<ui:fragment rendered="#{pedVendaInterfilialBean.selecionada.isPedido or pedVendaInterfilialBean.selecionada.isEncomenda}">
+						<div class="ui-g-0 ui-md-0 ui-lg-0">
+			     			<p:outputLabel value=" " /> <br />
+			     			<p:selectBooleanButton id="filterPorCodBarra" value="#{pedVendaInterfilialBean.filterPorCodBarra}" offLabel="Off" onLabel="On" onIcon="icon-codebar" offIcon="icon-codebar-off">
+			     				<p:ajax update="@form" />
+			     			</p:selectBooleanButton>
+			     		</div>
+		     		</ui:fragment>
+		     		
+					
+		     		
+	     		</div>
+	     		<!-- oncomplete="PF('bUIItensPedVendaBean').hide(); PF('panelResultFilterPedVendaBean').show();" -->
+	     		
+	     		<p:fieldset id="fildSalvarItens" legend="#{pedVendaInterfilialBean.produtoSelecionada.codInterno} - #{pedVendaInterfilialBean.produtoSelecionada.descricao}" styleClass="painelFieldset" style="margin-top:10px;" rendered="#{not empty pedVendaInterfilialBean.produtoSelecionada}">
+	     		
+	     			<!-- <div id="imgProduto" style="border: 1px solid #000; width: 150px; height: 150px;">
+	     				<p:graphicImage library="images" name="piso.jpg" width="100%" />
+	     			</div> -->
+		        
+		        	<p:focus context="fildSalvarItens"/>
+		        	<p:messages id="msgAddEntPedItem" showDetail="true" showSummary="false" />
+		        	
+		        	<h:panelGroup>
+						<h:outputText value="Quantidade por Embalagem: " styleClass="tx_bold" />
+						<h:outputText value="#{pedVendaInterfilialBean.produtoSelecionada.qtdVendaAtacToString}" styleClass="tx_bold_16" />
+						<h:outputText value=" #{pedVendaInterfilialBean.produtoSelecionada.unidadeDesc}" styleClass="tx_bold" />
+						<h:outputText value=" (Produto em Promoção" rendered="#{pedVendaInterfilialBean.produtoSelecionada.inPromocao}" styleClass="tx_azul_bold" />
+						<h:outputText value=" a partir de " rendered="#{pedVendaInterfilialBean.produtoSelecionada.inPromocao == true and (pedVendaInterfilialBean.produtoSelecionada.qtdPromoMin gt 0 or pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax gt 0)}" styleClass="tx_azul_bold" />
+						<h:outputText value="#{pedVendaInterfilialBean.produtoSelecionada.qtdPromoMin == 0? 1 : pedVendaInterfilialBean.produtoSelecionada.qtdPromoMin}" rendered="#{pedVendaInterfilialBean.produtoSelecionada.inPromocao == true and (pedVendaInterfilialBean.produtoSelecionada.qtdPromoMin gt 0 or pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax gt 0)}" styleClass="tx_azul_bold">
+								<f:convertNumber minFractionDigits="0" maxFractionDigits="#{pedVendaInterfilialBean.produtoSelecionada.qtdDecimal}" locale="pt_BR"/>
+						</h:outputText>
+						<h:outputText value=" até " rendered="#{pedVendaInterfilialBean.produtoSelecionada.inPromocao == true and (pedVendaInterfilialBean.produtoSelecionada.qtdPromoMin gt 0 and pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax gt 0)}" styleClass="tx_azul_bold" />
+						<h:outputText value="#{pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax}" styleClass="tx_azul_bold" rendered="#{pedVendaInterfilialBean.produtoSelecionada.inPromocao == true and (pedVendaInterfilialBean.produtoSelecionada.qtdPromoMin gt 0 or pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax gt 0)}">
+								<f:convertNumber minFractionDigits="0" maxFractionDigits="#{pedVendaInterfilialBean.produtoSelecionada.qtdDecimal}" locale="pt_BR"/>
+						</h:outputText>
+						<h:outputText value="#{pedVendaInterfilialBean.produtoSelecionada.unidadeDesc}" rendered="#{pedVendaInterfilialBean.produtoSelecionada.inPromocao == true and (pedVendaInterfilialBean.produtoSelecionada.qtdPromoMin gt 0 or pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax gt 0)}" styleClass="tx_azul_bold" />
+						<h:outputText value=")" rendered="#{pedVendaInterfilialBean.produtoSelecionada.inPromocao}" styleClass="tx_azul_bold" />
+					</h:panelGroup>
+					
+					<br />
+					
+		        	<ui:fragment rendered="#{not empty pedVendaInterfilialBean.produtoSelecionada.estoques}">
+		        		
+			     		<p:dataTable id="dtEstoquePedVendaBean" var="est" value="#{pedVendaInterfilialBean.produtoSelecionada.estoques}" emptyMessage="Nenhum registro encontrado." >
+			     			
+							<p:column priority="1" style="width: 180px;text-align: center;">
+								<f:facet name="header">Qtd.</f:facet>
+								<p:commandButton id="btnSomar" 
+									action="#{pedVendaInterfilialBean.somarQtdPedVendaItem(est,pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax)}"
+									update="@form:precoItem @form:descontoItem @form:subTotalItem @form:subTotalPesoBrutoKg @form:subTotalQtd @form:dtEstoquePedVendaBean :formFiltroPedVenda:msg" 
+									icon="ui-icon-plus"
+									title="+"
+									/>
+								
+								<p:inputNumber id="quantidade" value="#{est.qtdReservar}" rendered="#{pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax gt 0}" inputStyle="width:40%;" inputStyleClass="tx_center" minValue="0" maxValue="#{est.qtdDisponivel}" decimalSeparator="," thousandSeparator="." emptyValue="zero" decimalPlaces="#{pedVendaInterfilialBean.produtoSelecionada.qtdDecimal}"  autocomplete="off" onfocus="this.select()" onkeypress="if(event.keyCode == 13){ $('#formItensPedVendaBean\\:btnSalvarItem').focus(); return false; }" >
+									<p:ajax event="blur" process="@this" update="@this @form:precoItem @form:descontoItem @form:dtEstoquePedVendaBean:volume @form:subTotalItem @form:subTotalPesoBrutoKg @form:subTotalQtd :formFiltroPedVenda:msg comComposicoes" listener="#{pedVendaInterfilialBean.addQtdPedVendaItem(est)}" />
+								</p:inputNumber> 
+								<p:inputNumber id="quantidade2" value="#{est.qtdReservar}" rendered="#{pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax == null or pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax == 0}" inputStyle="width:40%;" inputStyleClass="tx_center" minValue="0" maxValue="#{est.qtdDisponivel}" decimalSeparator="," thousandSeparator="." emptyValue="zero" decimalPlaces="#{pedVendaInterfilialBean.produtoSelecionada.qtdDecimal}"  autocomplete="off" onfocus="this.select()" onkeypress="if(event.keyCode == 13){ $('#formItensPedVendaBean\\:btnSalvarItem').focus(); return false; }" >
+									<p:ajax event="blur" process="@this" update="@this @form:precoItem @form:descontoItem @form:dtEstoquePedVendaBean:volume @form:subTotalItem @form:subTotalPesoBrutoKg @form:subTotalQtd :formFiltroPedVenda:msg comComposicoes" listener="#{pedVendaInterfilialBean.addQtdPedVendaItem(est)}" />
+								</p:inputNumber> 
+								
+								<p:commandButton id="btnSubtrair" 
+									action="#{pedVendaInterfilialBean.subtrairQtdPedVendaItem(est)}"
+									update="@form:precoItem @form:descontoItem @form:subTotalItem @form:subTotalPesoBrutoKg @form:subTotalQtd @form:dtEstoquePedVendaBean :formFiltroPedVenda:msg" 
+									icon="ui-icon-minus"
+									title="-"
+									/>
+									
+				        	</p:column>
+				        	
+				        	<p:column styleClass="customCollumnId" priority="4">
+				        		<f:facet name="header">Unid.</f:facet>
+				        		<h:outputText value="#{pedVendaInterfilialBean.produtoSelecionada.unidadeDesc}" />
+				        	</p:column>
+				        	
+				        	<p:column styleClass="customCollumnQtd" priority="1">
+								<f:facet name="header">Vol.</f:facet>
+								<h:outputText id="volume" value="#{est.volume}" />
+				        	</p:column>
+				        	
+				        	<p:column styleClass="customCollumnQtdEstoque" priority="1" rendered="#{pedVendaInterfilialBean.selecionada.isPedido or pedVendaInterfilialBean.selecionada.isProdComposto}">
+								<f:facet name="header">Estoque</f:facet>
+								<h:outputText value="#{est.qtdDisponivelToString}" />
+				        	</p:column>
+				        	
+				        	<p:column priority="2" rendered="#{pedVendaInterfilialBean.selecionada.isPedido or pedVendaInterfilialBean.selecionada.isEncomenda}">
+								<f:facet name="header">Deposito</f:facet>
+								<h:outputText value="#{est.depositoDesc}" /> / <h:outputText value="#{est.localidadeDesc}" />
+				        	</p:column>
+				        	
+				        	<p:column rendered="false" priority="1">
+								<f:facet name="header">Localidade</f:facet>
+								<h:outputText value="#{est.localidadeDesc}" />
+				        	</p:column>
+				        	
+				        	<p:column priority="3" rendered="#{pedVendaInterfilialBean.selecionada.isProdComposto}">
+								<f:facet name="header">Composição</f:facet>
+								<p:dataTable id="comComposicoes" var="comp" 
+											 value="#{pedVendaInterfilialBean.produtoSelecionada.composicoes}" 
+											 emptyMessage="Nenhuma composição encontrada.">
+						        	<p:column>
+										<f:facet name="header">Produto</f:facet>
+										<h:outputText value="#{comp.produtoCod}" /> <br /> <h:outputText value="#{comp.produtoDesc}" />
+						        	</p:column>
+						        	<p:column styleClass="customCollumnQtdEstoque">
+										<f:facet name="header">Qtd.</f:facet>
+										<p:outputLabel value="#{comp.subTotalToString(est.qtdReservar)}" />
+						        	</p:column>
+								</p:dataTable>
+				        	</p:column>
+				        	
+				        	<p:column priority="1" rendered="#{pedVendaInterfilialBean.selecionada.isPedido or pedVendaInterfilialBean.selecionada.isEncomenda}">
+								<f:facet name="header">Lote</f:facet>
+								<h:outputText value="#{est.codLote}" /> <br />
+								<h:outputText value="#{est.dtVencLote}">
+			     					<f:convertDateTime pattern="dd/MM/yyyy" />
+			     				</h:outputText> 
+				        	</p:column>
+				        	
+				        </p:dataTable>
+				        
+				        <div class="ui-g">
+			     			
+			     			<div class="ui-g-3 ui-md-2 ui-lg-0">
+								<h:panelGroup id="subTotalQtd">
+									Total: <br />
+									<h:outputText value="#{pedVendaInterfilialBean.pedVendaItem.quantidade}" styleClass="tx_bold_16">
+										<f:convertNumber minFractionDigits="#{pedVendaInterfilialBean.produtoSelecionada.qtdDecimal}" maxFractionDigits="#{pedVendaInterfilialBean.produtoSelecionada.qtdDecimal}" locale="pt_BR" />
+									</h:outputText>
+									<h:outputText value=" #{pedVendaInterfilialBean.produtoSelecionada.unidadeDesc}" styleClass="tx_bold" />
+								</h:panelGroup>
+							</div>
+							<div class="ui-g-3 ui-md-2 ui-lg-0">	 
+								<h:panelGroup id="precoItem">
+									<p:outputLabel for="preco" value="Preço: " /> <br />
+									<p:inputNumber id="preco" value="#{pedVendaInterfilialBean.pedVendaItem.preco}" valueChangeListener="#{pedVendaInterfilialBean.precoChangedProduto}" rendered="#{pedVendaInterfilialBean.produtoSelecionada.inPromocao==false and pedVendaInterfilialBean.descPedido==false}" size="12" decimalSeparator="," thousandSeparator="." emptyValue="zero" decimalPlaces="2"  autocomplete="off" onfocus="this.select()" onkeypress="if(event.keyCode == 13){ $('#formItensPedVendaBean\\:btnSalvarItem').focus(); return false; }" inputStyle="width:100%;" inputStyleClass="tx_right_16">
+										<p:ajax update="@form:descontoItem @form:subTotalItem" />
+									</p:inputNumber>
+									<h:outputText value="#{pedVendaInterfilialBean.pedVendaItem.preco}" rendered="#{((pedVendaInterfilialBean.produtoSelecionada.inPromocao==true and pedVendaInterfilialBean.produtoSelecionada.qtdPromoMin == 0 and pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax == 0) or pedVendaInterfilialBean.descPedido==true)}" converter="currencyFormat" styleClass="#{pedVendaInterfilialBean.produtoSelecionada.inPromocao ? 'tx_azul_bold_16' : 'tx_bold_16'}" />
+									<h:outputText value="#{pedVendaInterfilialBean.pedVendaItem.preco}" rendered="#{((pedVendaInterfilialBean.produtoSelecionada.inPromocao==true and pedVendaInterfilialBean.pedVendaItem.quantidade ge pedVendaInterfilialBean.produtoSelecionada.qtdPromoMin and pedVendaInterfilialBean.pedVendaItem.quantidade le pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax and pedVendaInterfilialBean.produtoSelecionada.qtdPromoMin ge 0 and pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax gt 0))}" converter="currencyFormat" styleClass="#{pedVendaInterfilialBean.produtoSelecionada.inPromocao ? 'tx_azul_bold_16' : 'tx_bold_16'}" />
+									<h:outputText value="#{pedVendaInterfilialBean.pedVendaItem.precoTabela}" rendered="#{((pedVendaInterfilialBean.produtoSelecionada.inPromocao==true and (pedVendaInterfilialBean.pedVendaItem.quantidade lt pedVendaInterfilialBean.produtoSelecionada.qtdPromoMin or pedVendaInterfilialBean.pedVendaItem.quantidade gt pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax and pedVendaInterfilialBean.produtoSelecionada.qtdPromoMin ge 0 and pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax gt 0)))}" converter="currencyFormat" styleClass="tx_bold_16" />
+								</h:panelGroup>
+							</div>	
+							<ui:fragment rendered="#{pedVendaInterfilialBean.descPedido==false}">
+								<div class="ui-g-3 ui-md-2 ui-lg-0">
+									<h:panelGroup id="descontoItem">
+										<p:outputLabel for="descItem" value="Desconto(%): " /><br />
+										<p:inputNumber id="descItem" value="#{pedVendaInterfilialBean.descItem}" valueChangeListener="#{pedVendaInterfilialBean.descontoChangedProduto}" disabled="#{((pedVendaInterfilialBean.produtoSelecionada.inPromocao==true and (pedVendaInterfilialBean.pedVendaItem.quantidade ge pedVendaInterfilialBean.produtoSelecionada.qtdPromoMin)))}" size="10" decimalSeparator="," thousandSeparator="." emptyValue="zero" decimalPlaces="2"  autocomplete="off" onfocus="this.select()" onkeypress="if(event.keyCode == 13){ $('#formItensPedVendaBean\\:btnSalvarItem').focus(); return false; }" inputStyle="width:100%;" inputStyleClass="tx_right_16">
+											<p:ajax update="@form:precoItem @form:subTotalItem :formFiltroPedVenda:msg" />
+										</p:inputNumber>
+									</h:panelGroup>
+								</div>
+							</ui:fragment>
+							<div class="ui-g-3 ui-md-2 ui-lg-0">	
+								<h:panelGroup id="subTotalItem">
+									Valor: <br />
+									<h:outputText value="#{pedVendaInterfilialBean.pedVendaItem.subTotal}" converter="currencyFormat" styleClass="tx_bold_16" />
+								</h:panelGroup>
+							</div>	
+							<div class="ui-g-4 ui-md-2 ui-lg-0">
+								<h:panelGroup id="subTotalPesoBrutoKg">
+									Peso Bruto: <br />
+									<h:outputText value="#{pedVendaInterfilialBean.pedVendaItem.pesoBrutoKg}" styleClass="tx_bold_16">
+										<f:convertNumber minFractionDigits="0" maxFractionDigits="3" locale="pt_BR"/>
+									</h:outputText>
+									<h:outputText value=" Kg" styleClass="tx_bold" />
+								</h:panelGroup>
+							</div>
+							<div class="ui-g-4 ui-md-2 ui-lg-0">	
+								<h:panelGroup>
+									Pr.Tabela: <br />
+									<h:outputText value="#{pedVendaInterfilialBean.pedVendaItem.precoTabela}" converter="currencyFormat" styleClass="tx_bold_16" />
+								</h:panelGroup>
+							</div>
+							
+			     		</div>
+			     		 
+			     		<br />
+			     		
+			     		<div class="ui-g">
+			     			<div class="ui-g-0 ui-md-0 ui-lg-0">
+					     		<p:commandButton id="btnSalvarItem" 
+										value="Salvar" 
+										actionListener="#{pedVendaInterfilialBean.salvarItemProduto}" 
+										update=":formStepsPedVendaBean @form"
+										process="@form:fildSalvarItens"
+										icon="ui-icon-disk" />
+										
+								<p:commandButton id="btnCancelarItem" 
+										value="Cancelar" 
+										actionListener="#{pedVendaInterfilialBean.cancelarItemProduto}" 
+										update="@form"
+										process="@this"
+										icon="ui-icon-cancel" />
+										
+								<p:commandButton id="btnCalcularPiso" 
+												 update="@none"
+												 actionListener="#{pedVendaInterfilialBean.novoCalculoPiso}" 
+												 value="Calculadora" 
+												 icon="ui-icon-calculator"
+												 oncomplete="PF('ovlPanelCalcPiso').show()"
+												 rendered="#{pedVendaInterfilialBean.produtoSelecionada.unidadeDesc eq 'M2'}"
+												 />
+												 
+				     		</div>
+				     	</div>
+			     	
+			     	</ui:fragment>
+			     		
+		     	</p:fieldset>
+		     	
+	     		<p:panel id="panelResultFilterPedVendaBean" widgetVar="panelResultFilterPedVendaBean" header="(#{pedVendaInterfilialBean.listaProdutosLDM.rowCount}) Produtos" rendered="#{pedVendaInterfilialBean.openResultListaProdutos}">
+	     		
+	     			<!-- <p:ajax event="close" update="@none" listener="#{pedVendaInterfilialBean.focusFilterProduto}" /> -->
+	     			<f:facet name="actions">
+						<p:commandLink styleClass="ui-panel-titlebar-icon ui-corner-all ui-state-default" title="Fechar" update="@form:panelItensPedVendaBean" process="@this" actionListener="#{pedVendaInterfilialBean.closeResultListaProduto}" oncomplete="$('#formItensPedVendaBean\\:descProdFilter').focus();$('#formItensPedVendaBean\\:descProdFilter').select();">
+							<h:outputText styleClass="ui-icon ui-icon-closethick" />
+						</p:commandLink>
+					</f:facet>
+					
+		     		<p:dataTable id="dtItensPedVendaBean" widgetVar="UIdtItensPedVendaBean" 
+		     						var="prod" 
+		     						value="#{pedVendaInterfilialBean.listaProdutosLDM}" 
+		     						emptyMessage="Nenhum produto encontrado." 
+		     						reflow="true" 
+		     						paginator="true" 
+		     						rows="10"
+		     						first="0"
+                 					paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                 					rowsPerPageTemplate="10,20,30" 
+                 					lazy="true"
+                 					>
+		
+						<p:column sortBy="#{prod.codInterno}" styleClass="customCollumnId" priority="1">
+							<f:facet name="header">Código</f:facet>
+							<h:outputText value="#{prod.codInterno}" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : ''}"/>
+			        	</p:column>
+			        	
+			        	<p:column sortBy="#{prod.produtoLinhaDesc}" priority="2" styleClass="customCollumnProdutoLinha">
+							<f:facet name="header">Linha</f:facet>
+							<h:outputText value="#{prod.produtoLinhaDesc}" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : ''}" style="text-wrap:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>
+			        	</p:column>
+			        	
+			        	<p:column sortBy="#{prod.descricao}" priority="1">
+							<f:facet name="header">Descrição</f:facet>
+							<h:outputText id="descProd" value="#{prod.descricao}" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : 'tx_bold'}" style="text-wrap:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>
+							<p:tooltip id="toolDescProd" for="descProd" value="#{prod.descricao}" position="top"/>
+			        	</p:column>
+			        	
+			        	<p:column sortBy="#{prod.qtdDisponivel}" styleClass="customCollumnQtdEstoque" rendered="#{pedVendaInterfilialBean.selecionada.isPedido or pedVendaInterfilialBean.selecionada.isProdComposto}" priority="1">
+							<f:facet name="header">Estoque</f:facet>
+							<h:outputText value="#{prod.qtdDisponivelToString}" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : ''}" />
+							<h:outputText value=" #{prod.unidadeDesc}" styleClass="#{prod.inPromocao ? 'tx_azul' : ''}"/> 
+			        	</p:column>
+			        	
+			        	<p:column sortBy="#{prod.preco}" styleClass="customCollumnValor" priority="1">
+							<f:facet name="header">Preço</f:facet>
+							<h:outputText value="#{prod.inPromocao ? prod.precoPromo : prod.preco}" converter="currencyFormat" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : 'tx_bold'}"/>
+			        	</p:column>
+			        	
+			        	<p:column styleClass="customCollumn1Icon" priority="1">
+							<f:facet name="header"></f:facet>
+							
+							<p:commandButton id="btnAddProd" 
+									update="@form" 
+									process="@this"
+									action="#{pedVendaInterfilialBean.addProduto}"
+									icon="ui-icon-plus" 
+									title="Incluir"
+									disabled="#{prod.disponivel==false}"
+									rendered="#{(prod.inPedVenda==false and (prod.ncmOpFisc==1 or pedVendaInterfilialBean.selecionada.isProdComposto))}"
+									onclick="PF('bUIItensPedVendaBean').show()"
+									oncomplete="PF('bUIItensPedVendaBean').hide()"
+									>
+								<f:setPropertyActionListener target="#{pedVendaInterfilialBean.produtoSelecionada}" value="#{prod}" />	
+							</p:commandButton>
+							<!--  -->
+							<p:graphicImage library="images" name="check.png" rendered="#{prod.inPedVenda}"/>
+							
+							<ui:fragment rendered="#{prod.ncmOpFisc==0}">
+								<p:graphicImage id="warningOpFiscal" library="images" name="warning.png" />
+								<p:tooltip for="warningOpFiscal" position="left" value="Não existe Operação Fiscal para a NCM/Tipo de Operação: #{prod.ncmCodigo} / #{pedVendaInterfilialBean.selecionada.movFiscTipo.opFiscTipoDesc}" />
+								<div class="alert alert-dismissible alert-danger w3-hide-medium w3-hide-large tx_bold"> Não existe Operação Fiscal para a NCM/Tipo de Operação: #{prod.ncmCodigo} / #{pedVendaInterfilialBean.selecionada.movFiscTipo.opFiscTipoDesc}</div>
+							</ui:fragment>
+			        	</p:column>
+			        	
+			        </p:dataTable>
+		        </p:panel>
+		        
+		    
+		    </p:fieldset>
+		    
+		    <p:fieldset id="fildSetProdCompostosInclusos" legend="(#{pedVendaInterfilialBean.listaPedVendaComposto.size()}) Composições" rendered="#{not empty pedVendaInterfilialBean.listaPedVendaComposto}" styleClass="painelFieldset">
+		    	<p:dataTable id="dtProdCompostoPedVendaBean" var="prod" value="#{pedVendaInterfilialBean.listaPedVendaComposto}" reflow="true">
+					<p:column sortBy="#{prod.codInterno}" styleClass="customCollumnId">
+						<f:facet name="header">Código</f:facet>
+						<h:outputText value="#{prod.codProduto}" />
+		        	</p:column>
+		        	
+		        	<p:column sortBy="#{prod.descricao}">
+						<f:facet name="header">Descrição</f:facet>
+						<h:outputText id="descProdItemComp" value="#{prod.descricao}" style="text-wrap:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>
+						<p:tooltip id="toolDescProdItemComp" for="descProdItemComp" value="#{prod.descricao}" position="top"/>
+		        	</p:column>
+		        	
+		        	<p:column styleClass="customCollumnQtdEstoque">
+						<f:facet name="header">Qtd.</f:facet>
+						<h:outputText value="#{prod.quantidade}" >
+							<f:convertNumber minFractionDigits="0" maxFractionDigits="0" />
+						</h:outputText>
+						<!-- <h:outputText value=" UN" /> -->
+					</p:column>
+					
+					<p:column styleClass="customCollumn2Icon" rendered="#{pedVendaInterfilialBean.selecionada.podeEditar}">
+						<f:facet name="header"></f:facet>
+						<p:commandButton id="btnEditarProdComp" 
+								update="@form" 
+								process="@this"
+								action="#{pedVendaInterfilialBean.editarProdComposto(prod)}" 
+								icon="ui-icon-pencil" 
+								disabled="#{pedVendaInterfilialBean.selecionada.podeEditar==false}"
+								title="Editar" 
+								onclick="PF('bUIItensPedVendaBean').show()"
+								oncomplete="PF('bUIItensPedVendaBean').hide()"
+								/>
+						
+						<p:commandButton id="btnExcluirProdComp" 
+								update="@form :formStepsPedVendaBean" 
+								process="@this"
+								action="#{pedVendaInterfilialBean.excluirProdComposto(prod.id)}" 
+								icon="ui-icon-trash" 
+								disabled="#{pedVendaInterfilialBean.selecionada.podeEditar==false}"
+								title="Excluir">
+							<p:confirm header="Confirme" message="Deseja Excluir #{prod.codProduto} - #{prod.descricao}?" icon="ui-icon-alert" />
+						</p:commandButton>
+		        	</p:column>
+				</p:dataTable>
+			</p:fieldset>
+			
+		    <p:fieldset id="fildSetItensInclusos" legend="(#{pedVendaInterfilialBean.listaPedVendaItem.size()}) Itens Inclusos" rendered="#{not empty pedVendaInterfilialBean.listaPedVendaItem}" styleClass="painelFieldset">
+		    
+					
+		    	<p:dataTable id="dtItensInclusosPedVendaBean" var="prod" value="#{pedVendaInterfilialBean.listaPedVendaItem}" emptyMessage="Nenhum registro encontrado." reflow="true">
+		
+					<p:column sortBy="#{prod.produtoCodInterno}" priority="1" styleClass="customCollumnId">
+						<f:facet name="header">Código</f:facet>
+						<h:outputText value="#{prod.produtoCodInterno}" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : ''}" />
+					</p:column>
+					
+					<p:column sortBy="#{prod.produtoDesc}" priority="1">
+						<f:facet name="header">Descrição</f:facet>
+						<h:outputText id="descProdItem" value="#{prod.produtoDesc}" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : 'tx_bold'}" style="text-wrap:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"/>
+						<p:tooltip id="toolDescProdItem" for="descProdItem" value="#{prod.produtoDesc}" position="top"/>
+						<ui:fragment rendered="#{not empty prod.lotes}">
+						<p:repeat var="lote" value="#{prod.lotes}">
+							<br />
+							<h:outputText value="#{lote.codlote} - " styleClass="tx_bold" /> 
+							<h:outputText value="#{lote.dtVencimento}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+							<h:outputText value=" - #{lote.qtdToString}" />
+							<h:outputText value=" #{prod.unidadeDesc}" />
+						</p:repeat>
+						</ui:fragment>
+					</p:column>
+					
+		        	<p:column styleClass="customCollumnQtdEstoque" priority="1">
+						<f:facet name="header">Qtd.</f:facet>
+						<h:outputText value="#{prod.quantidadeToString}" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : ''}"/>
+						<h:outputText value=" #{prod.unidadeDesc}" styleClass="#{prod.inPromocao ? 'tx_azul' : ''}"/>
+					</p:column>
+		        	
+		        	<p:column sortBy="#{prod.preco}" priority="1" styleClass="customCollumnValor">
+						<f:facet name="header">Preço</f:facet>
+						<h:outputText value="#{prod.preco}" converter="currencyFormat" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : 'tx_bold'}"/>
+		        	</p:column>
+		        	
+		        	<p:column sortBy="#{prod.precoTabela}" priority="2" styleClass="customCollumnValor">
+						<f:facet name="header">Tab.</f:facet>
+						<h:outputText value="#{prod.precoTabela}" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : 'tx_bold'}" converter="currencyFormat" />
+		        	</p:column>
+		        	
+		        	<p:column sortBy="#{prod.percDesconto}" priority="2" styleClass="customCollumnValor">
+						<f:facet name="header">% Desc</f:facet>
+						<h:outputText value="#{prod.percDesconto}" converter="currencyFormat" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : ''}" />
+						<h:outputText value="%" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : ''}" /> 
+						<!-- <p:graphicImage library="images" name="warning.png" rendered="#{prod.percDesconto gt pedVendaInterfilialBean.alcada.alcada}"/> -->
+		        	</p:column>
+
+<!-- 
+		        	<p:column sortBy="#{prod.valorDesconto}" priority="2" styleClass="customCollumnTotal">
+						<f:facet name="header">R$ Desc</f:facet>
+						<h:outputText value="#{prod.valorDesconto}" converter="currencyFormat" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : ''}" />
+		        	</p:column>
+ -->
+		        	<p:column sortBy="#{prod.subTotal}" priority="1" styleClass="customCollumnTotal">
+						<f:facet name="header">Total</f:facet>
+						<h:outputText value="#{prod.subTotal}" styleClass="#{prod.inPromocao ? 'tx_azul_bold' : ''}" converter="currencyFormat" />
+		        	</p:column>
+		        	
+		        	<p:column styleClass="customCollumn2Icon" priority="1" rendered="#{pedVendaInterfilialBean.selecionada.isEncomenda == true || pedVendaInterfilialBean.selecionada.isPedido == true and pedVendaInterfilialBean.selecionada.podeEditar}">
+						<f:facet name="header"></f:facet>
+						<p:commandButton id="btnEditarItem" 
+								update="@form" 
+								process="@this"
+								action="#{pedVendaInterfilialBean.editarProduto(prod.id, prod.produtoId)}" 
+								icon="ui-icon-pencil" 
+								disabled="#{pedVendaInterfilialBean.selecionada.podeEditar==false}"
+								title="Editar" 
+								onclick="PF('bUIItensPedVendaBean').show()"
+								oncomplete="PF('bUIItensPedVendaBean').hide()"
+								/>
+						
+						<p:commandButton id="btnExcluirItem" 
+								update="@form :formStepsPedVendaBean" 
+								process="@this"
+								action="#{pedVendaInterfilialBean.excluirProduto(prod.id)}" 
+								icon="ui-icon-trash" 
+								disabled="#{pedVendaInterfilialBean.selecionada.podeEditar==false}"
+								title="Excluir">
+							<p:confirm header="Confirme" message="Deseja Excluir #{prod.produtoCodInterno} - #{prod.produtoDesc}?" icon="ui-icon-alert" />
+						</p:commandButton>
+		        	</p:column>
+		        	
+		        </p:dataTable>
+		        
+		        <div class="ui-datatable ui-widget">
+		        <div class="ui-datatable-tablewrapper">
+					<table role="grid">
+						<tr>
+							<td class="ui-state-default" style="text-align:right">Total</td>
+							<td class="ui-state-default"></td>
+							<td class="ui-state-default" style="text-align:right">
+								<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.valPedidoPrTab}" converter="currencyFormat" styleClass="tx_bold_16" />
+							</td>
+						</tr>
+						<ui:fragment rendered="#{pedVendaInterfilialBean.selecionada.valPedido ne pedVendaInterfilialBean.selecionada.valPedidoPrTab}">
+							<tr>
+								<td class="ui-state-default" style="text-align:right">Total com Desconto</td>
+								<td class="ui-state-default" align="right">
+									<ui:fragment rendered="#{pedVendaInterfilialBean.descPedido}">
+										<p:inputNumber id="descPedVenda" value="#{pedVendaInterfilialBean.selecionada.desconto}" valueChangeListener="#{pedVendaInterfilialBean.descPedVendaChanged}" rendered="#{pedVendaInterfilialBean.selecionada.podeEditar}" size="10" maxValue="#{contextoBean.usuarioLogado.usuarioGrupo.descontoMaximo}" decimalSeparator="," thousandSeparator="." emptyValue="zero" decimalPlaces="2" autocomplete="off" symbol="%" symbolPosition="s" onfocus="this.select()" onkeypress="if(event.keyCode == 13){ $('#formItensPedVendaBean\\:btnItensAvancar').focus(); return false; }" inputStyleClass="tx_right_16">
+											<p:ajax update="@form:fildSetItensInclusos :formStepsPedVendaBean" />
+										</p:inputNumber>
+										<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.desconto}" rendered="#{pedVendaInterfilialBean.selecionada.podeEditar==false}" converter="currencyFormat" styleClass="tx_bold_16" />
+										<!-- <p:graphicImage library="images" name="warning.png" rendered="#{pedVendaInterfilialBean.selecionada.desconto gt pedVendaInterfilialBean.alcada.alcada}"/> -->
+									</ui:fragment>
+								</td>
+								<td class="ui-state-default" style="text-align:right">
+									<!-- <ui:fragment rendered="#{pedVendaInterfilialBean.descPedido}">
+										<p:inputNumber id="prDescPedVenda" value="#{pedVendaInterfilialBean.selecionada.valPedido}" valueChangeListener="#{pedVendaInterfilialBean.prDescPedVendaChanged}" rendered="#{pedVendaInterfilialBean.selecionada.podeEditar}" size="10"  decimalSeparator="," thousandSeparator="." emptyValue="zero" decimalPlaces="2"  autocomplete="off" onfocus="this.select()" onkeypress="if(event.keyCode == 13){ $('#formItensPedVendaBean\\:btnItensAvancar').focus(); return false; }" inputStyle="width:100%;" inputStyleClass="tx_right_16">
+											<p:ajax update="@form:fildSetItensInclusos :formStepsPedVendaBean" />
+										</p:inputNumber>
+										<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.valPedido}" rendered="#{pedVendaInterfilialBean.selecionada.podeEditar==false}" converter="currencyFormat" styleClass="tx_bold_16" />
+									</ui:fragment> -->
+									<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.valPedido}" converter="currencyFormat" styleClass="#{pedVendaInterfilialBean.selecionada.desconto gt pedVendaInterfilialBean.alcada.alcada ? 'tx_bold_red_16' : 'tx_bold_16'}" />
+								</td>
+								
+							</tr>
+						</ui:fragment>
+						<tr>
+							<td class="ui-state-default" style="text-align:right">#{pedVendaInterfilialBean.descPedido==true ? 'Desconto' : 'Desconto Médio (%)'}</td>
+							<td class="ui-state-default"></td>
+							<td class="ui-state-default" style="text-align:right">
+								<ui:fragment rendered="#{pedVendaInterfilialBean.descPedido==true}">
+		                    		<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.descontoVl}" converter="currencyFormat" styleClass="tx_bold_16" />
+								</ui:fragment>
+								<ui:fragment rendered="#{pedVendaInterfilialBean.descPedido==false}">
+									<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.descMedioPedido}" converter="currencyFormat" styleClass="tx_bold_16" />
+								</ui:fragment> 
+							</td>
+						</tr>
+						<tr>
+							<td class="ui-state-default" style="text-align:right">Total Peso Bruto</td>
+							<td class="ui-state-default"></td>
+							<td class="ui-state-default" style="text-align:right">
+								<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.pesoBrutoKg}" styleClass="tx_bold_16">
+									<f:convertNumber maxFractionDigits="0" minFractionDigits="0" />
+							 	</p:outputLabel> (KG)
+							</td>
+						</tr>
+						<tr>
+							<td class="ui-state-default" style="text-align:right">Total Volumes</td>
+							<td class="ui-state-default"></td>
+							<td class="ui-state-default" style="text-align:right">
+								<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.volume}" styleClass="tx_bold_16">
+									<f:convertNumber maxFractionDigits="0" minFractionDigits="0" />
+							 	</p:outputLabel>
+							</td>
+						</tr>
+					</table>
+				</div>
+				</div>
+		        
+		    </p:fieldset>
+     		<p:commandButton id="btnItensAvancar" 
+				value="Próximo" 
+				actionListener="#{pedVendaInterfilialBean.openCondPagto}" 
+				update="@form :formStepsPedVendaBean :formVerCliPedVendaBean :formCondPagtoPedVendaBean"
+				process="@this"
+				icon="ui-icon-arrow-1-e"  
+				disabled="#{empty pedVendaInterfilialBean.listaPedVendaItem}"
+				rendered="#{pedVendaInterfilialBean.renderedStep}"
+				/>
+				
+			
+     	</p:panel>
+     	
+     </h:form>
+     
+     <!-- Condicao Pagamento -->
+     <h:form id="formCondPagtoPedVendaBean">
+     
+     	<p:panel id="panelCondPagtoPedVendaBean" rendered="#{pedVendaInterfilialBean.stepIndex==2 or pedVendaInterfilialBean.renderedStep == false}">
+     	
+     		<p:fieldset id="fildDivergencias" legend="(#{pedVendaInterfilialBean.listaDivergencias.size()}) Divergências" styleClass="painelFieldset" rendered="#{not empty pedVendaInterfilialBean.listaDivergencias}" toggleable="false">
+		     	<p:dataTable id="dtDivergencias" 
+								var="item" 
+									value="#{pedVendaInterfilialBean.listaDivergencias}" 
+										reflow="true">
+					
+			        <p:column styleClass="customCollumnDataHora">
+						<f:facet name="header">Registrado</f:facet>
+						<h:outputText value="#{item.dt_create}">
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+						</h:outputText>	
+			        </p:column>
+			        
+			        <p:column> 
+						<f:facet name="header">Tipo</f:facet>
+						
+						<h:panelGroup rendered="#{item.tipo==2}">
+							<h:outputText value="Lotes diferentes no produto "/>
+							<h:outputText value="#{item.produtoCod}" styleClass="tx_bold" />
+							<h:outputText value=" - "/> 
+							<h:outputText value="#{item.produtoDesc}" styleClass="tx_bold" />
+						</h:panelGroup>
+						
+						<h:panelGroup rendered="#{item.tipo==1}">
+							<h:outputText value="Inclusão de desconto "/>
+							<h:outputText value="#{item.desconto}" converter="currencyFormat" styleClass="tx_bold" />
+							<h:outputText value="% " styleClass="tx_bold" />
+							<h:outputText value="(#{item.condPagtoDesc})" styleClass="tx_bold" />
+							<h:outputText value=" no produto " rendered="#{not empty item.produtoCod}"/>
+							<h:outputText value="#{item.produtoCod}" styleClass="tx_bold" rendered="#{not empty item.produtoCod}" />
+							<h:outputText value=" - " rendered="#{not empty item.produtoCod}"/> 
+							<h:outputText value="#{item.produtoDesc}" styleClass="tx_bold" rendered="#{not empty item.produtoCod}"/>
+						</h:panelGroup>
+						
+						<h:panelGroup rendered="#{item.tipo==3}">
+							<h:outputText value="Encomenda de produto "/>
+							<h:outputText value="#{item.produtoCod}" styleClass="tx_bold" />
+							<h:outputText value=" - "/> 
+							<h:outputText value="#{item.produtoDesc}" styleClass="tx_bold" />
+						</h:panelGroup>
+						
+			        </p:column>
+			        
+			        <p:column> 
+						<f:facet name="header">Situação</f:facet>
+						<h:panelGroup rendered="#{item.situacao==0}">
+							<h:graphicImage library="images" name="clock.png" rendered="#{item.situacao==0}" />
+							<h:outputText value=" Aguardando Liberação"/>
+						</h:panelGroup>
+						
+						<h:panelGroup rendered="#{item.situacao==1}">
+						
+							<h:graphicImage library="images" name="help_F.png" rendered="#{item.situacao==1}" />
+							<h:outputText value=" por "/>
+							<h:outputText value="#{item.usuarioNome}" styleClass="tx_bold" />
+							<h:outputText value=" em "/>
+							<h:outputText value="#{item.dtInteracao}" styleClass="tx_bold" >
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+							</h:outputText>	
+						</h:panelGroup>
+						
+						<h:panelGroup rendered="#{item.situacao==2}">
+							<h:graphicImage library="images" name="help_C.png" rendered="#{item.situacao==2}" />
+							<h:outputText value=" por "/>
+							<h:outputText value="#{item.usuarioNome}" styleClass="tx_bold" />
+							<h:outputText value=" em "/>
+							<h:outputText value="#{item.dtInteracao}" styleClass="tx_bold" >
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+							</h:outputText>	
+						</h:panelGroup>
+			        </p:column>
+			    </p:dataTable>
+			</p:fieldset>
+     	
+     		<p:messages id="msgCondPagto" showDetail="true" showSummary="false" rendered="#{pedVendaInterfilialBean.msgCondPagto}" />
+
+     		<div class="ui-g">
+				<!--  
+				<div class="ui-g-6 ui-md-0 ui-lg-0">
+					<h:panelGroup>
+						<p:outputLabel value="Forma Pagto:" /> <br />
+						<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.formaPagto.descricao}" styleClass="tx_bold" rendered="#{pedVendaInterfilialBean.selecionada.podeEditar == false and empty pedVendaInterfilialBean.listaPedVendaCartao}"/>
+						
+						<ui:fragment rendered="#{pedVendaInterfilialBean.selecionada.podeEditar and pedVendaInterfilialBean.renderedSelectFormaPagto}">
+						<div class="ui-g">
+							<div class="ui-g-0 ui-md-0 ui-lg-0">
+								<div class="ui-fluid">
+									<p:selectOneMenu id="formaPagto" value="#{pedVendaInterfilialBean.selecionada.formaPagto}" autoWidth="true">
+										<f:selectItems value="#{pedVendaInterfilialBean.formaPagtoSelectItem}" /> 
+										<p:ajax event="change" process="@this" update="@form :formStepsPedVendaBean" listener="#{pedVendaInterfilialBean.verificarFormaPagto}" />
+									</p:selectOneMenu>
+								</div>
+							</div>
+						</div>
+						</ui:fragment>
+						
+						<p:repeat var="cartoes" value="#{pedVendaInterfilialBean.listaPedVendaCartao}"  >
+							<h:outputText value="#{cartoes.nomeAdministradora}" styleClass="tx_bold" />
+							<h:outputText value=" - R$ " />
+							<h:outputText value="#{cartoes.valor}" converter="currencyFormat" />
+							<h:outputText value="  em #{cartoes.qtdParcela}x" rendered="#{not empty cartoes.qtdParcela}" /> 
+							<br />
+						</p:repeat>
+					</h:panelGroup>
+				</div>
+				-->
+				
+				<!-- <div class="ui-g-6 ui-md-0 ui-lg-0">
+					<h:panelGroup id="panelGroupTabPreco">	
+						<p:outputLabel value="Tab.Preço:" /> <br />
+			        	<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.tabPreco.descricao}" styleClass="tx_bold"/>
+					</h:panelGroup>
+				</div> 
+				-->
+
+				<div class="ui-g-6 ui-md-0 ui-lg-0">
+					<h:panelGroup>	
+							<p:outputLabel value="Frete:"  /> <br />
+							<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.freteTipo.descricao}" styleClass="tx_bold" />
+					</h:panelGroup>
+				</div>
+				<div class="ui-g-6 ui-md-0 ui-lg-0">
+					<h:panelGroup>	
+						<h:outputText value="Entrada: " /> <br />
+						<h:outputText value="#{pedVendaInterfilialBean.selecionada.entrada}" styleClass="tx_bold" >
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+						</h:outputText>
+					</h:panelGroup>
+				</div>
+				
+				<div class="ui-g-6 ui-md-0 ui-lg-0">
+					<h:panelGroup>	
+						<h:outputText value="Retirada: " /> <br />
+						<p:calendar id="prevRetirada" 
+									value="#{pedVendaInterfilialBean.selecionada.prevRetirada}"
+									valueChangeListener="#{pedVendaInterfilialBean.verificarPrevRetirada}" 
+									pattern="dd/MM/yyyy" size="10" rendered="#{pedVendaInterfilialBean.selecionada.podeEditar}" 
+									required="true" 
+									requiredMessage="Selecione a Data de Retirada">
+							<p:ajax event="dateSelect" process="@this" update="@form :formStepsPedVendaBean" />
+						</p:calendar>
+						<h:outputText value="#{pedVendaInterfilialBean.selecionada.prevRetirada}" styleClass="tx_bold" rendered="#{pedVendaInterfilialBean.selecionada.podeEditar==false}">
+							<f:convertDateTime pattern="dd/MM/yyyy" />
+						</h:outputText>
+					</h:panelGroup>
+				</div>
+
+				<ui:fragment rendered="#{not empty pedVendaInterfilialBean.selecionada.conclusao}">
+					<div class="ui-g-6 ui-md-0 ui-lg-0">
+						<h:panelGroup>	
+							<h:outputText value="Conclusão: " /> <br />
+							<h:outputText value="#{pedVendaInterfilialBean.selecionada.conclusao}" styleClass="tx_bold" >
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+							</h:outputText>
+						</h:panelGroup>
+					</div>
+				</ui:fragment>
+				
+				<ui:fragment rendered="#{not empty pedVendaInterfilialBean.selecionada.efetivacao}">
+					<div class="ui-g-6 ui-md-0 ui-lg-0">
+						<h:panelGroup>	
+							<h:outputText value="Efetivação: " /> <br />
+							<h:outputText value="#{pedVendaInterfilialBean.selecionada.efetivacao}" styleClass="tx_bold">
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+							</h:outputText>
+						</h:panelGroup>
+					</div>
+				</ui:fragment>
+				
+				<!-- 
+					<h:panelGroup>
+						<p:outputLabel value="Mov. Fiscal:" /> <br />
+						<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.movFiscTipo.descricao}" styleClass="tx_bold"/>
+		        	</h:panelGroup>
+		        	
+		        	<h:panelGroup>
+						<p:outputLabel value="Tipo Cobrança:" /> <br />
+						<p:outputLabel value="#{pedVendaInterfilialBean.selecionada.cobrTipo.descricao}" styleClass="tx_bold"/>
+		        	</h:panelGroup>
+				-->	
+				
+				<div class="ui-g-12 ui-md-12 ui-lg-12">
+					<h:outputText value="Observação: " />
+					<p:inputTextarea id="observacao" 
+										value="#{pedVendaInterfilialBean.selecionada.observacao}"
+										valueChangeListener="#{pedVendaInterfilialBean.verificarObservacao}"  
+										rendered="#{pedVendaInterfilialBean.selecionada.podeEditar}"
+							 			maxlength="1000" 
+							 			counter="displayRefObs" 
+							 			counterTemplate="{0} caracteres restante." 
+							 			autoResize="false" 
+							 			style="width:100%;">
+						<p:ajax event="blur" process="@this" update="@form :formStepsPedVendaBean" />
+					</p:inputTextarea>
+					<h:outputText id="displayRefObs" rendered="#{pedVendaInterfilialBean.selecionada.podeEditar}" />
+					<h:outputText escape="false" value="#{pedVendaInterfilialBean.selecionada.observacao}" rendered="#{pedVendaInterfilialBean.selecionada.podeEditar==false}"/>
+				</div>
+				
+			</div>
+			
+			<ui:fragment rendered="#{pedVendaInterfilialBean.renderedStep}">
+				<p:commandButton id="btnConcluir" 
+						update="@form :formStepsPedVendaBean" 
+						process="@form"
+						action="#{pedVendaInterfilialBean.concluir}" 
+						icon="icon-finalizado" 
+						disabled="#{!pedVendaInterfilialBean.selecionada.podeConcluir}"
+						value="Concluir"
+						onsuccess="verTabsPedidosAfterConcluir();">
+					<p:confirm header="Confirme" message="Deseja Concluir o Pedido?" icon="ui-icon-alert" />
+				</p:commandButton>
+				
+				<p:commandButton value="Novo" 
+								 actionListener="#{pedVendaInterfilialBean.novoPedVendaNormal}"
+								 update=":formStepsPedVendaBean :formVerCliPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean"
+								 process="@this"
+								 icon="icon-new"
+								 rendered="#{!pedVendaInterfilialBean.selecionada.podeConcluir}"
+								 oncomplete="updatePanelUrlDescricao('Pedido / Novo')"
+								 />
+								 
+				<p:commandButton value="Encomenda" 
+								 actionListener="#{pedVendaInterfilialBean.novoPedVendaEncomenda}"
+								 update=":formStepsPedVendaBean :formVerCliPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean"
+								 process="@this"
+								 icon="icon-new"
+								 rendered="#{pedVendaInterfilialBean.selecionada.podeConcluir == false and pedVendaInterfilialBean.renderedBtnEncomenda}"
+								 oncomplete="updatePanelUrlDescricao('Encomenda / Novo')"
+								 />
+								 
+				<p:commandButton value="Composto" 
+								 actionListener="#{pedVendaInterfilialBean.novoPedVendaProdComposto}"
+								 update=":formStepsPedVendaBean :formVerCliPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean"
+								 process="@this"
+								 icon="icon-new"
+								 rendered="#{pedVendaInterfilialBean.selecionada.podeConcluir == false and pedVendaInterfilialBean.renderedBtnComposto}"
+								 oncomplete="updatePanelUrlDescricao('Composto / Novo')"
+								 />
+			</ui:fragment>
+			
+     	</p:panel>
+     	
+     </h:form>
+     
+     <h:form>
+	    <p:confirmDialog widgetVar="confirmDialog" message="Ao alterar o cliente, o Frete pode ser alterado. Clique em 'Sim' para manter o Frete salvo no pedido ou clique em 'Não' para carregar o Frete padrão do cliente." header="Confirmação" severity="alert">
+	        <p:commandButton value="Sim" actionListener="#{pedVendaInterfilialBean.confirmAction}" update=":formStepsPedVendaBean :formVerCliPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean" oncomplete="PF('confirmDialog').hide();" />
+	        <p:commandButton value="Não" actionListener="#{pedVendaInterfilialBean.cancelAction}" update=":formStepsPedVendaBean :formVerCliPedVendaBean :formItensPedVendaBean :formCondPagtoPedVendaBean" oncomplete="PF('confirmDialog').hide();" />
+	    </p:confirmDialog>
+	</h:form>
+     
+     <!-- Concluir -->
+     
+     <!-- <script>
+     	closePanelResultFilterPedVendaBean();
+     </script> -->
+     
+    </div>
+    
+	<script>
+		
+		function closePanelFiltroCli(){
+			$('#formFilterCliPedVenda\\:panelFilterCliPedVenda').hide();
+		}
+		closePanelFiltroCli();
+		
+		function focus(value){
+			if(value == 'cpf'){
+				$('#formVerCliPedVendaBean\\:cpf').focus();	
+			}
+			if(value == 'cnpj'){
+				$('#formVerCliPedVendaBean\\:cnpj').focus();	
+			}
+			if(value == 'nomeConsumidor'){
+				$('#formVerCliPedVendaBean\\:nomeConsumidor').focus();	
+			}
+		
+		}
+		
+		$('#btnConfirmacao').hide();
+		
+		
+
+	</script>    
+    
+</ui:composition>
