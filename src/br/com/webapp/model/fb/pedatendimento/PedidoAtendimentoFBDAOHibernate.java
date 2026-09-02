@@ -2,11 +2,15 @@ package br.com.webapp.model.fb.pedatendimento;
 
 import java.math.BigInteger;
 import java.util.Date;
+import java.util.List;
 
+import org.hibernate.Hibernate;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.transform.Transformers;
 
+import br.com.webapp.model.fb.pedatendimento.dto.PedidoAtendimentoFBDTO;
 import br.com.webapp.web.util.DAOException;
 
 public class PedidoAtendimentoFBDAOHibernate implements PedidoAtendimentoFBDAO {
@@ -179,6 +183,94 @@ public class PedidoAtendimentoFBDAOHibernate implements PedidoAtendimentoFBDAO {
             e.printStackTrace();
             throw new DAOException("Erro ao remover Pedido de Atendimento sem itens.");
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<PedidoAtendimentoFBDTO> listar(
+            Integer empresaAtendimentoId, String status,
+            Date dataInicial, Date dataFinal, Integer usuarioId) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT ")
+           .append(" a.ID_PEDATENDIMENTO AS id, ")
+           .append(" a.ID_PEDVENDA AS pedVendaId, ")
+           .append(" a.ID_PESSOA_EMP_VENDA AS empresaVendaId, ")
+           .append(" a.ID_PESSOA_EMP_ATEND AS empresaAtendimentoId, ")
+           .append(" ev.NOMEFANTMNEM AS empresaVendaDesc, ")
+           .append(" ea.NOMEFANTMNEM AS empresaAtendimentoDesc, ")
+           .append(" cli.NOMEFANTMNEM AS clienteDesc, ")
+           .append(" a.FORMA_ATENDIMENTO AS formaAtendimento, ")
+           .append(" a.STATUS AS status, ")
+           .append(" a.DATA_ACORDADA AS dataAcordada, ")
+           .append(" a.DATA_CRIACAO AS dataCriacao, ")
+           .append(" CAST(COUNT(DISTINCT i.ID_PEDVENDAITEM) AS INTEGER) AS qtdItens, ")
+           .append(" CAST(SUM(i.QUANTIDADE) AS DECIMAL(18,3)) AS quantidade ")
+           .append(" FROM PEDATENDIMENTO a ")
+           .append(" INNER JOIN PEDATENDITEM i ")
+           .append(" ON i.ID_PEDATENDIMENTO = a.ID_PEDATENDIMENTO ")
+           .append(" INNER JOIN PESSOA ev ")
+           .append(" ON ev.ID_PESSOA = a.ID_PESSOA_EMP_VENDA ")
+           .append(" INNER JOIN PESSOA ea ")
+           .append(" ON ea.ID_PESSOA = a.ID_PESSOA_EMP_ATEND ")
+           .append(" INNER JOIN PESSOA cli ")
+           .append(" ON cli.ID_PESSOA = a.ID_PESSOA_CLI ")
+           .append(" WHERE EXISTS (SELECT 1 FROM USUARIOEMPRESA ue ")
+           .append(" WHERE ue.ID_USUARIO = :ID_USUARIO ")
+           .append(" AND ue.ID_PESSOA_EMP = a.ID_PESSOA_EMP_ATEND) ");
+
+        if (empresaAtendimentoId != null) {
+            sql.append(" AND a.ID_PESSOA_EMP_ATEND = :ID_EMPRESA_ATENDIMENTO ");
+        }
+        if (status != null && !status.trim().isEmpty()) {
+            sql.append(" AND a.STATUS = :STATUS ");
+        }
+        if (dataInicial != null) {
+            sql.append(" AND a.DATA_ACORDADA >= :DATA_INICIAL ");
+        }
+        if (dataFinal != null) {
+            sql.append(" AND a.DATA_ACORDADA <= :DATA_FINAL ");
+        }
+
+        sql.append(" GROUP BY a.ID_PEDATENDIMENTO, a.ID_PEDVENDA, ")
+           .append(" a.ID_PESSOA_EMP_VENDA, a.ID_PESSOA_EMP_ATEND, ")
+           .append(" ev.NOMEFANTMNEM, ea.NOMEFANTMNEM, cli.NOMEFANTMNEM, ")
+           .append(" a.FORMA_ATENDIMENTO, a.STATUS, ")
+           .append(" a.DATA_ACORDADA, a.DATA_CRIACAO ")
+           .append(" ORDER BY a.DATA_ACORDADA, a.ID_PEDATENDIMENTO ");
+
+        Query query = session.createSQLQuery(sql.toString())
+                .addScalar("id", Hibernate.INTEGER)
+                .addScalar("pedVendaId", Hibernate.INTEGER)
+                .addScalar("empresaVendaId", Hibernate.INTEGER)
+                .addScalar("empresaAtendimentoId", Hibernate.INTEGER)
+                .addScalar("empresaVendaDesc", Hibernate.STRING)
+                .addScalar("empresaAtendimentoDesc", Hibernate.STRING)
+                .addScalar("clienteDesc", Hibernate.STRING)
+                .addScalar("formaAtendimento", Hibernate.STRING)
+                .addScalar("status", Hibernate.STRING)
+                .addScalar("dataAcordada", Hibernate.DATE)
+                .addScalar("dataCriacao", Hibernate.TIMESTAMP)
+                .addScalar("qtdItens", Hibernate.INTEGER)
+                .addScalar("quantidade", Hibernate.DOUBLE)
+                .setResultTransformer(Transformers.aliasToBean(
+                        PedidoAtendimentoFBDTO.class));
+
+        query.setParameter("ID_USUARIO", usuarioId);
+        if (empresaAtendimentoId != null) {
+            query.setParameter("ID_EMPRESA_ATENDIMENTO",
+                    empresaAtendimentoId);
+        }
+        if (status != null && !status.trim().isEmpty()) {
+            query.setParameter("STATUS", status);
+        }
+        if (dataInicial != null) {
+            query.setDate("DATA_INICIAL", dataInicial);
+        }
+        if (dataFinal != null) {
+            query.setDate("DATA_FINAL", dataFinal);
+        }
+
+        return query.list();
     }
 
     private Integer getSeq(String generator) throws DAOException {
