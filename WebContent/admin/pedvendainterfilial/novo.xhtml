@@ -764,33 +764,29 @@
 
 							<p:column priority="1" style="width: 180px;text-align: center;">
 								<f:facet name="header">Qtd.</f:facet>
-								<h:panelGroup rendered="#{est.empresaId eq pedVendaInterfilialBean.selecionada.empresaId}">
+								
 	<p:commandButton id="btnSomar" 
 										action="#{pedVendaInterfilialBean.somarQtdPedVendaItem(est,pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax)}"
-										update="@form:precoItem @form:descontoItem @form:subTotalItem @form:subTotalPesoBrutoKg @form:subTotalQtd @form:dtEstoquePedVendaBean :formFiltroPedVenda:msg" 
+										update="@form:precoItem @form:descontoItem @form:subTotalItem @form:subTotalPesoBrutoKg @form:subTotalQtd @form:atendimentoInterfilial @form:dtEstoquePedVendaBean :formFiltroPedVenda:msg" 
 										icon="ui-icon-plus"
 										title="+"
 										/>
 									
 									<p:inputNumber id="quantidade" value="#{est.qtdReservar}" rendered="#{pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax gt 0}" inputStyle="width:40%;" inputStyleClass="tx_center" minValue="0" maxValue="#{est.qtdDisponivel}" decimalSeparator="," thousandSeparator="." emptyValue="zero" decimalPlaces="#{pedVendaInterfilialBean.produtoSelecionada.qtdDecimal}"  autocomplete="off" onfocus="this.select()" onkeypress="if(event.keyCode == 13){ $('#formItensPedVendaBean\\:btnSalvarItem').focus(); return false; }" >
-										<p:ajax event="blur" process="@this" update="@this @form:precoItem @form:descontoItem @form:dtEstoquePedVendaBean:volume @form:subTotalItem @form:subTotalPesoBrutoKg @form:subTotalQtd :formFiltroPedVenda:msg comComposicoes" listener="#{pedVendaInterfilialBean.addQtdPedVendaItem(est)}" />
+										<p:ajax event="blur" process="@this" update="@this @form:precoItem @form:descontoItem @form:dtEstoquePedVendaBean:volume @form:subTotalItem @form:subTotalPesoBrutoKg @form:subTotalQtd @form:atendimentoInterfilial :formFiltroPedVenda:msg comComposicoes" listener="#{pedVendaInterfilialBean.addQtdPedVendaItem(est)}" />
 									</p:inputNumber> 
 									<p:inputNumber id="quantidade2" value="#{est.qtdReservar}" rendered="#{pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax == null or pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax == 0}" inputStyle="width:40%;" inputStyleClass="tx_center" minValue="0" maxValue="#{est.qtdDisponivel}" decimalSeparator="," thousandSeparator="." emptyValue="zero" decimalPlaces="#{pedVendaInterfilialBean.produtoSelecionada.qtdDecimal}"  autocomplete="off" onfocus="this.select()" onkeypress="if(event.keyCode == 13){ $('#formItensPedVendaBean\\:btnSalvarItem').focus(); return false; }" >
-										<p:ajax event="blur" process="@this" update="@this @form:precoItem @form:descontoItem @form:dtEstoquePedVendaBean:volume @form:subTotalItem @form:subTotalPesoBrutoKg @form:subTotalQtd :formFiltroPedVenda:msg comComposicoes" listener="#{pedVendaInterfilialBean.addQtdPedVendaItem(est)}" />
+										<p:ajax event="blur" process="@this" update="@this @form:precoItem @form:descontoItem @form:dtEstoquePedVendaBean:volume @form:subTotalItem @form:subTotalPesoBrutoKg @form:subTotalQtd @form:atendimentoInterfilial :formFiltroPedVenda:msg comComposicoes" listener="#{pedVendaInterfilialBean.addQtdPedVendaItem(est)}" />
 									</p:inputNumber> 
 									
 									<p:commandButton id="btnSubtrair" 
 										action="#{pedVendaInterfilialBean.subtrairQtdPedVendaItem(est)}"
-										update="@form:precoItem @form:descontoItem @form:subTotalItem @form:subTotalPesoBrutoKg @form:subTotalQtd @form:dtEstoquePedVendaBean :formFiltroPedVenda:msg" 
+										update="@form:precoItem @form:descontoItem @form:subTotalItem @form:subTotalPesoBrutoKg @form:subTotalQtd @form:atendimentoInterfilial @form:dtEstoquePedVendaBean :formFiltroPedVenda:msg" 
 										icon="ui-icon-minus"
 										title="-"
 										/>
 										
-					        									</h:panelGroup>
-								<h:panelGroup rendered="#{est.empresaId ne pedVendaInterfilialBean.selecionada.empresaId}" layout="block" styleClass="pedido-interfilial-estoque-remoto-aviso">
-									<h:outputText value="Disponível na rede" />
-									<small>Seleção interfilial em configuração</small>
-								</h:panelGroup>
+					        									
 				        	</p:column>
 				        	
 				        	<p:column styleClass="customCollumnId" priority="4">
@@ -832,6 +828,52 @@
 										<p:outputLabel value="#{comp.subTotalToString(est.qtdReservar)}" />
 						        	</p:column>
 								</p:dataTable>
+				        
+				        <h:panelGroup id="atendimentoInterfilial" layout="block">
+				        	<p:fieldset legend="Atendimento por outra filial"
+				        				styleClass="pedido-interfilial-atendimento"
+				        				rendered="#{pedVendaInterfilialBean.itemInterfilial}">
+				        		<div class="pedido-interfilial-atendimento-resumo">
+				        			<span>Filial responsável pelo estoque</span>
+				        			<strong>#{pedVendaInterfilialBean.empresaEstoqueSelecionadaDesc}</strong>
+				        			<small>Utilize somente uma filial de estoque para este item.</small>
+				        		</div>
+				        		<div class="ui-g">
+				        			<div class="ui-g-12 ui-md-6 ui-lg-0">
+				        				<p:outputLabel for="formaAtendimento" value="Como o cliente receberá? *" />
+				        				<br />
+				        				<p:selectOneRadio id="formaAtendimento"
+				        						value="#{pedVendaInterfilialBean.formaAtendimento}"
+				        						required="true"
+				        						requiredMessage="Informe como o item será atendido.">
+				        					<f:selectItems value="#{pedVendaInterfilialBean.formaAtendimentoSelectItem}" />
+				        				</p:selectOneRadio>
+				        			</div>
+				        			<div class="ui-g-12 ui-md-3 ui-lg-0">
+				        				<p:outputLabel for="dataAcordadaAtendimento" value="Data acordada *" />
+				        				<br />
+				        				<p:calendar id="dataAcordadaAtendimento"
+				        						value="#{pedVendaInterfilialBean.dataAcordadaAtendimento}"
+				        						pattern="dd/MM/yyyy"
+				        						navigator="true"
+				        						showOn="button"
+				        						required="true"
+				        						requiredMessage="Informe a data acordada com o cliente." />
+				        			</div>
+				        			<div class="ui-g-12 ui-md-12 ui-lg-12">
+				        				<p:outputLabel for="observacaoAtendimento" value="Observação para logística" />
+				        				<br />
+				        				<p:inputTextarea id="observacaoAtendimento"
+				        						value="#{pedVendaInterfilialBean.observacaoAtendimento}"
+				        						maxlength="500"
+				        						autoResize="false"
+				        						placeholder="Ex.: entregar após 14h, acesso pela expedição..."
+				        						style="width:100%;" />
+				        			</div>
+				        		</div>
+				        	</p:fieldset>
+				        </h:panelGroup>
+
 				        	</p:column>
 				        	
 				        	<p:column priority="1" rendered="#{pedVendaInterfilialBean.selecionada.isPedido or pedVendaInterfilialBean.selecionada.isEncomenda}">
