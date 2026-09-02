@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import br.com.webapp.model.fb.pedatendimento.dto.PedidoAtendimentoFBDTO;
 import br.com.webapp.model.fb.pedvenda.PedVendaFB;
 import br.com.webapp.model.fb.pedvenda.PedVendaItemFB;
 import br.com.webapp.model.fb.produto.ProdutoEstoqueFB;
@@ -140,6 +141,13 @@ public class PedidoAtendimentoFBRN {
             pedidoAtendimentoDAO.rollback();
             throw new RNException(e.getMessage());
         }
+    }
+
+    public List<PedidoAtendimentoFBDTO> listar(
+            Integer empresaAtendimentoId, String status,
+            Date dataInicial, Date dataFinal, Integer usuarioId) {
+        return pedidoAtendimentoDAO.listar(empresaAtendimentoId,
+                status, dataInicial, dataFinal, usuarioId);
     }
 
     public PedidoAtendimentoFB carregarPorPedVendaItem(
