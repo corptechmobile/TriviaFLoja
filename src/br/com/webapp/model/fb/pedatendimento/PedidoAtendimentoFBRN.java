@@ -120,7 +120,22 @@ public class PedidoAtendimentoFBRN {
             new ProdutoEstoqueFBRN().bloqueEstoque(
                     empresaAtendimentoId, produto.getId());
         } catch (RNException e) {
+            pedidoAtendimentoDAO.rollback();
             throw e;
+        } catch (Exception e) {
+            pedidoAtendimentoDAO.rollback();
+            throw new RNException(e.getMessage());
+        }
+    }
+
+    public void excluirPorPedVendaItem(Integer pedVendaId,
+            Integer pedVendaItemId) throws RNException {
+        try {
+            validarAlteracao(pedVendaItemId);
+            pedidoAtendimentoDAO.excluirItensPorPedVendaItem(
+                    pedVendaItemId);
+            pedidoAtendimentoDAO.excluirCabecalhosSemItens(
+                    pedVendaId);
         } catch (Exception e) {
             pedidoAtendimentoDAO.rollback();
             throw new RNException(e.getMessage());
