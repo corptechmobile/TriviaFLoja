@@ -62,6 +62,64 @@
     border-radius: 4px;
 }
 
+.pedido-interfilial .pedido-interfilial-consulta-rede {
+    background: #f7fbff;
+    border: 1px solid #d7e9f5;
+    border-radius: 5px;
+    box-sizing: border-box;
+    margin: 2px 8px;
+    padding: 7px 10px;
+}
+
+.pedido-interfilial .pedido-interfilial-coluna-filial {
+    min-width: 150px;
+}
+
+.pedido-interfilial .pedido-interfilial-filial-nome {
+    color: #274b5d;
+    font-weight: 600;
+}
+
+.pedido-interfilial .pedido-interfilial-tag-local,
+.pedido-interfilial .pedido-interfilial-tag-remota {
+    border-radius: 10px;
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    margin-top: 4px;
+    padding: 2px 7px;
+    text-transform: uppercase;
+}
+
+.pedido-interfilial .pedido-interfilial-tag-local {
+    background: #e7f6eb;
+    color: #28733a;
+}
+
+.pedido-interfilial .pedido-interfilial-tag-remota {
+    background: #e8f3fb;
+    color: #176a98;
+}
+
+.pedido-interfilial .estoque-outra-filial td {
+    background-color: #f8fcff;
+}
+
+.pedido-interfilial .pedido-interfilial-estoque-remoto-aviso {
+    color: #176a98;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.pedido-interfilial .pedido-interfilial-estoque-remoto-aviso small {
+    color: #78909c;
+    display: block;
+    font-size: 10px;
+    font-weight: 400;
+    margin-top: 3px;
+}
+
 @media (max-width: 768px) {
     .pedido-interfilial .pedido-interfilial-cabecalho {
         align-items: flex-start;
