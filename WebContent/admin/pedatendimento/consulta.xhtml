@@ -1,0 +1,143 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://java.sun.com/jsf/core">
+
+    <h:outputStylesheet library="css" name="pedido-interfilial.css"/>
+
+    <div class="tab-content-space pedido-interfilial">
+        <div id="tabViewVar:Title:tab_pedidoAtendimentoListaBean"
+             class="panelUrlDescricao" style="display:none;"></div>
+
+        <div class="pedido-interfilial-cabecalho">
+            <div>
+                <span class="pedido-interfilial-etiqueta">PLANEJAMENTO OPERACIONAL</span>
+                <h2>Pedidos para atendimento</h2>
+                <p>Organize separações, entregas, retiradas e transferências pela data acordada.</p>
+            </div>
+            <div class="pedido-interfilial-seguranca">
+                <i class="icon-calendar"></i>
+                <span>Somente filiais autorizadas ao usuário</span>
+            </div>
+        </div>
+
+        <h:form id="formPedidoAtendimentoConsulta">
+            <p:growl id="msg" showDetail="true" life="5000"/>
+
+            <p:panel id="filtros" header="Filtros">
+                <div class="ui-fluid">
+                    <div class="ui-g">
+                        <div class="ui-g-12 ui-md-3 ui-lg-0">
+                            <p:outputLabel for="empresa" value="Filial responsável"/>
+                            <p:selectOneMenu id="empresa"
+                                    value="#{pedidoAtendimentoListaBean.empresaAtendimentoId}"
+                                    filter="true" filterMatchMode="contains">
+                                <f:selectItem itemValue="#{null}" itemLabel="Todas as filiais autorizadas"/>
+                                <f:selectItems value="#{pedidoAtendimentoListaBean.empresaSelectItem}"/>
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="ui-g-12 ui-md-2 ui-lg-0">
+                            <p:outputLabel for="status" value="Situação"/>
+                            <p:selectOneMenu id="status"
+                                    value="#{pedidoAtendimentoListaBean.status}">
+                                <f:selectItem itemValue="#{null}" itemLabel="Todas"/>
+                                <f:selectItems value="#{pedidoAtendimentoListaBean.statusSelectItem}"/>
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="ui-g-6 ui-md-2 ui-lg-0">
+                            <p:outputLabel for="dataInicial" value="Data acordada — início"/>
+                            <p:calendar id="dataInicial"
+                                    value="#{pedidoAtendimentoListaBean.dataInicial}"
+                                    pattern="dd/MM/yyyy" navigator="true"
+                                    showOn="button"/>
+                        </div>
+                        <div class="ui-g-6 ui-md-2 ui-lg-0">
+                            <p:outputLabel for="dataFinal" value="Data acordada — fim"/>
+                            <p:calendar id="dataFinal"
+                                    value="#{pedidoAtendimentoListaBean.dataFinal}"
+                                    pattern="dd/MM/yyyy" navigator="true"
+                                    showOn="button"/>
+                        </div>
+                        <div class="ui-g-12 ui-md-3 ui-lg-0 pedido-atendimento-acoes-filtro">
+                            <p:commandButton id="btnBuscar" value="Buscar"
+                                    icon="icon-search"
+                                    actionListener="#{pedidoAtendimentoListaBean.buscar}"
+                                    process="@form:filtros" update="@form"/>
+                            <p:commandButton value="Limpar"
+                                    icon="ui-icon-close"
+                                    actionListener="#{pedidoAtendimentoListaBean.limparFiltros}"
+                                    process="@this" update="@form"/>
+                        </div>
+                    </div>
+                </div>
+            </p:panel>
+
+            <p:dataTable id="listaAtendimentos"
+                    var="atendimento"
+                    value="#{pedidoAtendimentoListaBean.lista}"
+                    emptyMessage="Nenhum pedido de atendimento encontrado."
+                    paginator="true" rows="15"
+                    paginatorTemplate="{RowsPerPageDropdown} {FirstPageLink} {PreviousPageLink} {CurrentPageReport} {NextPageLink} {LastPageLink}"
+                    rowsPerPageTemplate="15,30,50"
+                    reflow="true"
+                    rowStyleClass="#{atendimento.atrasado ? 'pedido-atendimento-atrasado' : ''}">
+
+                <p:column priority="1" styleClass="customCollumnId">
+                    <f:facet name="header">Atendimento</f:facet>
+                    <h:outputText value="#{atendimento.id}" styleClass="tx_bold"/>
+                </p:column>
+
+                <p:column priority="1" styleClass="customCollumnId">
+                    <f:facet name="header">Pedido</f:facet>
+                    <h:outputText value="#{atendimento.pedVendaId}"/>
+                </p:column>
+
+                <p:column priority="2">
+                    <f:facet name="header">Cliente</f:facet>
+                    <h:outputText value="#{atendimento.clienteDesc}" styleClass="tx_bold"/>
+                </p:column>
+
+                <p:column priority="2">
+                    <f:facet name="header">Origem da venda</f:facet>
+                    <h:outputText value="#{atendimento.empresaVendaDesc}"/>
+                </p:column>
+
+                <p:column priority="1">
+                    <f:facet name="header">Forma de atendimento</f:facet>
+                    <h:outputText value="#{atendimento.formaAtendimentoDesc}"/>
+                </p:column>
+
+                <p:column priority="1" styleClass="customCollumnQtd">
+                    <f:facet name="header">Itens</f:facet>
+                    <h:outputText value="#{atendimento.qtdItens}"/>
+                </p:column>
+
+                <p:column priority="3" styleClass="customCollumnQtd">
+                    <f:facet name="header">Quantidade</f:facet>
+                    <h:outputText value="#{atendimento.quantidade}">
+                        <f:convertNumber minFractionDigits="0"
+                                maxFractionDigits="3" locale="pt_BR"/>
+                    </h:outputText>
+                </p:column>
+
+                <p:column priority="1">
+                    <f:facet name="header">Data acordada</f:facet>
+                    <h:outputText value="#{atendimento.dataAcordada}"
+                            styleClass="#{atendimento.atrasado ? 'pedido-atendimento-data-atrasada' : 'tx_bold'}">
+                        <f:convertDateTime pattern="dd/MM/yyyy"/>
+                    </h:outputText>
+                    <h:outputText value=" Atrasado"
+                            rendered="#{atendimento.atrasado}"
+                            styleClass="pedido-atendimento-alerta"/>
+                </p:column>
+
+                <p:column priority="1">
+                    <f:facet name="header">Situação</f:facet>
+                    <h:outputText value="#{atendimento.status}"
+                            styleClass="pedido-atendimento-status"/>
+                </p:column>
+            </p:dataTable>
+        </h:form>
+    </div>
+</ui:composition>
