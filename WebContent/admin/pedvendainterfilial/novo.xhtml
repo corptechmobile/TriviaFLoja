@@ -690,6 +690,11 @@
 			     			<p:outputLabel for="semEstoqueFilter" value=" Sem estoque " />
 			     		</div>
 		     		</ui:fragment>
+		     		<div class="ui-g-12 ui-md-3 ui-lg-0 pedido-interfilial-consulta-rede">
+		     			<p:outputLabel for="consultarEstoqueRede" value="Origem do estoque:" /> <br />
+		     			<p:selectBooleanCheckbox id="consultarEstoqueRede" value="#{pedVendaInterfilialBean.consultarEstoqueRede}" />
+		     			<p:outputLabel for="consultarEstoqueRede" value=" Consultar filiais autorizadas" />
+		     		</div>
 		     		<div class="ui-g-0 ui-md-0 ui-lg-0">	
 		     			<p:outputLabel value=" " /> <br />
 		     			<p:commandButton id="btnBuscarProd" 
@@ -748,31 +753,44 @@
 					
 		        	<ui:fragment rendered="#{not empty pedVendaInterfilialBean.produtoSelecionada.estoques}">
 		        		
-			     		<p:dataTable id="dtEstoquePedVendaBean" var="est" value="#{pedVendaInterfilialBean.produtoSelecionada.estoques}" emptyMessage="Nenhum registro encontrado." >
+			     		<p:dataTable id="dtEstoquePedVendaBean" var="est" value="#{pedVendaInterfilialBean.produtoSelecionada.estoques}" emptyMessage="Nenhum registro encontrado." rowStyleClass="#{est.empresaId eq pedVendaInterfilialBean.selecionada.empresaId ? 'estoque-filial-venda' : 'estoque-outra-filial'}">
 			     			
+							<p:column priority="1" styleClass="pedido-interfilial-coluna-filial">
+								<f:facet name="header">Filial</f:facet>
+								<h:outputText value="#{est.empresaDesc}" styleClass="pedido-interfilial-filial-nome" />
+								<br />
+								<h:outputText value="#{est.empresaId eq pedVendaInterfilialBean.selecionada.empresaId ? 'Loja da venda' : 'Outra filial'}" styleClass="#{est.empresaId eq pedVendaInterfilialBean.selecionada.empresaId ? 'pedido-interfilial-tag-local' : 'pedido-interfilial-tag-remota'}" />
+							</p:column>
+
 							<p:column priority="1" style="width: 180px;text-align: center;">
 								<f:facet name="header">Qtd.</f:facet>
-								<p:commandButton id="btnSomar" 
-									action="#{pedVendaInterfilialBean.somarQtdPedVendaItem(est,pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax)}"
-									update="@form:precoItem @form:descontoItem @form:subTotalItem @form:subTotalPesoBrutoKg @form:subTotalQtd @form:dtEstoquePedVendaBean :formFiltroPedVenda:msg" 
-									icon="ui-icon-plus"
-									title="+"
-									/>
-								
-								<p:inputNumber id="quantidade" value="#{est.qtdReservar}" rendered="#{pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax gt 0}" inputStyle="width:40%;" inputStyleClass="tx_center" minValue="0" maxValue="#{est.qtdDisponivel}" decimalSeparator="," thousandSeparator="." emptyValue="zero" decimalPlaces="#{pedVendaInterfilialBean.produtoSelecionada.qtdDecimal}"  autocomplete="off" onfocus="this.select()" onkeypress="if(event.keyCode == 13){ $('#formItensPedVendaBean\\:btnSalvarItem').focus(); return false; }" >
-									<p:ajax event="blur" process="@this" update="@this @form:precoItem @form:descontoItem @form:dtEstoquePedVendaBean:volume @form:subTotalItem @form:subTotalPesoBrutoKg @form:subTotalQtd :formFiltroPedVenda:msg comComposicoes" listener="#{pedVendaInterfilialBean.addQtdPedVendaItem(est)}" />
-								</p:inputNumber> 
-								<p:inputNumber id="quantidade2" value="#{est.qtdReservar}" rendered="#{pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax == null or pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax == 0}" inputStyle="width:40%;" inputStyleClass="tx_center" minValue="0" maxValue="#{est.qtdDisponivel}" decimalSeparator="," thousandSeparator="." emptyValue="zero" decimalPlaces="#{pedVendaInterfilialBean.produtoSelecionada.qtdDecimal}"  autocomplete="off" onfocus="this.select()" onkeypress="if(event.keyCode == 13){ $('#formItensPedVendaBean\\:btnSalvarItem').focus(); return false; }" >
-									<p:ajax event="blur" process="@this" update="@this @form:precoItem @form:descontoItem @form:dtEstoquePedVendaBean:volume @form:subTotalItem @form:subTotalPesoBrutoKg @form:subTotalQtd :formFiltroPedVenda:msg comComposicoes" listener="#{pedVendaInterfilialBean.addQtdPedVendaItem(est)}" />
-								</p:inputNumber> 
-								
-								<p:commandButton id="btnSubtrair" 
-									action="#{pedVendaInterfilialBean.subtrairQtdPedVendaItem(est)}"
-									update="@form:precoItem @form:descontoItem @form:subTotalItem @form:subTotalPesoBrutoKg @form:subTotalQtd @form:dtEstoquePedVendaBean :formFiltroPedVenda:msg" 
-									icon="ui-icon-minus"
-									title="-"
-									/>
+								<h:panelGroup rendered="#{est.empresaId eq pedVendaInterfilialBean.selecionada.empresaId}">
+	<p:commandButton id="btnSomar" 
+										action="#{pedVendaInterfilialBean.somarQtdPedVendaItem(est,pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax)}"
+										update="@form:precoItem @form:descontoItem @form:subTotalItem @form:subTotalPesoBrutoKg @form:subTotalQtd @form:dtEstoquePedVendaBean :formFiltroPedVenda:msg" 
+										icon="ui-icon-plus"
+										title="+"
+										/>
 									
+									<p:inputNumber id="quantidade" value="#{est.qtdReservar}" rendered="#{pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax gt 0}" inputStyle="width:40%;" inputStyleClass="tx_center" minValue="0" maxValue="#{est.qtdDisponivel}" decimalSeparator="," thousandSeparator="." emptyValue="zero" decimalPlaces="#{pedVendaInterfilialBean.produtoSelecionada.qtdDecimal}"  autocomplete="off" onfocus="this.select()" onkeypress="if(event.keyCode == 13){ $('#formItensPedVendaBean\\:btnSalvarItem').focus(); return false; }" >
+										<p:ajax event="blur" process="@this" update="@this @form:precoItem @form:descontoItem @form:dtEstoquePedVendaBean:volume @form:subTotalItem @form:subTotalPesoBrutoKg @form:subTotalQtd :formFiltroPedVenda:msg comComposicoes" listener="#{pedVendaInterfilialBean.addQtdPedVendaItem(est)}" />
+									</p:inputNumber> 
+									<p:inputNumber id="quantidade2" value="#{est.qtdReservar}" rendered="#{pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax == null or pedVendaInterfilialBean.produtoSelecionada.qtdPromoMax == 0}" inputStyle="width:40%;" inputStyleClass="tx_center" minValue="0" maxValue="#{est.qtdDisponivel}" decimalSeparator="," thousandSeparator="." emptyValue="zero" decimalPlaces="#{pedVendaInterfilialBean.produtoSelecionada.qtdDecimal}"  autocomplete="off" onfocus="this.select()" onkeypress="if(event.keyCode == 13){ $('#formItensPedVendaBean\\:btnSalvarItem').focus(); return false; }" >
+										<p:ajax event="blur" process="@this" update="@this @form:precoItem @form:descontoItem @form:dtEstoquePedVendaBean:volume @form:subTotalItem @form:subTotalPesoBrutoKg @form:subTotalQtd :formFiltroPedVenda:msg comComposicoes" listener="#{pedVendaInterfilialBean.addQtdPedVendaItem(est)}" />
+									</p:inputNumber> 
+									
+									<p:commandButton id="btnSubtrair" 
+										action="#{pedVendaInterfilialBean.subtrairQtdPedVendaItem(est)}"
+										update="@form:precoItem @form:descontoItem @form:subTotalItem @form:subTotalPesoBrutoKg @form:subTotalQtd @form:dtEstoquePedVendaBean :formFiltroPedVenda:msg" 
+										icon="ui-icon-minus"
+										title="-"
+										/>
+										
+					        									</h:panelGroup>
+								<h:panelGroup rendered="#{est.empresaId ne pedVendaInterfilialBean.selecionada.empresaId}" layout="block" styleClass="pedido-interfilial-estoque-remoto-aviso">
+									<h:outputText value="Disponível na rede" />
+									<small>Seleção interfilial em configuração</small>
+								</h:panelGroup>
 				        	</p:column>
 				        	
 				        	<p:column styleClass="customCollumnId" priority="4">
