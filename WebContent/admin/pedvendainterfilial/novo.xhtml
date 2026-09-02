@@ -13,9 +13,15 @@
                 <h2>Venda com estoque de outras filiais</h2>
                 <p>Consulte a disponibilidade da rede e defina como cada item será atendido.</p>
             </div>
-            <div class="pedido-interfilial-seguranca">
-                <i class="icon-lock"></i>
-                <span>Fluxo independente da entrada de pedido atual</span>
+            <div class="pedido-interfilial-cabecalho-acoes">
+                <div class="pedido-interfilial-seguranca">
+                    <i class="icon-lock"></i>
+                    <span>Fluxo independente da entrada de pedido atual</span>
+                </div>
+                <button type="button" class="pedido-interfilial-btn-planejamento"
+                        onclick="openTab('pedidoAtendimentoListaBean', 'Pedidos para Atendimento', 'Pedidos para Atendimento', 'pedatendimento/consulta.jsf?id=1')">
+                    Ver planejamento
+                </button>
             </div>
         </div>
     <div id="tabViewVar:Title:tab_pedVendaInterfilialBean" class="panelUrlDescricao" style="display: none;"></div>
