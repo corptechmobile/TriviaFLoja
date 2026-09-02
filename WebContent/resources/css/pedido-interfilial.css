@@ -120,6 +120,43 @@
     margin-top: 3px;
 }
 
+.pedido-interfilial .pedido-interfilial-atendimento {
+    background: #f7fbff;
+    border-color: #cfe4f1;
+    margin-top: 14px;
+}
+
+.pedido-interfilial .pedido-interfilial-atendimento-resumo {
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #d7e9f5;
+    border-left: 4px solid #0787c1;
+    border-radius: 5px;
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 10px 12px;
+}
+
+.pedido-interfilial .pedido-interfilial-atendimento-resumo span {
+    color: #607d8b;
+    font-size: 12px;
+}
+
+.pedido-interfilial .pedido-interfilial-atendimento-resumo strong {
+    color: #17465f;
+    font-size: 14px;
+}
+
+.pedido-interfilial .pedido-interfilial-atendimento-resumo small {
+    color: #78909c;
+    margin-left: auto;
+}
+
+.pedido-interfilial .pedido-interfilial-atendimento .ui-radiobutton {
+    margin-left: 10px;
+}
+
 @media (max-width: 768px) {
     .pedido-interfilial .pedido-interfilial-cabecalho {
         align-items: flex-start;
