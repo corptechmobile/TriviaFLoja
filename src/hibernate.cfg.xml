@@ -42,6 +42,8 @@
 			<!-- <mapping class="br.com.webapp.model.fb.pedvenda.PedVendaItemFB"/> -->  <!-- Concluído -->
 			<mapping class="br.com.webapp.model.fb.pedvenda.diverg.PedVendaDivergFB"/>
 			<!-- <mapping class="br.com.webapp.model.fb.pedvendaitem.dto.PedVendaItemFBDTO"/> -->
+			<mapping class="br.com.webapp.model.fb.pedatendimento.PedidoAtendimentoFB"/>
+			<mapping class="br.com.webapp.model.fb.pedatendimento.PedidoAtendimentoItemFB"/>
 			<mapping class="br.com.webapp.model.fb.reserva.ReservaFB"/>
 			<mapping class="br.com.webapp.model.fb.reservalote.ReservaLoteFB"/>
 			<mapping class="br.com.webapp.model.fb.reservafila.ReservaFilaFB"/>
