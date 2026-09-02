@@ -1659,21 +1659,32 @@ public class PedVendaInterfilialBean implements Serializable {
 	// gets and sets
 	
 	public boolean isItemInterfilial() {
-		Integer empresaEstoqueId = getEmpresaEstoqueSelecionadaId();
-		return empresaEstoqueId != null && selecionada != null
-				&& !empresaEstoqueId.equals(selecionada.getEmpresaId());
+		if(produtoSelecionada == null || produtoSelecionada.getEstoques() == null || selecionada == null) {
+			return false;
+		}
+		for(ProdutoEstoqueFB estoque : produtoSelecionada.getEstoques()) {
+			if(estoque.getQtdReservar() != null && estoque.getQtdReservar().doubleValue() > 0.0
+					&& !estoque.getEmpresaId().equals(selecionada.getEmpresaId())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public Integer getEmpresaEstoqueSelecionadaId() {
 		if(produtoSelecionada == null || produtoSelecionada.getEstoques() == null) {
 			return null;
 		}
+		Integer empresaLocalId = null;
 		for(ProdutoEstoqueFB estoque : produtoSelecionada.getEstoques()) {
 			if(estoque.getQtdReservar() != null && estoque.getQtdReservar().doubleValue() > 0.0) {
-				return estoque.getEmpresaId();
+				if(selecionada != null && !estoque.getEmpresaId().equals(selecionada.getEmpresaId())) {
+					return estoque.getEmpresaId();
+				}
+				empresaLocalId = estoque.getEmpresaId();
 			}
 		}
-		return null;
+		return empresaLocalId;
 	}
 
 	public String getEmpresaEstoqueSelecionadaDesc() {
