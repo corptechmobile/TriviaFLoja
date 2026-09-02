@@ -1,6 +1,8 @@
 package br.com.webapp.web;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -34,6 +36,8 @@ import br.com.webapp.model.fb.fretetipo.FreteTipoFB;
 import br.com.webapp.model.fb.fretetipo.FreteTipoFBRN;
 import br.com.webapp.model.fb.movfisctipo.MovFiscTipoFB;
 import br.com.webapp.model.fb.movfisctipo.MovFiscTipoFBRN;
+import br.com.webapp.model.fb.pedatendimento.PedidoAtendimentoFB;
+import br.com.webapp.model.fb.pedatendimento.PedidoAtendimentoFBRN;
 import br.com.webapp.model.fb.pedvenda.PedVendaFB;
 import br.com.webapp.model.fb.pedvenda.PedVendaFBRN;
 import br.com.webapp.model.fb.pedvenda.PedVendaItemFB;
@@ -97,7 +101,12 @@ public class PedVendaInterfilialBean implements Serializable {
 	private List<SelectItem> condPagtoSelectItem;
 	private List<SelectItem> freteTipoSelectItem;
 	private List<SelectItem> formaPagtoSelectItem;
-	private List<SelectItem> tipoMovFiscSelectItem; 
+	private List<SelectItem> tipoMovFiscSelectItem;
+	private List<SelectItem> formaAtendimentoSelectItem;
+
+	private String formaAtendimento;
+	private Date dataAcordadaAtendimento;
+	private String observacaoAtendimento; 
 	
 	
 	private Integer selecionadaId;
@@ -218,6 +227,7 @@ public class PedVendaInterfilialBean implements Serializable {
 	}
 	
 	private void limparProdutoSelected() {
+		limparDadosAtendimento();
 		listaDivergencias = null;
 		listaPedVendaItem = null;
 		produtoSelecionada = null;
@@ -225,6 +235,12 @@ public class PedVendaInterfilialBean implements Serializable {
 		descItem = 0.0;
 	}
 	
+	private void limparDadosAtendimento() {
+		formaAtendimento = null;
+		dataAcordadaAtendimento = null;
+		observacaoAtendimento = null;
+	}
+
 	public void cadastrarNovoCliente() {
 		cliente = new ClienteFB();
 		cliente.setTipoPessoa(ClienteFB.TIPO_PESSOA_FISICA);
@@ -1109,6 +1125,7 @@ public class PedVendaInterfilialBean implements Serializable {
 	
 	public void addProduto() {
 		try {
+			limparDadosAtendimento();
 			
 			ProdutoEstoqueFBRN produtoEstoqueFBRN = new ProdutoEstoqueFBRN();
 			produtoSelecionada.setEstoques(produtoEstoqueFBRN.listar(selecionada.getEncomenda(), consultarEstoqueRede ? null : selecionada.getEmpresaId(), contextoBean.getUsuarioLogado().getId(), produtoSelecionada.getId(), produtoSelecionada.getControlaLote(), Funcoes.SO_ESTOQUE, produtoSelecionada.getPermiteVendaSemEstoque()));
@@ -1137,8 +1154,18 @@ public class PedVendaInterfilialBean implements Serializable {
 		try {
 			
 			produtoSelecionada = new ProdutoFBRN().carregar(selecionada.getEncomenda(), produtoId, selecionada.getEncomenda(), selecionada.getEmpresaId(), selecionada.getMovFiscTipo().getOpFiscTipoId(), contextoBean.getUsuarioLogado().getId(), selecionada.getTabPrecoId(), selecionada.getCondPagtoId(), Funcoes.IS_TRANSFERENCIA, Funcoes.COMPARTILHA_ESTOQUE, Funcoes.EMP_ENCH_EST_COMPART, comEstoqueFilter, semEstoqueFilter, selecionada.getFreteTipoId());
+			ProdutoEstoqueFBRN produtoEstoqueFBRN = new ProdutoEstoqueFBRN();
+			produtoSelecionada.setEstoques(produtoEstoqueFBRN.listar(selecionada.getEncomenda(), consultarEstoqueRede ? null : selecionada.getEmpresaId(), contextoBean.getUsuarioLogado().getId(), produtoSelecionada.getId(), produtoSelecionada.getControlaLote(), Funcoes.SO_ESTOQUE, produtoSelecionada.getPermiteVendaSemEstoque()));
 			pedVendaItem = new PedVendaItemFBRN().editar(pedVendaItemId, produtoSelecionada, selecionada.getEncomenda());
 			descItem = pedVendaItem.getPercDesconto();
+
+			limparDadosAtendimento();
+			PedidoAtendimentoFB atendimento = new PedidoAtendimentoFBRN().carregarPorPedVendaItem(pedVendaItemId);
+			if(atendimento != null) {
+				formaAtendimento = atendimento.getFormaAtendimento();
+				dataAcordadaAtendimento = atendimento.getDataAcordada();
+				observacaoAtendimento = atendimento.getObservacao();
+			}
 			
 			calcularPisoBean.novo();
 			
@@ -1177,6 +1204,9 @@ public class PedVendaInterfilialBean implements Serializable {
 	public void excluirProduto(Integer pedVendaItemFBId) {
 		try {
 			
+			PedidoAtendimentoFBRN pedidoAtendimentoFBRN = new PedidoAtendimentoFBRN();
+			pedidoAtendimentoFBRN.excluirPorPedVendaItem(selecionada.getId(), pedVendaItemFBId);
+
 			PedVendaFBRN pedVendaFBRN = new PedVendaFBRN();
 			pedVendaFBRN.excluirItem(selecionada, pedVendaItemFBId, contextoBean.getUsuarioLogado().getId());
 			
@@ -1337,10 +1367,16 @@ public class PedVendaInterfilialBean implements Serializable {
 		try {
 			
 			PedVendaFBRN pedVendaFBRN = new PedVendaFBRN();
+			PedidoAtendimentoFBRN pedidoAtendimentoFBRN = new PedidoAtendimentoFBRN();
 			
 			pedVendaItem.setUsuarioWebId(contextoBean.getUsuarioLogado().getId());
 			
+			pedidoAtendimentoFBRN.validarAlteracao(pedVendaItem.getId());
+			pedidoAtendimentoFBRN.validarSelecao(selecionada, produtoSelecionada, formaAtendimento, dataAcordadaAtendimento);
+			
 			selecionadaId = pedVendaFBRN.salvar(FacesContext.getCurrentInstance(), selecionada, produtoSelecionada, pedVendaItem, alcada.getAlcada(), contextoBean.getUsuarioLogado().getUsuarioGrupo().getDescontoMaximo(), descPedido);
+			
+			pedidoAtendimentoFBRN.sincronizar(selecionada, pedVendaItem, produtoSelecionada, formaAtendimento, dataAcordadaAtendimento, observacaoAtendimento, contextoBean.getUsuarioLogado().getId());
 			
 			limparProdutoSelected();
 			buscarItensPedido();
@@ -1622,6 +1658,71 @@ public class PedVendaInterfilialBean implements Serializable {
 	
 	// gets and sets
 	
+	public boolean isItemInterfilial() {
+		Integer empresaEstoqueId = getEmpresaEstoqueSelecionadaId();
+		return empresaEstoqueId != null && selecionada != null
+				&& !empresaEstoqueId.equals(selecionada.getEmpresaId());
+	}
+
+	public Integer getEmpresaEstoqueSelecionadaId() {
+		if(produtoSelecionada == null || produtoSelecionada.getEstoques() == null) {
+			return null;
+		}
+		for(ProdutoEstoqueFB estoque : produtoSelecionada.getEstoques()) {
+			if(estoque.getQtdReservar() != null && estoque.getQtdReservar().doubleValue() > 0.0) {
+				return estoque.getEmpresaId();
+			}
+		}
+		return null;
+	}
+
+	public String getEmpresaEstoqueSelecionadaDesc() {
+		if(produtoSelecionada == null || produtoSelecionada.getEstoques() == null) {
+			return "";
+		}
+		Integer empresaId = getEmpresaEstoqueSelecionadaId();
+		for(ProdutoEstoqueFB estoque : produtoSelecionada.getEstoques()) {
+			if(empresaId != null && empresaId.equals(estoque.getEmpresaId())) {
+				return estoque.getEmpresaDesc();
+			}
+		}
+		return "";
+	}
+
+	public List<SelectItem> getFormaAtendimentoSelectItem() {
+		if(formaAtendimentoSelectItem == null) {
+			formaAtendimentoSelectItem = new ArrayList<SelectItem>();
+			formaAtendimentoSelectItem.add(new SelectItem(PedidoAtendimentoFB.FORMA_ENTREGA_CLIENTE, "Entrega no endereco do cliente"));
+			formaAtendimentoSelectItem.add(new SelectItem(PedidoAtendimentoFB.FORMA_RETIRADA_FILIAL_ESTOQUE, "Retirada na filial do estoque"));
+			formaAtendimentoSelectItem.add(new SelectItem(PedidoAtendimentoFB.FORMA_TRANSFERENCIA_FILIAL_VENDA, "Transferir para a loja da venda"));
+		}
+		return formaAtendimentoSelectItem;
+	}
+
+	public String getFormaAtendimento() {
+		return formaAtendimento;
+	}
+
+	public void setFormaAtendimento(String formaAtendimento) {
+		this.formaAtendimento = formaAtendimento;
+	}
+
+	public Date getDataAcordadaAtendimento() {
+		return dataAcordadaAtendimento;
+	}
+
+	public void setDataAcordadaAtendimento(Date dataAcordadaAtendimento) {
+		this.dataAcordadaAtendimento = dataAcordadaAtendimento;
+	}
+
+	public String getObservacaoAtendimento() {
+		return observacaoAtendimento;
+	}
+
+	public void setObservacaoAtendimento(String observacaoAtendimento) {
+		this.observacaoAtendimento = observacaoAtendimento;
+	}
+
 	public boolean isConsultarEstoqueRede() {
 		return consultarEstoqueRede;
 	}
