@@ -65,7 +65,7 @@ public class PedidoAtendimentoFBDAOHibernate implements PedidoAtendimentoFBDAO {
             query.setParameter("STATUS", pedidoAtendimento.getStatus());
             query.setDate("DATA_ACORDADA", pedidoAtendimento.getDataAcordada());
             query.setTimestamp("DATA_CRIACAO", pedidoAtendimento.getDataCriacao());
-            query.setParameter("OBSERVACAO", pedidoAtendimento.getObservacao());
+            query.setParameter("OBSERVACAO", pedidoAtendimento.getObservacao(), Hibernate.STRING);
             query.executeUpdate();
 
             return pedidoAtendimento.getId();
@@ -95,9 +95,9 @@ public class PedidoAtendimentoFBDAOHibernate implements PedidoAtendimentoFBDAO {
             query.setParameter("ID_PEDVENDAITEM", item.getPedVendaItemId());
             query.setParameter("ID_PRODUTO", item.getProdutoId());
             query.setParameter("ID_LOCALIDADE", item.getLocalidadeId());
-            query.setParameter("ID_PRODUTOLOTE", item.getProdutoLoteId());
+            query.setParameter("ID_PRODUTOLOTE", item.getProdutoLoteId(), Hibernate.INTEGER);
             query.setParameter("QUANTIDADE", item.getQuantidade());
-            query.setParameter("OBSERVACAO", item.getObservacao());
+            query.setParameter("OBSERVACAO", item.getObservacao(), Hibernate.STRING);
             query.executeUpdate();
 
             return item.getId();
